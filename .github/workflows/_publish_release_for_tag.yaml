@@ -1,6 +1,5 @@
 # See: https://goreleaser.com/ci/actions/#workflow
-name: "RELEASE: Publish"
-run-name: "RELEASE: Publish [${{ inputs.tag }}]"
+name: "_INC: Publish"
 
 on:
   workflow_call:
