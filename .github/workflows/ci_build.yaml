@@ -1,6 +1,6 @@
 # See: https://goreleaser.com/ci/actions/#workflow
 name: "CI: Build"
-run-name: "CI: Build #${{ github.event.github.event.pull_request.number }}"
+run-name: "CI: Build #${{ github.event.pull_request.number }}"
 
 on:
   pull_request:
