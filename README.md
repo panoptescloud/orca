@@ -1,2 +1,3 @@
-# orca
-A tool to help "orca-strate" dev environments spread across multiple repos.
+# Orca
+
+Documentation is found on Github pages: [https://panoptescloud.github.io/orca/](https://panoptescloud.github.io/orca/)
