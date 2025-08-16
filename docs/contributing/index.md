@@ -1,6 +1,6 @@
 # Contributing guidelines
 
-This repository uses [Github Flow](https://docs.github.com/en/get-started/using-github/github-flow) branching strategy; feature branches come off of main, should be short-lived, and then are merged back into main. The configuration of the repository is configured to allow only rebase merging, so any commits you add on your branch will be placed on top of main once it's merged. The idea is to keep the commit history clean and informative. To aid this it is following the [conventional commit standard](https://www.conventionalcommits.org/en/v1.0.0/), which is enforced via a CI check.
+This repository uses [Github Flow](https://docs.github.com/en/get-started/using-github/github-flow) branching strategy; feature branches come off of main, should be short-lived, and then are merged back into main. The configuration of the repository is configured to allow only squash merging, to keep the commit history clean and informative. To aid this it is following the [conventional commit standard](https://www.conventionalcommits.org/en/v1.0.0/), which is enforced via a CI check.
 
 ## Commit standards
 
