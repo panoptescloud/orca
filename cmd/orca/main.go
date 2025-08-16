@@ -30,10 +30,20 @@ var versionCmd = &cobra.Command{
   RunE: handleVersion,
 }
 
+var checkCmd = &cobra.Command{
+  Use: "check",
+  Short: "Checks for dependencies.",
+  Long: `Checks that the following system dependencies are installed and usable:
+- git
+- docker`,
+  RunE: handleCheck,
+}
+
 func init() {
   versionCmd.Flags().Bool("short", false, "Show only the version, excluding commit and date information.")
 
   rootCmd.AddCommand(versionCmd)
+  rootCmd.AddCommand(checkCmd)
 }
 
 func main() {
