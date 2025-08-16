@@ -36,6 +36,8 @@ jobs:
         run: npm clean-install
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
         run: npm audit signatures
+      - name: Create empty file
+        run: echo "" > nextversion
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -46,6 +48,8 @@ jobs:
         run: echo "next_version=$(cat nextversion)" >> "$GITHUB_OUTPUT"
 
   publish_release:
+    # If it's empty, we don't need to create a new release
+    if: needs.generate_next_tag.outputs.next_version != ''
     name: "Publish release"
     needs:
       - generate_next_tag
