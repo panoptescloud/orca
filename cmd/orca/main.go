@@ -13,6 +13,8 @@ var (
   date string = "unknown"
 )
 
+var svcContainer *services = &services{}
+
 var rootCmd = &cobra.Command{
   Use:   "orca",
   Short: "Orca is used to orchestrate complex development environments with docker compose.",
@@ -33,9 +35,7 @@ var versionCmd = &cobra.Command{
 var checkCmd = &cobra.Command{
   Use: "check",
   Short: "Checks for dependencies.",
-  Long: `Checks that the following system dependencies are installed and usable:
-- git
-- docker`,
+  Long: `Checks that the following system dependencies are installed and usable.`,
   RunE: handleCheck,
 }
 
