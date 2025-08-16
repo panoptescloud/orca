@@ -1,4 +1,4 @@
-name: "RELEASE: Generate next tag"
+name: "RELEASE: Create"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -10,7 +10,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate_next_tag:
@@ -31,7 +31,9 @@ jobs:
         with:
           node-version: "lts/*"
       - name: Install dependencies
-        run: npm clean-install
+        run: |
+          # npm clean-install
+          npm install -g semantic-release/exec
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
         run: npm audit signatures
       - name: Release
@@ -39,3 +41,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
+      - name: Expose next version to github env
+        run: cat nextversion >> $GITHUB_ENV
+      - uses: ./github/workflows/_publish_release_for_tag.yaml
+        with:
+          tag: ${{ env.NEXT_VERSION }}
