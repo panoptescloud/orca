@@ -2,7 +2,7 @@
   "plugins": [
     "@semantic-release/commit-analyzer",
     ["@semantic-release/exec", {
-      "publishCmd": "echo \"${nextRelease.version}\" >> nextversion"
+      "publishCmd": "echo \"${nextRelease.version}\" > nextversion"
     }]
   ]
 }
