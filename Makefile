@@ -1,9 +1,10 @@
 DC_PROJECT=pc_orca
 DC=docker compose -f ./docker-compose.yml -p $(DC_PROJECT)
+NOW=$(shell date '+%Y-%m-%d %H:%M:%S')
 
 .PHONY: build
 build:
-	./scripts/build.sh
+	VERSION="dev" COMMIT="wip-commit" DATE="$(NOW)" ./scripts/build.sh
 
 .PHONY: lint-last-commit
 lint-last-commit:
