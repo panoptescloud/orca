@@ -7,6 +7,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+  version string = "dev"
+  commit string = "none"
+  date string = "unknown"
+)
+
 var rootCmd = &cobra.Command{
   Use:   "orca",
   Short: "Orca is used to orchestrate complex development environments with docker compose.",
@@ -16,6 +22,18 @@ utilities to interact with services form anywhere on the host.`,
   Run: func(cmd *cobra.Command, args []string) {
     fmt.Println("Hello world!")
   },
+}
+
+var versionCmd = &cobra.Command{
+  Use: "version",
+  Short: "Show the current version you're using.",
+  RunE: handleVersion,
+}
+
+func init() {
+  versionCmd.Flags().Bool("short", false, "Show only the version, excluding commit and date information.")
+
+  rootCmd.AddCommand(versionCmd)
 }
 
 func main() {
