@@ -1,4 +1,4 @@
-# Contributing guidelines
+# Development guide
 
 This repository uses [Github Flow](https://docs.github.com/en/get-started/using-github/github-flow) branching strategy; feature branches come off of main, should be short-lived, and then are merged back into main. The configuration of the repository is configured to allow only squash merging, to keep the commit history clean and informative. To aid this it is following the [conventional commit standard](https://www.conventionalcommits.org/en/v1.0.0/), which is enforced via a CI check.
 
@@ -19,3 +19,7 @@ The usage of some of the features in mkdocs will result in the docs not renderin
 ### Working locally
 
 If you're writing docs locally and wanna see what the rendered result looks like you can use the mkdocs server in watch mode. This is all hooked up in the `docker-compose.yml` file. Simply run `make dc-up` in the root of this repository, and you'll be able to see the rendered docs on [http://localhost:9898](http://localhost:9898). Every time either the `mkdocs.yml` config or a file in the `docs` directory changes, it will be re-rendered and any browsers will reload the page.
+
+## Why npm?
+
+NPM isn't actually used by the app in any way, but a couple of the tools we're using require it. We need to install some plugins for [semantic-release](https://semantic-release.gitbook.io/semantic-release/) and [commitlintjs](https://commitlint.js.org/), so we have an npm file structure to enable these tools.
