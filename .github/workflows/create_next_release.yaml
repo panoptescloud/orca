@@ -21,6 +21,8 @@ jobs:
       issues: write # to be able to comment on released issues
       pull-requests: write # to be able to comment on released pull requests
       id-token: write # to enable use of OIDC for npm provenance
+    outputs:
+      next_version: ${{ steps.expose_next_version.outputs.next_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,9 +33,7 @@ jobs:
         with:
           node-version: "lts/*"
       - name: Install dependencies
-        run: |
-          # npm clean-install
-          npm install -g semantic-release/exec
+        run: npm clean-install
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
         run: npm audit signatures
       - name: Release
@@ -41,8 +41,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
-      - name: Expose next version to github env
-        run: cat nextversion >> $GITHUB_ENV
-      - uses: ./github/workflows/_publish_release_for_tag.yaml
-        with:
-          tag: ${{ env.NEXT_VERSION }}
+      - name: Expose next version output
+        id: expose_next_version
+        run: echo "next_version=$(cat nextversion)" >> "$GITHUB_OUTPUT"
+
+  publish_release:
+    name: "Publish release"
+    needs:
+      - generate_next_tag
+    uses: ./.github/workflows/_publish_release_for_tag.yaml
+    secrets: inherit
+    with:
+      tag: ${{ needs.generate_next_tag.outputs.next_version }}
