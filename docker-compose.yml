@@ -1,0 +1,9 @@
+services:
+  mkdocs:
+    build:
+      context: .
+      dockerfile: ./.local/docs/Dockerfile
+    ports:
+      - "9898:8000"
+    volumes:
+      - .:/docs
