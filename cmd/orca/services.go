@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/panoptescloud/orca/internal/git"
 	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/panoptescloud/orca/internal/tui"
 )
@@ -11,6 +12,10 @@ type services struct {
 	tui *tui.Tui
 
 	hostSystem *hostsys.HostSystem
+
+	executor *hostsys.Executor
+
+	git *git.Git
 }
 
 func (s *services) GetTui() *tui.Tui {
@@ -36,4 +41,27 @@ func (s *services) GetHostSystem() *hostsys.HostSystem {
 	)
 
 	return s.hostSystem
+}
+
+func (s *services) GetExecutor() *hostsys.Executor {
+	if s.executor != nil {
+		return s.executor
+	}
+
+	s.executor = hostsys.NewExecutor()
+
+	return s.executor
+}
+
+func (s *services) GetGit() *git.Git {
+	if s.git != nil {
+		return s.git
+	}
+
+	s.git = git.NewGit(
+		s.GetExecutor(),
+		s.GetTui(),
+	)
+
+	return s.git
 }

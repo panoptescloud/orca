@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"io"
+	"log/slog"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -20,6 +21,10 @@ type Tui struct {
 	successStyle lipgloss.Style
 }
 
+func (t *Tui) NewLine() {
+	fmt.Fprintln(t.std, "")
+}
+
 func (t *Tui) Error(msg ...string) {
 	fmt.Fprintln(t.err, t.errStyle.Render(msg...))
 }
@@ -32,6 +37,18 @@ func (t *Tui) Info(msgs ...string) {
 	for _, msg := range msgs {
 		fmt.Fprintln(t.std, msg)
 	}
+}
+
+func (t *Tui) RecordIfError(msg string, err error) error {
+	if err == nil {
+		return nil
+	}
+
+	t.Error(msg)
+
+	slog.Error(err.Error())
+
+	return err
 }
 
 func NewTui(std io.Writer, err io.Writer) *Tui {

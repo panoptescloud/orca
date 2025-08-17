@@ -34,3 +34,25 @@ type ErrInvalidStrategy struct {
 func (err ErrInvalidStrategy) Error() string {
 	return fmt.Sprintf("invalid strategy: %s", err.Msg)
 }
+
+type ErrInvalidExecutionContext struct {
+	Msg string
+}
+
+func (err ErrInvalidExecutionContext) Error() string {
+	return fmt.Sprintf("invalid execution context: %s", err.Msg)
+}
+
+type ErrCommandExecutionFailed struct {
+	Msg string
+}
+
+func (err ErrCommandExecutionFailed) Error() string {
+	return fmt.Sprintf("command execution failed: %s", err.Msg)
+}
+
+type ErrUserAbortedExecution struct{}
+
+func (err ErrUserAbortedExecution) Error() string {
+	return "user aborted execution"
+}
