@@ -9,7 +9,7 @@ import (
 )
 
 type Tool struct {
-	Cmd string
+	Cmd     string
 	SubCmds []Tool
 }
 
@@ -29,7 +29,7 @@ func defaultRequirements() []Tool {
 	}
 }
 
-func buildFullCommand(tools... Tool) []string {
+func buildFullCommand(tools ...Tool) []string {
 	parts := make([]string, len(tools))
 
 	for i, t := range tools {
@@ -152,4 +152,3 @@ func (hs *HostSystem) VerifySetup() error {
 
 	return nil
 }
-

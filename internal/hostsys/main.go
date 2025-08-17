@@ -1,9 +1,9 @@
 package hostsys
 
 type tui interface {
-	Info(msg... string)
-	Error(msg... string)
-	Success(msg... string)
+	Info(msg ...string)
+	Error(msg ...string)
+	Success(msg ...string)
 }
 
 type HostSystem struct {

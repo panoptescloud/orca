@@ -17,7 +17,7 @@ func handleCheck(_ *cobra.Command, _ []string) error {
 		os.Exit(1)
 		return nil
 	}
-	
+
 	tui.Success("All requirements met!")
 
 	return nil
