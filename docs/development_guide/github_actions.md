@@ -65,6 +65,13 @@ This workflow renders and publishes the documentation using mkdocs. It pushes th
 
 *Trigger: [push](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#push) on main, but only if it includes changes to documentation*
 
+### `static_analysis.yaml`
+
+**Must pass in order to merge**
+
+This workflow runs a series of static checks across the full codebase. As it stands this just checks that the code conforms to the go formatting standard. More checks will be added in the future.
+
+*Trigger: [pull_request](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request)*
 
 ### [Github managed] `pages-build-deployment`
 
