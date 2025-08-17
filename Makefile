@@ -6,6 +6,14 @@ NOW=$(shell date '+%Y-%m-%d %H:%M:%S')
 build:
 	VERSION="dev" COMMIT="wip-commit" DATE="$(NOW)" ./scripts/build.sh
 
+.PHONY: fmt
+fmt:
+	./scripts/fmt.sh
+
+.PHONY: vet
+vet:
+	./scripts/vet.sh
+
 .PHONY: lint-last-commit
 lint-last-commit:
 	npx commitlint --last
