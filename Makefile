@@ -10,6 +10,10 @@ build:
 fmt:
 	./scripts/fmt.sh
 
+.PHONY: vet
+vet:
+	./scripts/vet.sh
+
 .PHONY: lint-last-commit
 lint-last-commit:
 	npx commitlint --last
