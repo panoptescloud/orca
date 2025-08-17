@@ -32,18 +32,29 @@ var versionCmd = &cobra.Command{
   RunE: handleVersion,
 }
 
-var checkCmd = &cobra.Command{
+var sysCmd = &cobra.Command{
+  Use: "sys",
+  Short: "Commands for handling the installation of this tool.",
+  RunE: handleGroup,
+}
+
+var sysCheckCmd = &cobra.Command{
   Use: "check",
   Short: "Checks for dependencies.",
   Long: `Checks that the following system dependencies are installed and usable.`,
   RunE: handleCheck,
 }
 
+func handleGroup(cmd *cobra.Command, _ []string) error {
+  return cmd.Help()
+}
+
 func init() {
   versionCmd.Flags().Bool("short", false, "Show only the version, excluding commit and date information.")
 
+  sysCmd.AddCommand(sysCheckCmd)
   rootCmd.AddCommand(versionCmd)
-  rootCmd.AddCommand(checkCmd)
+  rootCmd.AddCommand(sysCmd)
 }
 
 func main() {
