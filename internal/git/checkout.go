@@ -23,6 +23,11 @@ func (g *Git) Checkout(dto CheckoutDTO) error {
 		return err
 	}
 
+	// Checkout the previously checked out branch, handle it as a special case
+	if dto.Name == "-" {
+		return g.performCheckout("-")
+	}
+
 	branches, err := g.searchBranches(SearchBranchesDTO{
 		Search: dto.Name,
 	})

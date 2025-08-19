@@ -3,20 +3,20 @@ DC=docker compose -f ./docker-compose.yml -p $(DC_PROJECT)
 NOW=$(shell date '+%Y-%m-%d %H:%M:%S')
 
 .PHONY: build
-build:
-	VERSION="dev" COMMIT="wip-commit" DATE="$(NOW)" ./scripts/build.sh
+build: fmt
+	@VERSION="dev" COMMIT="wip-commit" DATE="$(NOW)" ./scripts/build.sh
 
 .PHONY: fmt
 fmt:
-	./scripts/fmt.sh
+	@./scripts/fmt.sh
 
 .PHONY: vet
 vet:
-	./scripts/vet.sh
+	@./scripts/vet.sh
 
 .PHONY: lint-last-commit
 lint-last-commit:
-	npx commitlint --last
+	@npx commitlint --last
 
 .PHONY: dc-up
 dc-up:
