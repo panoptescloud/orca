@@ -31,6 +31,11 @@ func (g *Git) Checkout(dto CheckoutDTO) error {
 		return err
 	}
 
+	if branches.GetCurrent() != nil && branches.GetCurrent().Name == dto.Name {
+		g.tui.Info("Branch is already checked out!")
+		return nil
+	}
+
 	branches = branches.ExcludeCurrent()
 
 	branchesLength := len(branches)
