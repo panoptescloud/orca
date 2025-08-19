@@ -2,6 +2,7 @@ package git
 
 import (
 	"github.com/panoptescloud/orca/internal/common"
+	"github.com/panoptescloud/orca/internal/hostsys"
 )
 
 type CheckoutDTO struct {
@@ -12,7 +13,7 @@ func (g *Git) performCheckout(branch string) error {
 	err := g.exec.Exec("git", []string{
 		"checkout",
 		branch,
-	})
+	}, hostsys.WithHostIO())
 
 	return err
 }

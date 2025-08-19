@@ -15,9 +15,22 @@ func handleGCo(cmd *cobra.Command, args []string, cfg *config.Config) error {
 		searchTerm = args[0]
 	}
 
-	return g.Checkout(git.CheckoutDTO{
+	err := g.Checkout(git.CheckoutDTO{
 		Name: searchTerm,
 	})
+
+	if err != nil {
+		return err
+	}
+
+	shouldPull, err := cmd.Flags().GetBool("pull")
+	cobra.CheckErr(err)
+
+	if shouldPull {
+		return g.PullCurrentBranch()
+	}
+
+	return nil
 }
 
 func handleGBranches(cmd *cobra.Command, args []string, cfg *config.Config) error {

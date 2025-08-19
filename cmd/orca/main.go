@@ -114,6 +114,7 @@ func init() {
 	sysCmd.AddCommand(sysCheckCmd)
 	rootCmd.AddCommand(sysCmd)
 
+	gCoCmd.Flags().BoolP("pull", "p", false, "Pulls the branch from origin after checking it out.")
 	gCmd.AddCommand(gCoCmd)
 	gCmd.AddCommand(gBranchesCmd)
 	gCmd.AddCommand(gPullCmd)
