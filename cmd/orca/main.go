@@ -61,6 +61,13 @@ If no search term is given, will list all branches.`,
 	Run: errorHandlerWrapper(handleGBranches, 1),
 }
 
+var gPullCmd = &cobra.Command{
+	Use:   "pull",
+	Short: "Pulls a branch from origin.",
+	Long:  `Will pull the currently checked out branch`,
+	Run:   errorHandlerWrapper(handleGPull, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -108,8 +115,8 @@ func init() {
 	rootCmd.AddCommand(sysCmd)
 
 	gCmd.AddCommand(gCoCmd)
-
 	gCmd.AddCommand(gBranchesCmd)
+	gCmd.AddCommand(gPullCmd)
 
 	rootCmd.AddCommand(gCmd)
 }

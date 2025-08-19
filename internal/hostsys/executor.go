@@ -2,6 +2,7 @@ package hostsys
 
 import (
 	"bytes"
+	"os"
 	"os/exec"
 )
 
@@ -18,11 +19,38 @@ func ChdirOpt(dir string) ExecOpt {
 	}
 }
 
-func (e *Executor) Exec(cmdName string, args []string, opts ...ExecOpt) (stdout string, stderr string, err error) {
+func WithHostIO() ExecOpt {
+	return func(cmd *exec.Cmd) error {
+		cmd.Stdout = os.Stdout
+		cmd.Stdin = os.Stdin
+		cmd.Stderr = os.Stderr
+
+		return nil
+	}
+}
+
+func WithStdout() (ExecOpt, *bytes.Buffer) {
+	var stdout bytes.Buffer
+	ptr := &stdout
+	return func(cmd *exec.Cmd) error {
+		cmd.Stdout = ptr
+
+		return nil
+	}, ptr
+}
+
+func WithStderr() (ExecOpt, *bytes.Buffer) {
+	var stderr bytes.Buffer
+	ptr := &stderr
+	return func(cmd *exec.Cmd) error {
+		cmd.Stdout = ptr
+
+		return nil
+	}, ptr
+}
+
+func (e *Executor) Exec(cmdName string, args []string, opts ...ExecOpt) (err error) {
 	cmd := exec.Command(cmdName, args...)
-	var outb, errb bytes.Buffer
-	cmd.Stdout = &outb
-	cmd.Stderr = &errb
 
 	for _, opt := range opts {
 		opt(cmd)
@@ -30,7 +58,7 @@ func (e *Executor) Exec(cmdName string, args []string, opts ...ExecOpt) (stdout 
 
 	err = cmd.Run()
 
-	return outb.String(), errb.String(), err
+	return err
 }
 
 func NewExecutor() *Executor {

@@ -33,3 +33,9 @@ func handleGBranches(cmd *cobra.Command, args []string, cfg *config.Config) erro
 		Search: searchTerm,
 	})
 }
+
+func handleGPull(cmd *cobra.Command, args []string, cfg *config.Config) error {
+	g := svcContainer.GetGit()
+
+	return g.PullCurrentBranch()
+}

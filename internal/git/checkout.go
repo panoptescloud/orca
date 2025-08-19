@@ -9,7 +9,7 @@ type CheckoutDTO struct {
 }
 
 func (g *Git) performCheckout(branch string) error {
-	_, _, err := g.exec.Exec("git", []string{
+	err := g.exec.Exec("git", []string{
 		"checkout",
 		branch,
 	})

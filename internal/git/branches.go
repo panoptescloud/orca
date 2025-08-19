@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/panoptescloud/orca/internal/common"
+	"github.com/panoptescloud/orca/internal/hostsys"
 )
 
 type Branch struct {
@@ -108,10 +109,11 @@ func (g *Git) searchBranches(dto SearchBranchesDTO) (Branches, error) {
 		return nil, err
 	}
 
-	cmdOutput, _, err := g.exec.Exec("git", []string{
+	opt, stdout := hostsys.WithStdout()
+	err := g.exec.Exec("git", []string{
 		"branch",
 		"-l",
-	})
+	}, opt)
 
 	if err != nil {
 		return nil, common.ErrInvalidExecutionContext{
@@ -119,7 +121,7 @@ func (g *Git) searchBranches(dto SearchBranchesDTO) (Branches, error) {
 		}
 	}
 
-	branches := parseGitBranchOutput(cmdOutput)
+	branches := parseGitBranchOutput(stdout.String())
 
 	if dto.Search == "" {
 		return branches, nil
@@ -152,4 +154,16 @@ func (g *Git) ShowBranches(dto SearchBranchesDTO) error {
 	}
 
 	return nil
+}
+
+func (g *Git) PullCurrentBranch() error {
+	if err := g.mustBeInAGitRepository(); err != nil {
+		return err
+	}
+
+	err := g.exec.Exec("git", []string{
+		"pull",
+	}, hostsys.WithHostIO())
+
+	return g.tui.RecordIfError("Failed to pull branch!", err)
 }

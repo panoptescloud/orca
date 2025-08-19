@@ -15,7 +15,7 @@ type tui interface {
 }
 
 type executor interface {
-	Exec(cmdName string, args []string, opts ...hostsys.ExecOpt) (string, string, error)
+	Exec(cmdName string, args []string, opts ...hostsys.ExecOpt) error
 }
 
 type Git struct {
@@ -38,7 +38,7 @@ func (g *Git) mustBeInAGitRepository() error {
 }
 
 func (g *Git) isInGitRepository() bool {
-	_, _, err := g.exec.Exec("git", []string{"rev-parse", "--is-inside-work-tree"})
+	err := g.exec.Exec("git", []string{"rev-parse", "--is-inside-work-tree"})
 
 	return err == nil
 }
