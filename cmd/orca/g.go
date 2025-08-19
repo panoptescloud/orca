@@ -15,7 +15,7 @@ func handleGCo(cmd *cobra.Command, args []string, cfg *config.Config) error {
 		searchTerm = args[0]
 	}
 
-	err := g.Checkout(git.CheckoutDTO{
+	branch, err := g.Checkout(git.CheckoutDTO{
 		Name: searchTerm,
 	})
 
@@ -27,7 +27,9 @@ func handleGCo(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	cobra.CheckErr(err)
 
 	if shouldPull {
-		return g.PullCurrentBranch()
+		return g.PullBranch(git.PullBranchDTO{
+			Name: branch,
+		})
 	}
 
 	return nil
@@ -50,5 +52,5 @@ func handleGBranches(cmd *cobra.Command, args []string, cfg *config.Config) erro
 func handleGPull(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	g := svcContainer.GetGit()
 
-	return g.PullCurrentBranch()
+	return g.PullBranch(git.PullBranchDTO{})
 }
