@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/panoptescloud/orca/internal/common"
+	"github.com/panoptescloud/orca/internal/hostsys"
 )
 
 type Branch struct {
@@ -108,10 +109,11 @@ func (g *Git) searchBranches(dto SearchBranchesDTO) (Branches, error) {
 		return nil, err
 	}
 
-	cmdOutput, _, err := g.exec.Exec("git", []string{
+	opt, stdout := hostsys.WithStdout()
+	err := g.exec.Exec("git", []string{
 		"branch",
 		"-l",
-	})
+	}, opt)
 
 	if err != nil {
 		return nil, common.ErrInvalidExecutionContext{
@@ -119,7 +121,7 @@ func (g *Git) searchBranches(dto SearchBranchesDTO) (Branches, error) {
 		}
 	}
 
-	branches := parseGitBranchOutput(cmdOutput)
+	branches := parseGitBranchOutput(stdout.String())
 
 	if dto.Search == "" {
 		return branches, nil
@@ -152,4 +154,48 @@ func (g *Git) ShowBranches(dto SearchBranchesDTO) error {
 	}
 
 	return nil
+}
+
+func (g *Git) GetCurrentBranch() (string, error) {
+	branches, err := g.searchBranches(SearchBranchesDTO{})
+
+	if err != nil {
+		return "", err
+	}
+
+	if branches.GetCurrent() == nil {
+		return "", common.ErrCouldNotDetermineCurrentBranch{}
+	}
+
+	return branches.GetCurrent().Name, nil
+}
+
+type PullBranchDTO struct {
+	Name string
+}
+
+func (g *Git) PullBranch(dto PullBranchDTO) error {
+	if err := g.mustBeInAGitRepository(); err != nil {
+		return err
+	}
+
+	branchToPull := dto.Name
+
+	if dto.Name == "" {
+		current, err := g.GetCurrentBranch()
+
+		if err != nil {
+			return err
+		}
+
+		branchToPull = current
+	}
+
+	err := g.exec.Exec("git", []string{
+		"pull",
+		"origin",
+		branchToPull,
+	}, hostsys.WithHostIO())
+
+	return g.tui.RecordIfError("Failed to pull branch!", err)
 }

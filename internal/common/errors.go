@@ -56,3 +56,15 @@ type ErrUserAbortedExecution struct{}
 func (err ErrUserAbortedExecution) Error() string {
 	return "user aborted execution"
 }
+
+type ErrCouldNotDetermineCurrentBranch struct{}
+
+func (err ErrCouldNotDetermineCurrentBranch) Error() string {
+	return "could not determine current branch"
+}
+
+type ErrNoBranchesFound struct{}
+
+func (err ErrNoBranchesFound) Error() string {
+	return "no branches found"
+}

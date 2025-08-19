@@ -15,9 +15,24 @@ func handleGCo(cmd *cobra.Command, args []string, cfg *config.Config) error {
 		searchTerm = args[0]
 	}
 
-	return g.Checkout(git.CheckoutDTO{
+	branch, err := g.Checkout(git.CheckoutDTO{
 		Name: searchTerm,
 	})
+
+	if err != nil {
+		return err
+	}
+
+	shouldPull, err := cmd.Flags().GetBool("pull")
+	cobra.CheckErr(err)
+
+	if shouldPull {
+		return g.PullBranch(git.PullBranchDTO{
+			Name: branch,
+		})
+	}
+
+	return nil
 }
 
 func handleGBranches(cmd *cobra.Command, args []string, cfg *config.Config) error {
@@ -32,4 +47,10 @@ func handleGBranches(cmd *cobra.Command, args []string, cfg *config.Config) erro
 	return g.ShowBranches(git.SearchBranchesDTO{
 		Search: searchTerm,
 	})
+}
+
+func handleGPull(cmd *cobra.Command, args []string, cfg *config.Config) error {
+	g := svcContainer.GetGit()
+
+	return g.PullBranch(git.PullBranchDTO{})
 }
