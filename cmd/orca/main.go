@@ -75,6 +75,13 @@ var gRbiCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleGRebaseInteractively, 1),
 }
 
+var gPushCmd = &cobra.Command{
+	Use:   "push",
+	Short: "Pushes the branch to origin.",
+	Long:  `Pushes the current branch to origin, using the current branches name as the target on the origin.`,
+	Run:   errorHandlerWrapper(handleGPush, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -128,6 +135,9 @@ func init() {
 
 	gRbiCmd.Flags().IntP("number", "n", 2, "The number of commits to include in the interactive rebase.")
 	gCmd.AddCommand(gRbiCmd)
+
+	gPushCmd.Flags().BoolP("force", "f", false, "Whether force push the branch.")
+	gCmd.AddCommand(gPushCmd)
 
 	gCmd.AddCommand(gPullCmd)
 

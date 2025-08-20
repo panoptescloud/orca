@@ -60,6 +60,17 @@ func handleGRebaseInteractively(cmd *cobra.Command, args []string, cfg *config.C
 	})
 }
 
+func handleGPush(cmd *cobra.Command, args []string, cfg *config.Config) error {
+	g := svcContainer.GetGit()
+
+	force, err := cmd.Flags().GetBool("force")
+	cobra.CheckErr(err)
+
+	return g.Push(git.PushDTO{
+		Force: force,
+	})
+}
+
 func handleGPull(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	g := svcContainer.GetGit()
 
