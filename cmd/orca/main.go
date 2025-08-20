@@ -96,6 +96,18 @@ var gLoglCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleGLogl, 1),
 }
 
+var utilCmd = &cobra.Command{
+	Use:   "util",
+	Short: "Utility commands, mainly helper type commands for internal use.",
+	RunE:  handleGroup,
+}
+
+var utilGenDocsCmd = &cobra.Command{
+	Use:   "gen-docs",
+	Short: "Generates markdown documentation for the CLI.",
+	Run:   errorHandlerWrapper(handleUtilGenDocs, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -105,7 +117,7 @@ var sysCmd = &cobra.Command{
 var sysCheckCmd = &cobra.Command{
 	Use:          "check",
 	Short:        "Checks for dependencies.",
-	Long:         `Checks that the following system dependencies are installed and usable.`,
+	Long:         `Checks that the required system dependencies are installed and usable.`,
 	Run:          errorHandlerWrapper(handleCheck, 1),
 	SilenceUsage: true,
 }
@@ -130,18 +142,22 @@ func handleGroup(cmd *cobra.Command, _ []string) error {
 func init() {
 	cobra.OnInitialize(bootstrap)
 
+	// Persistent flags
 	rootCmd.PersistentFlags().String("log-level", logging.LogLevelNoneName, "Log level to use, one of: debug, info, warn, error, none. Defaults to none, as most errors are already surfaced anyway.")
 	rootCmd.PersistentFlags().String("log-format", "text", "log format to use")
 
 	cobra.CheckErr(viper.BindPFlag("logging.level", rootCmd.PersistentFlags().Lookup("log-level")))
 	cobra.CheckErr(viper.BindPFlag("logging.format", rootCmd.PersistentFlags().Lookup("log-format")))
 
+	// Version
 	versionCmd.Flags().Bool("short", false, "Show only the version, excluding commit and date information.")
 	rootCmd.AddCommand(versionCmd)
 
+	// Sys
 	sysCmd.AddCommand(sysCheckCmd)
 	rootCmd.AddCommand(sysCmd)
 
+	// Git
 	gCoCmd.Flags().BoolP("pull", "p", false, "Pulls the branch from origin after checking it out.")
 	gCmd.AddCommand(gCoCmd)
 
@@ -163,6 +179,11 @@ func init() {
 	gCmd.AddCommand(gPullCmd)
 
 	rootCmd.AddCommand(gCmd)
+
+	// Utils
+	utilCmd.AddCommand(utilGenDocsCmd)
+
+	rootCmd.AddCommand(utilCmd)
 }
 
 func buildConfig() *config.Config {

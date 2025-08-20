@@ -6,6 +6,9 @@ on:
       - main
     paths:
       - mkdocs.yml
+      # Because the CLI docs are auto-generated, so if anything in here changes, we
+      # may need to redeploy the docs as well
+      - cmd/orca/**
       - docs/**
 
 permissions:
@@ -15,6 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: "build cli"
+        run: make build
+      - name: "generate CLI docs"
+        run: './.local/bin/orca util gen-docs'
       - name: Configure Git Credentials
         run: |
           git config user.name github-actions[bot]
