@@ -68,6 +68,34 @@ var gPullCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleGPull, 1),
 }
 
+var gRbiCmd = &cobra.Command{
+	Use:   "rbi",
+	Short: "Run an interactive rebase.",
+	Long:  `Starts an interactive rebase, for the number of commits required.`,
+	Run:   errorHandlerWrapper(handleGRebaseInteractively, 1),
+}
+
+var gPushCmd = &cobra.Command{
+	Use:   "push",
+	Short: "Pushes the branch to origin.",
+	Long:  `Pushes the current branch to origin, using the current branches name as the target on the origin.`,
+	Run:   errorHandlerWrapper(handleGPush, 1),
+}
+
+var gUndoCmd = &cobra.Command{
+	Use:   "undo",
+	Short: "Removes commits from the branch.",
+	Long:  `This will (destructively) remove commits from the current branch. The number of commits to remove is defined by the 'number' option.`,
+	Run:   errorHandlerWrapper(handleGUndo, 1),
+}
+
+var gLoglCmd = &cobra.Command{
+	Use:   "logl",
+	Short: "Shows the last X commits.",
+	Long:  `Only shows the short commit sha and subject of each commit for the last X commits on the current branch.`,
+	Run:   errorHandlerWrapper(handleGLogl, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -116,7 +144,22 @@ func init() {
 
 	gCoCmd.Flags().BoolP("pull", "p", false, "Pulls the branch from origin after checking it out.")
 	gCmd.AddCommand(gCoCmd)
+
 	gCmd.AddCommand(gBranchesCmd)
+
+	gRbiCmd.Flags().IntP("number", "n", 2, "The number of commits to include in the interactive rebase.")
+	gCmd.AddCommand(gRbiCmd)
+
+	gPushCmd.Flags().BoolP("force", "f", false, "Whether force push the branch.")
+	gCmd.AddCommand(gPushCmd)
+
+	gUndoCmd.Flags().BoolP("yes", "y", false, "Skip the confirmation prompt, and just delete them. #YOLO")
+	gUndoCmd.Flags().IntP("number", "n", 1, "The number of commits to remove from the branch.")
+	gCmd.AddCommand(gUndoCmd)
+
+	gLoglCmd.Flags().IntP("number", "n", 10, "The number of commits to remove from the branch.")
+	gCmd.AddCommand(gLoglCmd)
+
 	gCmd.AddCommand(gPullCmd)
 
 	rootCmd.AddCommand(gCmd)

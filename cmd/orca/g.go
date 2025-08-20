@@ -49,6 +49,54 @@ func handleGBranches(cmd *cobra.Command, args []string, cfg *config.Config) erro
 	})
 }
 
+func handleGRebaseInteractively(cmd *cobra.Command, args []string, cfg *config.Config) error {
+	g := svcContainer.GetGit()
+
+	amount, err := cmd.Flags().GetInt("number")
+	cobra.CheckErr(err)
+
+	return g.RebaseInteractively(git.RebaseInteractivelyDTO{
+		Amount: amount,
+	})
+}
+
+func handleGPush(cmd *cobra.Command, args []string, cfg *config.Config) error {
+	g := svcContainer.GetGit()
+
+	force, err := cmd.Flags().GetBool("force")
+	cobra.CheckErr(err)
+
+	return g.Push(git.PushDTO{
+		Force: force,
+	})
+}
+
+func handleGUndo(cmd *cobra.Command, args []string, cfg *config.Config) error {
+	g := svcContainer.GetGit()
+
+	autoConfirm, err := cmd.Flags().GetBool("yes")
+	cobra.CheckErr(err)
+
+	amount, err := cmd.Flags().GetInt("number")
+	cobra.CheckErr(err)
+
+	return g.UndoLastXCommits(git.UndoLastXCommitsDTO{
+		Amount:           amount,
+		SkipConfirmation: autoConfirm,
+	})
+}
+
+func handleGLogl(cmd *cobra.Command, args []string, cfg *config.Config) error {
+	g := svcContainer.GetGit()
+
+	amount, err := cmd.Flags().GetInt("number")
+	cobra.CheckErr(err)
+
+	return g.Logl(git.LoglDTO{
+		Amount: amount,
+	})
+}
+
 func handleGPull(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	g := svcContainer.GetGit()
 
