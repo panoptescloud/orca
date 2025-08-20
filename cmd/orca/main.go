@@ -89,6 +89,13 @@ var gUndoCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleGUndo, 1),
 }
 
+var gLoglCmd = &cobra.Command{
+	Use:   "logl",
+	Short: "Shows the last X commits.",
+	Long:  `Only shows the short commit sha and subject of each commit for the last X commits on the current branch.`,
+	Run:   errorHandlerWrapper(handleGLogl, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -149,6 +156,9 @@ func init() {
 	gUndoCmd.Flags().BoolP("yes", "y", false, "Skip the confirmation prompt, and just delete them. #YOLO")
 	gUndoCmd.Flags().IntP("number", "n", 1, "The number of commits to remove from the branch.")
 	gCmd.AddCommand(gUndoCmd)
+
+	gLoglCmd.Flags().IntP("number", "n", 10, "The number of commits to remove from the branch.")
+	gCmd.AddCommand(gLoglCmd)
 
 	gCmd.AddCommand(gPullCmd)
 

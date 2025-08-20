@@ -86,6 +86,17 @@ func handleGUndo(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	})
 }
 
+func handleGLogl(cmd *cobra.Command, args []string, cfg *config.Config) error {
+	g := svcContainer.GetGit()
+
+	amount, err := cmd.Flags().GetInt("number")
+	cobra.CheckErr(err)
+
+	return g.Logl(git.LoglDTO{
+		Amount: amount,
+	})
+}
+
 func handleGPull(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	g := svcContainer.GetGit()
 
