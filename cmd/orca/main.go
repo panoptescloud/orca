@@ -68,6 +68,13 @@ var gPullCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleGPull, 1),
 }
 
+var gRbiCmd = &cobra.Command{
+	Use:   "rbi",
+	Short: "Run an interactive rebase.",
+	Long:  `Starts an interactive rebase, for the number of commits required.`,
+	Run:   errorHandlerWrapper(handleGRebaseInteractively, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -116,7 +123,12 @@ func init() {
 
 	gCoCmd.Flags().BoolP("pull", "p", false, "Pulls the branch from origin after checking it out.")
 	gCmd.AddCommand(gCoCmd)
+
 	gCmd.AddCommand(gBranchesCmd)
+
+	gRbiCmd.Flags().IntP("number", "n", 2, "The number of commits to include in the interactive rebase.")
+	gCmd.AddCommand(gRbiCmd)
+
 	gCmd.AddCommand(gPullCmd)
 
 	rootCmd.AddCommand(gCmd)

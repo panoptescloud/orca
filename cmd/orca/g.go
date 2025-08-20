@@ -49,6 +49,17 @@ func handleGBranches(cmd *cobra.Command, args []string, cfg *config.Config) erro
 	})
 }
 
+func handleGRebaseInteractively(cmd *cobra.Command, args []string, cfg *config.Config) error {
+	g := svcContainer.GetGit()
+
+	amount, err := cmd.Flags().GetInt("number")
+	cobra.CheckErr(err)
+
+	return g.RebaseInteractively(git.RebaseInteractivelyDTO{
+		Amount: amount,
+	})
+}
+
 func handleGPull(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	g := svcContainer.GetGit()
 
