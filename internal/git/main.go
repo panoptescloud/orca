@@ -5,6 +5,9 @@ import (
 	"github.com/panoptescloud/orca/internal/hostsys"
 )
 
+const ConfirmYes = "Yes"
+const ConfirmNo = "No"
+
 type tui interface {
 	Info(msg ...string)
 	Error(msg ...string)

@@ -71,6 +71,21 @@ func handleGPush(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	})
 }
 
+func handleGUndo(cmd *cobra.Command, args []string, cfg *config.Config) error {
+	g := svcContainer.GetGit()
+
+	autoConfirm, err := cmd.Flags().GetBool("yes")
+	cobra.CheckErr(err)
+
+	amount, err := cmd.Flags().GetInt("number")
+	cobra.CheckErr(err)
+
+	return g.UndoLastXCommits(git.UndoLastXCommitsDTO{
+		Amount:           amount,
+		SkipConfirmation: autoConfirm,
+	})
+}
+
 func handleGPull(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	g := svcContainer.GetGit()
 

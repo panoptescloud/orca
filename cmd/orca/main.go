@@ -82,6 +82,13 @@ var gPushCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleGPush, 1),
 }
 
+var gUndoCmd = &cobra.Command{
+	Use:   "undo",
+	Short: "Removes commits from the branch.",
+	Long:  `This will (destructively) remove commits from the current branch. The number of commits to remove is defined by the 'number' option.`,
+	Run:   errorHandlerWrapper(handleGUndo, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -138,6 +145,10 @@ func init() {
 
 	gPushCmd.Flags().BoolP("force", "f", false, "Whether force push the branch.")
 	gCmd.AddCommand(gPushCmd)
+
+	gUndoCmd.Flags().BoolP("yes", "y", false, "Skip the confirmation prompt, and just delete them. #YOLO")
+	gUndoCmd.Flags().IntP("number", "n", 1, "The number of commits to remove from the branch.")
+	gCmd.AddCommand(gUndoCmd)
 
 	gCmd.AddCommand(gPullCmd)
 
