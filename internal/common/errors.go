@@ -68,3 +68,57 @@ type ErrNoBranchesFound struct{}
 func (err ErrNoBranchesFound) Error() string {
 	return "no branches found"
 }
+
+type ErrInvalidSemVerValue struct {
+	Value string
+}
+
+func (err ErrInvalidSemVerValue) Error() string {
+	return fmt.Sprintf("invalid semver value given: %s", err.Value)
+}
+
+type ErrVersionNotFound struct {
+	Version string
+}
+
+func (err ErrVersionNotFound) Error() string {
+	return fmt.Sprintf("version did not exist: %s", err.Version)
+}
+
+type ErrUnexpectedApiError struct {
+	Msg string
+}
+
+func (err ErrUnexpectedApiError) Error() string {
+	return fmt.Sprintf("unexpected API error: %s", err.Msg)
+}
+
+type ErrRateLimitedByApi struct {
+	Api string
+}
+
+func (err ErrRateLimitedByApi) Error() string {
+	return fmt.Sprintf("rate limit exceeded for '%s'", err.Api)
+}
+
+type ErrUnsupportedOS struct {
+	OS string
+}
+
+func (err ErrUnsupportedOS) Error() string {
+	return fmt.Sprintf("unsupported OS: %s", err.OS)
+}
+
+type ErrUnsupportedArchitecture struct {
+	Arch string
+}
+
+func (err ErrUnsupportedArchitecture) Error() string {
+	return fmt.Sprintf("unsupported architecture: %s", err.Arch)
+}
+
+type ErrInvalidArchive struct{}
+
+func (err ErrInvalidArchive) Error() string {
+	return fmt.Sprintf("invalid archive used")
+}

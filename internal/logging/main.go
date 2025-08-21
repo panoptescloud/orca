@@ -22,7 +22,8 @@ func NewSlogHandler(cfg *config.Config) (slog.Handler, error) {
 	}
 
 	opts := &slog.HandlerOptions{
-		Level: l,
+		Level:     l,
+		AddSource: true,
 	}
 
 	var handler slog.Handler
