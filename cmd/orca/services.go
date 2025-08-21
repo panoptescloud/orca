@@ -4,8 +4,10 @@ import (
 	"os"
 
 	"github.com/panoptescloud/orca/internal/git"
+	"github.com/panoptescloud/orca/internal/github"
 	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/panoptescloud/orca/internal/tui"
+	"github.com/panoptescloud/orca/internal/updater"
 )
 
 type services struct {
@@ -16,6 +18,10 @@ type services struct {
 	executor *hostsys.Executor
 
 	git *git.Git
+
+	githubClient *github.GithubClient
+
+	selfUpdater *updater.SelfUpdater
 }
 
 func (s *services) GetTui() *tui.Tui {
@@ -64,4 +70,27 @@ func (s *services) GetGit() *git.Git {
 	)
 
 	return s.git
+}
+
+func (s *services) GetGithubClient() *github.GithubClient {
+	if s.githubClient != nil {
+		return s.githubClient
+	}
+
+	s.githubClient = github.NewGithubClient()
+
+	return s.githubClient
+}
+
+func (s *services) GetSelfUpdater() *updater.SelfUpdater {
+	if s.selfUpdater != nil {
+		return s.selfUpdater
+	}
+
+	s.selfUpdater = updater.NewSelfUpdater(
+		s.GetGithubClient(),
+		s.GetTui(),
+	)
+
+	return s.selfUpdater
 }

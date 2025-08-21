@@ -108,6 +108,13 @@ var utilGenDocsCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleUtilGenDocs, 1),
 }
 
+var utilSelfUpdateCmd = &cobra.Command{
+	Use:   "self-update",
+	Short: "Updates this tool.",
+	Long:  `By default will update to the latest available version. A specific version can be specified if a specific version is required.`,
+	Run:   errorHandlerWrapper(handleUtilSelfUpdate, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -182,6 +189,9 @@ func init() {
 
 	// Utils
 	utilCmd.AddCommand(utilGenDocsCmd)
+
+	utilSelfUpdateCmd.Flags().String("to", "", "The version you wish to switch to. If left blank will download latest avaialable")
+	utilCmd.AddCommand(utilSelfUpdateCmd)
 
 	rootCmd.AddCommand(utilCmd)
 }
