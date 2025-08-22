@@ -14,8 +14,19 @@ type ConfigWorkspace struct {
 }
 
 type Config struct {
-	Logging    ConfigLogging
-	Workspaces []ConfigWorkspace
+	Logging          ConfigLogging
+	Workspaces       []ConfigWorkspace
+	CurrentWorkspace string `mapstructure:"current_workspace"`
+}
+
+func (self *Config) WorkspaceExists(ws string) bool {
+	for _, workspace := range self.Workspaces {
+		if workspace.Name == ws {
+			return true
+		}
+	}
+
+	return false
 }
 
 func NewDefaultConfig() *Config {
@@ -24,6 +35,7 @@ func NewDefaultConfig() *Config {
 			Level:  "none",
 			Format: "text",
 		},
-		Workspaces: []ConfigWorkspace{},
+		Workspaces:       []ConfigWorkspace{},
+		CurrentWorkspace: "",
 	}
 }

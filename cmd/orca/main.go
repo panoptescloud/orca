@@ -136,6 +136,18 @@ var configPathCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleConfigPath, 1),
 }
 
+var wsCmd = &cobra.Command{
+	Use:   "ws",
+	Short: "Commands related to managing workspaces.",
+	RunE:  handleGroup,
+}
+
+var wsSwitchCmd = &cobra.Command{
+	Use:   "switch",
+	Short: "Switch to another workspace",
+	Run:   errorHandlerWrapper(handleWsSwitch, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -239,6 +251,10 @@ func init() {
 	configCmd.AddCommand(configPathCmd)
 	configCmd.AddCommand(configShowCmd)
 	rootCmd.AddCommand(configCmd)
+
+	// workspaces
+	wsCmd.AddCommand(wsSwitchCmd)
+	rootCmd.AddCommand(wsCmd)
 }
 
 func bootstrap() {

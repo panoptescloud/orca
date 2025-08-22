@@ -122,3 +122,11 @@ type ErrInvalidArchive struct{}
 func (err ErrInvalidArchive) Error() string {
 	return fmt.Sprintf("invalid archive used")
 }
+
+type ErrUnknownWorkspace struct {
+	Workspace string
+}
+
+func (err ErrUnknownWorkspace) Error() string {
+	return fmt.Sprintf("unknown workspace: %s", err.Workspace)
+}

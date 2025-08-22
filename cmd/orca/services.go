@@ -34,6 +34,7 @@ func (s *services) GetConfigManager() *config.Manager {
 	}
 
 	s.configManager = config.NewManager(
+		s.GetTui(),
 		afero.NewOsFs(),
 		getConfigFilePath(),
 	)

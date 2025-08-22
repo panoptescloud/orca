@@ -1,15 +1,23 @@
 package config
 
 import (
+	"fmt"
 	"path/filepath"
 
+	"github.com/panoptescloud/orca/internal/common"
 	"github.com/spf13/afero"
 	"gopkg.in/yaml.v3"
 )
 
+type tui interface {
+	Error(msg ...string)
+	Success(msg ...string)
+}
+
 type Manager struct {
 	fs   afero.Fs
 	path string
+	tui  tui
 }
 
 func (self *Manager) loadFromFile() (*Config, error) {
@@ -55,9 +63,35 @@ func (self *Manager) LoadOrCreate() (*Config, error) {
 	return self.loadFromFile()
 }
 
-func NewManager(fs afero.Fs, path string) *Manager {
+func (self *Manager) SwitchWorkspace(workspace string) error {
+	cfg, err := self.loadFromFile()
+
+	if err != nil {
+		return err
+	}
+
+	if exists := cfg.WorkspaceExists(workspace); !exists {
+		self.tui.Error(fmt.Sprintf("Workspace '%s' does not exist!", workspace))
+		return common.ErrUnknownWorkspace{
+			Workspace: workspace,
+		}
+	}
+
+	cfg.CurrentWorkspace = workspace
+
+	if err := self.SaveConfig(cfg); err != nil {
+		return err
+	}
+
+	self.tui.Success(fmt.Sprintf("Switched to '%s' workspace", workspace))
+
+	return nil
+}
+
+func NewManager(tui tui, fs afero.Fs, path string) *Manager {
 	return &Manager{
 		fs:   fs,
 		path: path,
+		tui:  tui,
 	}
 }
