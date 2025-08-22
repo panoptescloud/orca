@@ -12,6 +12,9 @@ import (
 	"github.com/spf13/viper"
 )
 
+const configFileName = "orca.yaml"
+const configFileOverrideEnv = "ORCA_CONFIG_PATH"
+
 type runEHandlerFunc func(cmd *cobra.Command, args []string, config *config.Config) error
 type runHandlerFunc func(cmd *cobra.Command, args []string)
 
@@ -115,6 +118,18 @@ var utilSelfUpdateCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleUtilSelfUpdate, 1),
 }
 
+var configCmd = &cobra.Command{
+	Use:   "config",
+	Short: "Commands for managing configuration",
+	RunE:  handleGroup,
+}
+
+var configShowCmd = &cobra.Command{
+	Use:   "show",
+	Short: "Show the config",
+	Run:   errorHandlerWrapper(handleConfigShow, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -146,12 +161,31 @@ func handleGroup(cmd *cobra.Command, _ []string) error {
 	return cmd.Help()
 }
 
+func getConfigFilePath() string {
+	homeDir, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	configFile := fmt.Sprintf("%s/.orca/%s", homeDir, configFileName)
+
+	if override, found := os.LookupEnv(configFileOverrideEnv); found {
+		configFile = override
+	}
+
+	return configFile
+}
+
 func init() {
+	var err error
+	configManager := svcContainer.GetConfigManager()
+
+	appCfg, err = configManager.LoadOrCreate()
+	cobra.CheckErr(err)
+
 	cobra.OnInitialize(bootstrap)
 
 	// Persistent flags
-	rootCmd.PersistentFlags().String("log-level", logging.LogLevelNoneName, "Log level to use, one of: debug, info, warn, error, none. Defaults to none, as most errors are already surfaced anyway.")
-	rootCmd.PersistentFlags().String("log-format", "text", "log format to use")
+	rootCmd.PersistentFlags().String("log-level", appCfg.Logging.Level, "Log level to use, one of: debug, info, warn, error, none. Defaults to none, as most errors are already surfaced anyway.")
+	rootCmd.PersistentFlags().String("log-format", appCfg.Logging.Format, "log format to use")
 
 	cobra.CheckErr(viper.BindPFlag("logging.level", rootCmd.PersistentFlags().Lookup("log-level")))
 	cobra.CheckErr(viper.BindPFlag("logging.format", rootCmd.PersistentFlags().Lookup("log-format")))
@@ -194,35 +228,13 @@ func init() {
 	utilCmd.AddCommand(utilSelfUpdateCmd)
 
 	rootCmd.AddCommand(utilCmd)
-}
 
-func buildConfig() *config.Config {
-	if appCfg != nil {
-		return appCfg
-	}
-
-	c := config.NewDefault()
-	err := viper.Unmarshal(c)
-	cobra.CheckErr(err)
-
-	appCfg = c
-	return appCfg
+	// config
+	configCmd.AddCommand(configShowCmd)
+	rootCmd.AddCommand(configCmd)
 }
 
 func bootstrap() {
-	// if cfgFile != "" {
-	// 	// Use config file from the flag.
-	// 	viper.SetConfigFile(cfgFile)
-	// } else {
-	// 	// Find home directory.
-	// 	currentDir, err := os.Getwd()
-	// 	cobra.CheckErr(err)
-
-	// 	viper.AddConfigPath(currentDir)
-	// 	viper.SetConfigType("yaml")
-	// 	viper.SetConfigName("config")
-	// }
-
 	// Tell viper to replace . in nested path with underscores
 	// e.g. logging.level becomes LOGGING_LEVEL
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -230,13 +242,10 @@ func bootstrap() {
 	viper.SetEnvPrefix("orca")
 	viper.AutomaticEnv()
 
-	// err := viper.ReadInConfig()
+	err := viper.Unmarshal(appCfg)
+	cobra.CheckErr(err)
 
-	// cobra.CheckErr(err)
-
-	cfg := buildConfig()
-
-	h, err := logging.NewSlogHandler(cfg)
+	h, err := logging.NewSlogHandler(appCfg)
 
 	cobra.CheckErr(err)
 

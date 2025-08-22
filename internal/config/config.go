@@ -8,15 +8,22 @@ type ConfigLogging struct {
 	Format string
 }
 
-type Config struct {
-	Logging ConfigLogging
+type ConfigWorkspace struct {
+	Name string
+	Path string
 }
 
-func NewDefault() *Config {
+type Config struct {
+	Logging    ConfigLogging
+	Workspaces []ConfigWorkspace
+}
+
+func NewDefaultConfig() *Config {
 	return &Config{
 		Logging: ConfigLogging{
-			Level:  "info",
-			Format: "json",
+			Level:  "none",
+			Format: "text",
 		},
+		Workspaces: []ConfigWorkspace{},
 	}
 }

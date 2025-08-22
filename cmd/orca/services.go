@@ -3,14 +3,18 @@ package main
 import (
 	"os"
 
+	"github.com/panoptescloud/orca/internal/config"
 	"github.com/panoptescloud/orca/internal/git"
 	"github.com/panoptescloud/orca/internal/github"
 	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/panoptescloud/orca/internal/tui"
 	"github.com/panoptescloud/orca/internal/updater"
+	"github.com/spf13/afero"
 )
 
 type services struct {
+	configManager *config.Manager
+
 	tui *tui.Tui
 
 	hostSystem *hostsys.HostSystem
@@ -22,6 +26,19 @@ type services struct {
 	githubClient *github.GithubClient
 
 	selfUpdater *updater.SelfUpdater
+}
+
+func (s *services) GetConfigManager() *config.Manager {
+	if s.configManager != nil {
+		return s.configManager
+	}
+
+	s.configManager = config.NewManager(
+		afero.NewOsFs(),
+		getConfigFilePath(),
+	)
+
+	return s.configManager
 }
 
 func (s *services) GetTui() *tui.Tui {
