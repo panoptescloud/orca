@@ -120,7 +120,7 @@ func (err ErrUnsupportedArchitecture) Error() string {
 type ErrInvalidArchive struct{}
 
 func (err ErrInvalidArchive) Error() string {
-	return fmt.Sprintf("invalid archive used")
+	return "invalid archive used"
 }
 
 type ErrUnknownWorkspace struct {
