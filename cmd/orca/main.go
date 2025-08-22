@@ -130,6 +130,12 @@ var configShowCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleConfigShow, 1),
 }
 
+var configPathCmd = &cobra.Command{
+	Use:   "path",
+	Short: "Show the path to config being used.",
+	Run:   errorHandlerWrapper(handleConfigPath, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -230,6 +236,7 @@ func init() {
 	rootCmd.AddCommand(utilCmd)
 
 	// config
+	configCmd.AddCommand(configPathCmd)
 	configCmd.AddCommand(configShowCmd)
 	rootCmd.AddCommand(configCmd)
 }

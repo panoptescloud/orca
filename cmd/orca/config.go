@@ -17,3 +17,9 @@ func handleConfigShow(cmd *cobra.Command, _ []string, cfg *config.Config) error 
 
 	return nil
 }
+
+func handleConfigPath(cmd *cobra.Command, _ []string, cfg *config.Config) error {
+	fmt.Println(getConfigFilePath())
+
+	return nil
+}
