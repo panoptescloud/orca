@@ -62,6 +62,8 @@ func (s *services) GetHostSystem() *hostsys.HostSystem {
 
 	s.hostSystem = hostsys.NewHostSystem(
 		s.GetTui(),
+		afero.NewOsFs(),
+		getToolsDir(),
 	)
 
 	return s.hostSystem
@@ -108,6 +110,7 @@ func (s *services) GetSelfUpdater() *updater.SelfUpdater {
 	s.selfUpdater = updater.NewSelfUpdater(
 		s.GetGithubClient(),
 		s.GetTui(),
+		s.GetHostSystem(),
 	)
 
 	return s.selfUpdater

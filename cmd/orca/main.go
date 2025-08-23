@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/panoptescloud/orca/internal/config"
+	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/panoptescloud/orca/internal/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -14,6 +15,7 @@ import (
 
 const configFileName = "orca.yaml"
 const configFileOverrideEnv = "ORCA_CONFIG_PATH"
+const configToolsPathOverrideEnv = "ORCA_TOOLS_PATH"
 
 type runEHandlerFunc func(cmd *cobra.Command, args []string, config *config.Config) error
 type runHandlerFunc func(cmd *cobra.Command, args []string)
@@ -162,6 +164,16 @@ var sysCheckCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
+var sysInstallCmd = &cobra.Command{
+	Use:   "install",
+	Short: "Installs a tool system tool that is needed.",
+	Long: fmt.Sprintf(`Tools are installed 'locally' rather than globally, they will be stored within %s.
+
+The first argument must be one of: %s`, getToolsDir(), hostsys.AllAvailableToolsCsv()),
+	Run:          errorHandlerWrapper(handleSysInstall, 1),
+	SilenceUsage: true,
+}
+
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 	return func(cmd *cobra.Command, args []string) {
 		err := f(cmd, args, appCfg)
@@ -177,6 +189,19 @@ func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 
 func handleGroup(cmd *cobra.Command, _ []string) error {
 	return cmd.Help()
+}
+
+func getToolsDir() string {
+	homeDir, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	configFile := fmt.Sprintf("%s/.orca/bin", homeDir)
+
+	if override, found := os.LookupEnv(configToolsPathOverrideEnv); found {
+		configFile = override
+	}
+
+	return configFile
 }
 
 func getConfigFilePath() string {
@@ -214,6 +239,7 @@ func init() {
 
 	// Sys
 	sysCmd.AddCommand(sysCheckCmd)
+	sysCmd.AddCommand(sysInstallCmd)
 	rootCmd.AddCommand(sysCmd)
 
 	// Git

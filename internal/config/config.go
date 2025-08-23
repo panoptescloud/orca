@@ -16,7 +16,7 @@ type ConfigWorkspace struct {
 type Config struct {
 	Logging          ConfigLogging
 	Workspaces       []ConfigWorkspace
-	CurrentWorkspace string `mapstructure:"current_workspace"`
+	CurrentWorkspace string `yaml:"currentWorkspace" mapstructure:"current_workspace"`
 }
 
 func (self *Config) WorkspaceExists(ws string) bool {

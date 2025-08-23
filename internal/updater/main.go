@@ -1,16 +1,9 @@
 package updater
 
 import (
-	"archive/tar"
-	"bytes"
-	"compress/gzip"
 	"fmt"
-	"io"
-	"net/http"
-	"runtime"
 
 	"github.com/Masterminds/semver/v3"
-	"github.com/minio/selfupdate"
 	"github.com/panoptescloud/orca/internal/common"
 )
 
@@ -21,6 +14,10 @@ type VersioningStrategy string
 
 const VersioningStrategyLatest VersioningStrategy = "latest"
 const VersioningStrategySpecific VersioningStrategy = "specific"
+
+type installer interface {
+	ReplaceSelf(version string) error
+}
 
 type tui interface {
 	Info(msg ...string)
@@ -35,8 +32,9 @@ type githubClient interface {
 }
 
 type SelfUpdater struct {
-	github githubClient
-	tui    tui
+	github    githubClient
+	tui       tui
+	installer installer
 }
 
 func (s *SelfUpdater) ensureVersionExists(v *semver.Version) error {
@@ -73,146 +71,37 @@ func (s *SelfUpdater) getVersion(dto ApplyDTO) (*semver.Version, error) {
 	return s.github.LatestVersion(githubOwner, githubRepo)
 }
 
-func (s *SelfUpdater) getOSForGithubReleaseURL() (string, error) {
-	switch os := runtime.GOOS; os {
-	case "darwin":
-		return "Darwin", nil
-	case "linux":
-		return "Linux", nil
-	case "windows":
-		return "Windows", nil
-	default:
-		return "", common.ErrUnsupportedOS{
-			OS: os,
-		}
-	}
-}
-
-func (s *SelfUpdater) getArchForGithubReleaseURL() (string, error) {
-	switch arch := runtime.GOARCH; arch {
-	case "amd64":
-		return "X86_64", nil
-	default:
-		return "", common.ErrUnsupportedArchitecture{
-			Arch: arch,
-		}
-	}
-}
-
-func (s *SelfUpdater) extractExecutableFromArchive(executable []byte) (io.Reader, error) {
-	buf := bytes.NewReader(executable)
-	gzr, err := gzip.NewReader(buf)
-	if err != nil {
-		return nil, err
-	}
-	defer gzr.Close()
-
-	tr := tar.NewReader(gzr)
-
-	for {
-		header, err := tr.Next()
-
-		switch {
-
-		// if no more files are found return
-		case err == io.EOF:
-			return nil, common.ErrInvalidArchive{}
-
-		// return any other error
-		case err != nil:
-			return nil, err
-
-		// if the header is nil, just skip it (not sure how this happens)
-		case header == nil:
-			continue
-		}
-
-		if header.Name == "orca" {
-			return tr, nil
-		}
-	}
-}
-
-func (s *SelfUpdater) getExecutable(v *semver.Version) (io.Reader, error) {
-	os, err := s.getOSForGithubReleaseURL()
-
-	if err != nil {
-		return nil, err
-	}
-
-	arch, err := s.getArchForGithubReleaseURL()
-
-	if err != nil {
-		return nil, err
-	}
-
-	url := fmt.Sprintf(
-		"https://github.com/%s/%s/releases/download/v%s/orca_%s_%s.tar.gz",
-		githubOwner,
-		githubRepo,
-		v.String(),
-		os,
-		arch,
-	)
-
-	resp, err := http.Get(url)
-
-	if err != nil {
-		return nil, err
-	}
-
-	executable, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if err := resp.Body.Close(); err != nil {
-		return nil, err
-	}
-
-	binary, err := s.extractExecutableFromArchive(executable)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return binary, nil
-}
-
 type ApplyDTO struct {
 	Strategy         VersioningStrategy
 	SpecifiedVersion string
 }
 
-func (s *SelfUpdater) Apply(dto ApplyDTO) error {
-	v, err := s.getVersion(dto)
+func (self *SelfUpdater) Apply(dto ApplyDTO) error {
+	v, err := self.getVersion(dto)
 
 	if err != nil {
-		return s.tui.RecordIfError("Failed to find version!", err)
+		return self.tui.RecordIfError("Failed to find version!", err)
 	}
 
-	s.tui.Info(fmt.Sprintf("Switching to version: %s", v.String()))
+	self.tui.Info(fmt.Sprintf("Switching to version: %s", v.String()))
 
-	binary, err := s.getExecutable(v)
+	err = self.installer.ReplaceSelf(v.String())
 
 	if err != nil {
-		return s.tui.RecordIfError("Failed to get executable contents!", err)
+		return self.tui.RecordIfError(
+			"Failed to apply update!",
+			err,
+		)
 	}
 
-	err = selfupdate.Apply(binary, selfupdate.Options{})
-	if err != nil {
-		s.tui.RecordIfError("Failed to apply update!", err)
-	}
-
-	s.tui.Success(fmt.Sprintf("Successfully switched to version: %s", v.String()))
-
+	self.tui.Success("Successfully switched!")
 	return nil
 }
 
-func NewSelfUpdater(github githubClient, tui tui) *SelfUpdater {
+func NewSelfUpdater(github githubClient, tui tui, installer installer) *SelfUpdater {
 	return &SelfUpdater{
-		github: github,
-		tui:    tui,
+		github:    github,
+		tui:       tui,
+		installer: installer,
 	}
 }
