@@ -16,14 +16,17 @@ import (
 )
 
 const hostCtlVersion = "1.1.4"
+const sopsVersion = "3.10.2"
 const orcaRepo = "panoptescloud/orca"
 
 type AvailableTool string
 
 const ToolHostCtl AvailableTool = "hostctl"
+const ToolSops AvailableTool = "sops"
 
 var allAvailableTools []AvailableTool = []AvailableTool{
 	ToolHostCtl,
+	ToolSops,
 }
 
 func AllAvailableToolsCsv() string {
@@ -189,6 +192,80 @@ func (self *HostSystem) installHostCtl() error {
 	return afero.WriteFile(self.fs, targetPath, contents, 0755)
 }
 
+func (self *HostSystem) getSopsOSForDownload() (string, error) {
+	switch os := runtime.GOOS; os {
+	case "darwin":
+		return "darwin", nil
+	case "linux":
+		return "linux", nil
+	default:
+		return "", common.ErrUnsupportedOS{
+			OS: os,
+		}
+	}
+}
+
+func (self *HostSystem) getSopsArchForDownload() (string, error) {
+	switch arch := runtime.GOARCH; arch {
+	case "amd64":
+		return "amd64", nil
+	case "arm64":
+		return "arm64", nil
+	default:
+		return "", common.ErrUnsupportedArchitecture{
+			Arch: arch,
+		}
+	}
+}
+
+func (self *HostSystem) installSops() error {
+	os, err := self.getSopsOSForDownload()
+
+	if err != nil {
+		return err
+	}
+
+	arch, err := self.getSopsArchForDownload()
+
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf(
+		"https://github.com/getsops/sops/releases/download/v%s/sops-v%s.%s.%s",
+		sopsVersion,
+		sopsVersion,
+		os,
+		arch,
+	)
+
+	contents, err := self.getFileFromUrl(url)
+
+	if err != nil {
+		return err
+	}
+
+	if err := self.fs.MkdirAll(self.toolsDir, 0755); err != nil {
+		return err
+	}
+
+	targetPath := fmt.Sprintf("%s/%s", self.toolsDir, "sops")
+
+	exists, err := afero.Exists(self.fs, targetPath)
+
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		if err := self.fs.Remove(targetPath); err != nil {
+			return err
+		}
+	}
+
+	return afero.WriteFile(self.fs, targetPath, contents, 0755)
+}
+
 type InstallDTO struct {
 	Tool AvailableTool
 }
@@ -204,6 +281,8 @@ func (self *HostSystem) Install(dto InstallDTO) error {
 	switch dto.Tool {
 	case ToolHostCtl:
 		err = self.installHostCtl()
+	case ToolSops:
+		err = self.installSops()
 	default:
 		return self.tui.RecordIfError("This tool is not supported!", common.ErrNotImplemented{
 			Msg: "installation has not been implemented for this tool",
