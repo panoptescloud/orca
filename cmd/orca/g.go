@@ -1,12 +1,11 @@
 package main
 
 import (
-	"github.com/panoptescloud/orca/internal/config"
 	"github.com/panoptescloud/orca/internal/git"
 	"github.com/spf13/cobra"
 )
 
-func handleGCo(cmd *cobra.Command, args []string, cfg *config.Config) error {
+func handleGCo(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
 	searchTerm := ""
@@ -35,7 +34,7 @@ func handleGCo(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	return nil
 }
 
-func handleGBranches(cmd *cobra.Command, args []string, cfg *config.Config) error {
+func handleGBranches(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
 	searchTerm := ""
@@ -49,7 +48,7 @@ func handleGBranches(cmd *cobra.Command, args []string, cfg *config.Config) erro
 	})
 }
 
-func handleGRebaseInteractively(cmd *cobra.Command, args []string, cfg *config.Config) error {
+func handleGRebaseInteractively(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
 	amount, err := cmd.Flags().GetInt("number")
@@ -60,7 +59,7 @@ func handleGRebaseInteractively(cmd *cobra.Command, args []string, cfg *config.C
 	})
 }
 
-func handleGPush(cmd *cobra.Command, args []string, cfg *config.Config) error {
+func handleGPush(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
 	force, err := cmd.Flags().GetBool("force")
@@ -71,7 +70,7 @@ func handleGPush(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	})
 }
 
-func handleGUndo(cmd *cobra.Command, args []string, cfg *config.Config) error {
+func handleGUndo(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
 	autoConfirm, err := cmd.Flags().GetBool("yes")
@@ -86,7 +85,7 @@ func handleGUndo(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	})
 }
 
-func handleGLogl(cmd *cobra.Command, args []string, cfg *config.Config) error {
+func handleGLogl(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
 	amount, err := cmd.Flags().GetInt("number")
@@ -97,7 +96,7 @@ func handleGLogl(cmd *cobra.Command, args []string, cfg *config.Config) error {
 	})
 }
 
-func handleGPull(cmd *cobra.Command, args []string, cfg *config.Config) error {
+func handleGPull(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
 	return g.PullBranch(git.PullBranchDTO{})

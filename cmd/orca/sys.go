@@ -4,12 +4,11 @@ import (
 	"os"
 
 	"github.com/panoptescloud/orca/internal/common"
-	"github.com/panoptescloud/orca/internal/config"
 	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/spf13/cobra"
 )
 
-func handleCheck(_ *cobra.Command, _ []string, _ *config.Config) error {
+func handleCheck(_ *cobra.Command, _ []string) error {
 	tui := svcContainer.GetTui()
 
 	hs := svcContainer.GetHostSystem()
@@ -26,7 +25,7 @@ func handleCheck(_ *cobra.Command, _ []string, _ *config.Config) error {
 	return nil
 }
 
-func handleSysInstall(_ *cobra.Command, args []string, _ *config.Config) error {
+func handleSysInstall(_ *cobra.Command, args []string) error {
 	tui := svcContainer.GetTui()
 	if len(args) < 1 {
 		return tui.RecordIfError("Must provide the name of the tool as the first argument", common.ErrArgumentRequired{

@@ -7,7 +7,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/panoptescloud/orca/internal/config"
 	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/panoptescloud/orca/internal/logging"
 	"github.com/panoptescloud/orca/internal/workspaces"
@@ -19,7 +18,7 @@ const configFileName = "orca.yaml"
 const configFileOverrideEnv = "ORCA_CONFIG_PATH"
 const configToolsPathOverrideEnv = "ORCA_TOOLS_PATH"
 
-type runEHandlerFunc func(cmd *cobra.Command, args []string, config *config.Config) error
+type runEHandlerFunc func(cmd *cobra.Command, args []string) error
 type runHandlerFunc func(cmd *cobra.Command, args []string)
 
 var (
@@ -28,7 +27,6 @@ var (
 	date    string = "unknown"
 )
 
-var appCfg *config.Config
 var svcContainer *services = &services{}
 
 var rootCmd = &cobra.Command{
@@ -187,7 +185,7 @@ The first argument must be one of: %s`, getToolsDir(), hostsys.AllAvailableTools
 
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 	return func(cmd *cobra.Command, args []string) {
-		err := f(cmd, args, appCfg)
+		err := f(cmd, args)
 
 		if err != nil {
 			// Set as a debug level here as it should already be logged earlier
@@ -252,7 +250,7 @@ func init() {
 	var err error
 	configManager := svcContainer.GetConfigManager()
 
-	appCfg, err = configManager.LoadOrCreate()
+	appCfg, err := configManager.LoadOrCreate()
 	cobra.CheckErr(err)
 
 	cobra.OnInitialize(bootstrap)
@@ -327,10 +325,11 @@ func bootstrap() {
 	viper.SetEnvPrefix("orca")
 	viper.AutomaticEnv()
 
-	err := viper.Unmarshal(appCfg)
+	cfgManager := svcContainer.GetConfigManager()
+	err := viper.Unmarshal(cfgManager.Get())
 	cobra.CheckErr(err)
 
-	h, err := logging.NewSlogHandler(appCfg)
+	h, err := logging.NewSlogHandler(cfgManager.Get())
 
 	cobra.CheckErr(err)
 

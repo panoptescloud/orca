@@ -18,6 +18,7 @@ type Manager struct {
 	fs   afero.Fs
 	path string
 	tui  tui
+	cfg  *Config
 }
 
 func (self *Manager) loadFromFile() (*Config, error) {
@@ -45,7 +46,19 @@ func (self *Manager) SaveConfig(cfg *Config) error {
 		return err
 	}
 
-	return afero.WriteFile(self.fs, self.path, contents, 0655)
+	err = afero.WriteFile(self.fs, self.path, contents, 0655)
+
+	if err != nil {
+		return err
+	}
+
+	self.cfg = cfg
+
+	return nil
+}
+
+func (self *Manager) Get() *Config {
+	return self.cfg
 }
 
 func (self *Manager) LoadOrCreate() (*Config, error) {
@@ -57,10 +70,16 @@ func (self *Manager) LoadOrCreate() (*Config, error) {
 
 	if !exists {
 		cfg := NewDefaultConfig()
+		self.cfg = cfg
+
 		return cfg, self.SaveConfig(cfg)
 	}
 
-	return self.loadFromFile()
+	cfg, err := self.loadFromFile()
+
+	self.cfg = cfg
+
+	return self.cfg, err
 }
 
 func (self *Manager) SwitchWorkspace(workspace string) error {
@@ -111,5 +130,6 @@ func NewManager(tui tui, fs afero.Fs, path string) *Manager {
 		fs:   fs,
 		path: path,
 		tui:  tui,
+		cfg:  NewDefaultConfig(),
 	}
 }

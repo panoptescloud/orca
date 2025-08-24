@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/panoptescloud/orca/internal/config"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
-func handleConfigShow(cmd *cobra.Command, _ []string, cfg *config.Config) error {
-	contents, err := yaml.Marshal(cfg)
+func handleConfigShow(cmd *cobra.Command, _ []string) error {
+	contents, err := yaml.Marshal(svcContainer.GetConfigManager().Get())
 
 	cobra.CheckErr(err)
 
@@ -18,7 +17,7 @@ func handleConfigShow(cmd *cobra.Command, _ []string, cfg *config.Config) error 
 	return nil
 }
 
-func handleConfigPath(cmd *cobra.Command, _ []string, cfg *config.Config) error {
+func handleConfigPath(cmd *cobra.Command, _ []string) error {
 	fmt.Println(getConfigFilePath())
 
 	return nil

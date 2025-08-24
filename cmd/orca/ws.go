@@ -2,12 +2,11 @@ package main
 
 import (
 	"github.com/panoptescloud/orca/internal/common"
-	"github.com/panoptescloud/orca/internal/config"
 	"github.com/panoptescloud/orca/internal/workspaces"
 	"github.com/spf13/cobra"
 )
 
-func handleWsSwitch(cmd *cobra.Command, args []string, cfg *config.Config) error {
+func handleWsSwitch(cmd *cobra.Command, args []string) error {
 	tui := svcContainer.GetTui()
 
 	if len(args) < 1 {
@@ -23,7 +22,7 @@ func handleWsSwitch(cmd *cobra.Command, args []string, cfg *config.Config) error
 	return manager.SwitchWorkspace(args[0])
 }
 
-func handleWsInit(cmd *cobra.Command, args []string, cfg *config.Config) error {
+func handleWsInit(cmd *cobra.Command, args []string) error {
 	manager := svcContainer.GetWorkspaceManager()
 
 	source, err := cmd.Flags().GetString("source")
