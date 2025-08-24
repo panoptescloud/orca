@@ -38,3 +38,9 @@ func handleWsInit(cmd *cobra.Command, args []string) error {
 		Into:              target,
 	})
 }
+
+func handleWsLs(cmd *cobra.Command, args []string) error {
+	manager := svcContainer.GetWorkspaceManager()
+
+	return manager.Ls(workspaces.LsDTO{})
+}

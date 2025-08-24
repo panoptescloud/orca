@@ -125,6 +125,19 @@ func (self *Manager) AddWorkspace(path string, ws *common.Workspace) error {
 	return self.SaveConfig(cfg)
 }
 
+func (self *Manager) GetWorkspaceLocations() common.WorkspaceLocations {
+	locs := make(common.WorkspaceLocations, len(self.cfg.Workspaces))
+
+	for i, ws := range self.cfg.Workspaces {
+		locs[i] = common.WorkspaceLocation{
+			Name: ws.Name,
+			Path: ws.Path,
+		}
+	}
+
+	return locs
+}
+
 func NewManager(tui tui, fs afero.Fs, path string) *Manager {
 	return &Manager{
 		fs:   fs,

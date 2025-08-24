@@ -159,6 +159,12 @@ When using a git url, will clone the given repository, and then clone any other 
 	Run: errorHandlerWrapper(handleWsInit, 1),
 }
 
+var wsLsCmd = &cobra.Command{
+	Use:   "ls",
+	Short: "Lists all available workspaces.",
+	Run:   errorHandlerWrapper(handleWsLs, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -314,6 +320,8 @@ func init() {
 	wsInitCmd.Flags().StringP("target", "t", getWorkingDirParent(), "The directory to store the workspace projects.")
 	wsInitCmd.Flags().StringP("config", "c", workspaces.DefaultWorkspaceFileName, "The name of the workspace config file within the source.")
 	wsCmd.AddCommand(wsInitCmd)
+
+	wsCmd.AddCommand(wsLsCmd)
 	rootCmd.AddCommand(wsCmd)
 }
 

@@ -16,6 +16,7 @@ type tui interface {
 
 type configManager interface {
 	AddWorkspace(path string, ws *common.Workspace) error
+	GetWorkspaceLocations() common.WorkspaceLocations
 }
 
 type Manager struct {
