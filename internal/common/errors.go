@@ -163,3 +163,19 @@ type ErrNotImplemented struct {
 func (err ErrNotImplemented) Error() string {
 	return fmt.Sprintf("not implemented: %s", err.Msg)
 }
+
+type ErrFileNotFound struct {
+	Path string
+}
+
+func (err ErrFileNotFound) Error() string {
+	return fmt.Sprintf("file not found: %s", err.Path)
+}
+
+type ErrWorkspaceAlreadyExists struct {
+	Name string
+}
+
+func (err ErrWorkspaceAlreadyExists) Error() string {
+	return fmt.Sprintf("workspace already exists: %s", err.Name)
+}

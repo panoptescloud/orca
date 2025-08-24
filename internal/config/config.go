@@ -3,6 +3,8 @@
 // unmarshalling the yaml to map[string]interface. access_log is one example
 package config
 
+import "github.com/panoptescloud/orca/internal/common"
+
 type ConfigLogging struct {
 	Level  string
 	Format string
@@ -27,6 +29,21 @@ func (self *Config) WorkspaceExists(ws string) bool {
 	}
 
 	return false
+}
+
+func (self *Config) AddWorkspace(name string, path string) error {
+	if self.WorkspaceExists(name) {
+		return common.ErrWorkspaceAlreadyExists{
+			Name: name,
+		}
+	}
+
+	self.Workspaces = append(self.Workspaces, ConfigWorkspace{
+		Name: name,
+		Path: path,
+	})
+
+	return nil
 }
 
 func NewDefaultConfig() *Config {

@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/panoptescloud/orca/internal/config"
 	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/panoptescloud/orca/internal/logging"
+	"github.com/panoptescloud/orca/internal/workspaces"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -150,6 +152,15 @@ var wsSwitchCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleWsSwitch, 1),
 }
 
+var wsInitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Initialises a workspace.",
+	Long: `Initialises a new workspace with orca. Either a local directory or a git repository can be supplied.
+When using a local directory, will locate an orca workspace config and clone the relevant projects.
+When using a git url, will clone the given repository, and then clone any other required repositories based on an orca workspace file within the repo.`,
+	Run: errorHandlerWrapper(handleWsInit, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -217,6 +228,26 @@ func getConfigFilePath() string {
 	return configFile
 }
 
+func getWorkingDir() string {
+	wd, err := os.Getwd()
+
+	cobra.CheckErr(err)
+
+	return wd
+}
+
+func getWorkingDirParent() string {
+	wd := getWorkingDir()
+
+	dir := path.Dir(fmt.Sprintf("%s/../", wd))
+
+	_, err := os.Stat(dir)
+
+	cobra.CheckErr(err)
+
+	return dir
+}
+
 func init() {
 	var err error
 	configManager := svcContainer.GetConfigManager()
@@ -280,6 +311,11 @@ func init() {
 
 	// workspaces
 	wsCmd.AddCommand(wsSwitchCmd)
+
+	wsInitCmd.Flags().StringP("source", "s", getWorkingDir(), "The directory of the workspace configuration.")
+	wsInitCmd.Flags().StringP("target", "t", getWorkingDirParent(), "The directory to store the workspace projects.")
+	wsInitCmd.Flags().StringP("config", "c", workspaces.DefaultWorkspaceFileName, "The name of the workspace config file within the source.")
+	wsCmd.AddCommand(wsInitCmd)
 	rootCmd.AddCommand(wsCmd)
 }
 

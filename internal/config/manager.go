@@ -88,6 +88,24 @@ func (self *Manager) SwitchWorkspace(workspace string) error {
 	return nil
 }
 
+func (self *Manager) AddWorkspace(path string, ws *common.Workspace) error {
+	cfg, err := self.loadFromFile()
+
+	if err != nil {
+		return err
+	}
+
+	err = cfg.AddWorkspace(ws.Name, path)
+
+	if err != nil {
+		return common.ErrWorkspaceAlreadyExists{
+			Name: ws.Name,
+		}
+	}
+
+	return self.SaveConfig(cfg)
+}
+
 func NewManager(tui tui, fs afero.Fs, path string) *Manager {
 	return &Manager{
 		fs:   fs,

@@ -9,6 +9,7 @@ import (
 	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/panoptescloud/orca/internal/tui"
 	"github.com/panoptescloud/orca/internal/updater"
+	"github.com/panoptescloud/orca/internal/workspaces"
 	"github.com/spf13/afero"
 )
 
@@ -26,6 +27,8 @@ type services struct {
 	githubClient *github.GithubClient
 
 	selfUpdater *updater.SelfUpdater
+
+	workspaceManager *workspaces.Manager
 }
 
 func (s *services) GetConfigManager() *config.Manager {
@@ -114,4 +117,18 @@ func (s *services) GetSelfUpdater() *updater.SelfUpdater {
 	)
 
 	return s.selfUpdater
+}
+
+func (s *services) GetWorkspaceManager() *workspaces.Manager {
+	if s.workspaceManager != nil {
+		return s.workspaceManager
+	}
+
+	s.workspaceManager = workspaces.NewManager(
+		afero.NewOsFs(),
+		s.GetTui(),
+		s.GetConfigManager(),
+	)
+
+	return s.workspaceManager
 }
