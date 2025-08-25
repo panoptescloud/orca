@@ -138,6 +138,47 @@ func (self *Manager) GetWorkspaceLocations() common.WorkspaceLocations {
 	return locs
 }
 
+func (self *Manager) GetWorkspaceLocation(name string) (common.WorkspaceLocation, error) {
+	for _, ws := range self.cfg.Workspaces {
+		if ws.Name == name {
+			return common.WorkspaceLocation{
+				Name: ws.Name,
+				Path: ws.Path,
+			}, nil
+		}
+	}
+
+	return common.WorkspaceLocation{}, common.ErrUnknownWorkspace{
+		Workspace: name,
+	}
+}
+
+func (self *Manager) ProjectExists(wsName string, name string) (bool, error) {
+	cfg, err := self.loadFromFile()
+
+	if err != nil {
+		return false, err
+	}
+
+	return cfg.ProjectExists(wsName, name)
+}
+
+func (self *Manager) SetProjectPath(wsName string, name string, path string) error {
+	cfg, err := self.loadFromFile()
+
+	if err != nil {
+		return err
+	}
+
+	err = cfg.SetProjectPath(wsName, name, path)
+
+	if err != nil {
+		return err
+	}
+
+	return self.SaveConfig(cfg)
+}
+
 func NewManager(tui tui, fs afero.Fs, path string) *Manager {
 	return &Manager{
 		fs:   fs,

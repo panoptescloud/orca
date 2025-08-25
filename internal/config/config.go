@@ -10,9 +10,46 @@ type ConfigLogging struct {
 	Format string
 }
 
-type ConfigWorkspace struct {
+type ConfigProject struct {
 	Name string
 	Path string
+}
+
+type ConfigWorkspace struct {
+	Name     string
+	Path     string
+	Projects []ConfigProject
+}
+
+func (self *ConfigWorkspace) GetProject(name string) *ConfigProject {
+	for _, project := range self.Projects {
+		if project.Name == name {
+			return &project
+		}
+	}
+
+	return nil
+}
+
+func (self *ConfigWorkspace) GetProjectIndex(name string) int {
+	for i, p := range self.Projects {
+		if p.Name == name {
+			return i
+		}
+	}
+
+	return -1
+}
+
+func (self *ConfigWorkspace) ReplaceProject(project ConfigProject) {
+	i := self.GetProjectIndex(project.Name)
+
+	if i == -1 {
+		self.Projects = append(self.Projects, project)
+		return
+	}
+
+	self.Projects[i] = project
 }
 
 type Config struct {
@@ -42,6 +79,78 @@ func (self *Config) AddWorkspace(name string, path string) error {
 		Name: name,
 		Path: path,
 	})
+
+	return nil
+}
+
+func (self *Config) GetWorkspace(name string) (*ConfigWorkspace, error) {
+	for _, ws := range self.Workspaces {
+		if ws.Name == name {
+			return &ws, nil
+		}
+	}
+
+	return nil, common.ErrUnknownWorkspace{
+		Workspace: name,
+	}
+}
+
+func (self *Config) ProjectExists(wsName string, projectName string) (bool, error) {
+	ws, err := self.GetWorkspace(wsName)
+
+	if err != nil {
+		return false, err
+	}
+
+	for _, p := range ws.Projects {
+		if p.Name == projectName {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (self *Config) GetWorkspaceIndex(name string) int {
+	for i, ws := range self.Workspaces {
+		if ws.Name == name {
+			return i
+		}
+	}
+
+	return -1
+}
+
+func (self *Config) ReplaceWorkspace(ws ConfigWorkspace) {
+	i := self.GetWorkspaceIndex(ws.Name)
+
+	if i == -1 {
+		self.Workspaces = append(self.Workspaces, ws)
+		return
+	}
+
+	self.Workspaces[i] = ws
+}
+
+func (self *Config) SetProjectPath(wsName string, name string, path string) error {
+	ws, err := self.GetWorkspace(wsName)
+
+	if err != nil {
+		return err
+	}
+
+	project := ws.GetProject(name)
+
+	if project == nil {
+		project = &ConfigProject{
+			Name: name,
+		}
+	}
+
+	project.Path = path
+
+	ws.ReplaceProject(*project)
+	self.ReplaceWorkspace(*ws)
 
 	return nil
 }

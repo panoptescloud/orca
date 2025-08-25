@@ -131,6 +131,14 @@ func (err ErrUnknownWorkspace) Error() string {
 	return fmt.Sprintf("unknown workspace: %s", err.Workspace)
 }
 
+type ErrUnknownProject struct {
+	Project string
+}
+
+func (err ErrUnknownProject) Error() string {
+	return fmt.Sprintf("unknown project: %s", err.Project)
+}
+
 type ErrUnknownTool struct {
 	Tool string
 }
@@ -156,6 +164,15 @@ func (err ErrTooManyArguments) Error() string {
 	return fmt.Sprintf("too many arguments supplied, expected only %d", err.Expected)
 }
 
+type ErrInvalidInput struct {
+	To  string
+	Msg string
+}
+
+func (err ErrInvalidInput) Error() string {
+	return fmt.Sprintf("invalid input to '%s': %s", err.To, err.Msg)
+}
+
 type ErrNotImplemented struct {
 	Msg string
 }
@@ -178,4 +195,20 @@ type ErrWorkspaceAlreadyExists struct {
 
 func (err ErrWorkspaceAlreadyExists) Error() string {
 	return fmt.Sprintf("workspace already exists: %s", err.Name)
+}
+
+type ErrDirectoryAlreadyExists struct {
+	Path string
+}
+
+func (err ErrDirectoryAlreadyExists) Error() string {
+	return fmt.Sprintf("directory already exists: %s", err.Path)
+}
+
+type ErrRepositoryAlreadyCloned struct {
+	RepoURL string
+}
+
+func (err ErrRepositoryAlreadyCloned) Error() string {
+	return fmt.Sprintf("repository already cloned: %s", err.RepoURL)
 }

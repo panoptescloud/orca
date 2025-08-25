@@ -17,18 +17,28 @@ type tui interface {
 type configManager interface {
 	AddWorkspace(path string, ws *common.Workspace) error
 	GetWorkspaceLocations() common.WorkspaceLocations
+	GetWorkspaceLocation(name string) (common.WorkspaceLocation, error)
+	SetProjectPath(wsName string, name string, into string) error
+	ProjectExists(wsName string, name string) (bool, error)
+}
+
+type git interface {
+	GetRepositoryRootFromPath(path string) (string, error)
+	Clone(repoUrl string, target string) error
 }
 
 type Manager struct {
 	fs            afero.Fs
 	tui           tui
 	configManager configManager
+	git           git
 }
 
-func NewManager(fs afero.Fs, tui tui, configManager configManager) *Manager {
+func NewManager(fs afero.Fs, tui tui, configManager configManager, git git) *Manager {
 	return &Manager{
 		fs:            fs,
 		tui:           tui,
 		configManager: configManager,
+		git:           git,
 	}
 }

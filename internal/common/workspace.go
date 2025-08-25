@@ -7,11 +7,24 @@ type ProjectRepository struct {
 type Project struct {
 	Name       string
 	Repository ProjectRepository
+	Path       string
 }
 
 type Workspace struct {
 	Name     string
 	Projects []Project
+}
+
+func (self *Workspace) GetProject(name string) (*Project, error) {
+	for _, project := range self.Projects {
+		if project.Name == name {
+			return &project, nil
+		}
+	}
+
+	return nil, ErrUnknownProject{
+		Project: name,
+	}
 }
 
 type WorkspaceLocation struct {

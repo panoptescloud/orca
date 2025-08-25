@@ -66,8 +66,6 @@ func (self *Manager) Initialise(dto InitialiseDTO) error {
 		return self.tui.RecordIfError("Failed to register workspace, this is likely a bug!", err)
 	}
 
-	// TODO: clone the repos for the workspace...
-
 	self.tui.Success("Workspace initialised!")
 	return nil
 }

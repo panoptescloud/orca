@@ -44,3 +44,22 @@ func handleWsLs(cmd *cobra.Command, args []string) error {
 
 	return manager.Ls(workspaces.LsDTO{})
 }
+
+func handleWsClone(cmd *cobra.Command, args []string) error {
+	manager := svcContainer.GetWorkspaceManager()
+
+	name, err := cmd.Flags().GetString("workspace")
+	cobra.CheckErr(err)
+
+	projectName, err := cmd.Flags().GetString("project")
+	cobra.CheckErr(err)
+
+	to, err := cmd.Flags().GetString("target")
+	cobra.CheckErr(err)
+
+	return manager.Clone(workspaces.CloneDTO{
+		WorkspaceName: name,
+		Project:       projectName,
+		To:            to,
+	})
+}

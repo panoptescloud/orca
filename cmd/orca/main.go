@@ -165,6 +165,15 @@ var wsLsCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleWsLs, 1),
 }
 
+var wsCloneCmd = &cobra.Command{
+	Use:   "clone",
+	Short: "Clones all the projects required for this workspace.",
+	Long: `Based on the workspace config will clone each repository required by the workspace.
+This can be run at any time to clone any projects that have not already been cloned.
+The project option allows you to clone only a specific project.`,
+	Run: errorHandlerWrapper(handleWsClone, 1),
+}
+
 var sysCmd = &cobra.Command{
 	Use:   "sys",
 	Short: "Commands for handling the installation of this tool.",
@@ -322,7 +331,23 @@ func init() {
 	wsCmd.AddCommand(wsInitCmd)
 
 	wsCmd.AddCommand(wsLsCmd)
+
+	wsCloneCmd.Flags().StringP("target", "t", "", `The directory in which to clone the project(s). 
+If multiple projects are being cloned, then it will place them in {target}/{repo name}.
+If a single project is being clone then it will be cloned into {target}.`)
+	addWorkspaceOption(wsCloneCmd)
+	addProjectOption(wsCloneCmd)
+	wsCloneCmd.MarkFlagRequired("workspace")
+	wsCmd.AddCommand(wsCloneCmd)
 	rootCmd.AddCommand(wsCmd)
+}
+
+func addWorkspaceOption(cmd *cobra.Command) {
+	cmd.Flags().StringP("workspace", "w", "", "The name of the workspace to run this command for.")
+}
+
+func addProjectOption(cmd *cobra.Command) {
+	cmd.Flags().StringP("project", "p", "", "The name of the project within the workspace to run this command for.")
 }
 
 func bootstrap() {

@@ -128,6 +128,7 @@ func (s *services) GetWorkspaceManager() *workspaces.Manager {
 		afero.NewOsFs(),
 		s.GetTui(),
 		s.GetConfigManager(),
+		s.GetGit(),
 	)
 
 	return s.workspaceManager
