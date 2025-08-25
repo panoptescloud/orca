@@ -55,7 +55,7 @@ func (self *Manager) Initialise(dto InitialiseDTO) error {
 		return self.tui.RecordIfError("Failed to open config file!", err)
 	}
 
-	err = self.configManager.AddWorkspace(workspaceConfigPath, cfg)
+	err = self.configManager.AddWorkspace(workspaceConfigPath, *cfg)
 
 	if err != nil {
 		if _, ok := err.(common.ErrWorkspaceAlreadyExists); ok {

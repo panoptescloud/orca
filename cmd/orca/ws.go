@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/panoptescloud/orca/internal/common"
 	"github.com/panoptescloud/orca/internal/workspaces"
 	"github.com/spf13/cobra"
@@ -13,13 +15,19 @@ func handleWsSwitch(cmd *cobra.Command, args []string) error {
 		tui.Error("Must supply a workspace!")
 
 		return common.ErrUnknownWorkspace{
-			Workspace: "",
+			Name: "",
 		}
 	}
 
-	manager := svcContainer.GetConfigManager()
+	manager := svcContainer.GetConfig()
 
-	return manager.SwitchWorkspace(args[0])
+	if err := manager.SwitchWorkspace(args[0]); err != nil {
+		return tui.RecordIfError("Failed to switch workspace!", err)
+	}
+
+	tui.Success(fmt.Sprintf("Switched to %s", args[0]))
+
+	return nil
 }
 
 func handleWsInit(cmd *cobra.Command, args []string) error {

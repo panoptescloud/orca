@@ -124,19 +124,19 @@ func (err ErrInvalidArchive) Error() string {
 }
 
 type ErrUnknownWorkspace struct {
-	Workspace string
+	Name string
 }
 
 func (err ErrUnknownWorkspace) Error() string {
-	return fmt.Sprintf("unknown workspace: %s", err.Workspace)
+	return fmt.Sprintf("unknown workspace: %s", err.Name)
 }
 
 type ErrUnknownProject struct {
-	Project string
+	Name string
 }
 
 func (err ErrUnknownProject) Error() string {
-	return fmt.Sprintf("unknown project: %s", err.Project)
+	return fmt.Sprintf("unknown project: %s", err.Name)
 }
 
 type ErrUnknownTool struct {

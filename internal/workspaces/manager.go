@@ -15,7 +15,7 @@ type tui interface {
 }
 
 type configManager interface {
-	AddWorkspace(path string, ws *common.Workspace) error
+	AddWorkspace(path string, ws common.Workspace) error
 	GetWorkspaceLocations() common.WorkspaceLocations
 	GetWorkspaceLocation(name string) (common.WorkspaceLocation, error)
 	SetProjectPath(wsName string, name string, into string) error

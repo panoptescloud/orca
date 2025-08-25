@@ -23,7 +23,7 @@ func (self *Workspace) GetProject(name string) (*Project, error) {
 	}
 
 	return nil, ErrUnknownProject{
-		Project: name,
+		Name: name,
 	}
 }
 

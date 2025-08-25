@@ -14,7 +14,7 @@ import (
 )
 
 type services struct {
-	configManager *config.Manager
+	config *config.Config
 
 	tui *tui.Tui
 
@@ -31,18 +31,17 @@ type services struct {
 	workspaceManager *workspaces.Manager
 }
 
-func (s *services) GetConfigManager() *config.Manager {
-	if s.configManager != nil {
-		return s.configManager
+func (s *services) GetConfig() *config.Config {
+	if s.config != nil {
+		return s.config
 	}
 
-	s.configManager = config.NewManager(
-		s.GetTui(),
+	s.config = config.NewDefaultConfig(
 		afero.NewOsFs(),
 		getConfigFilePath(),
 	)
 
-	return s.configManager
+	return s.config
 }
 
 func (s *services) GetTui() *tui.Tui {
@@ -127,7 +126,7 @@ func (s *services) GetWorkspaceManager() *workspaces.Manager {
 	s.workspaceManager = workspaces.NewManager(
 		afero.NewOsFs(),
 		s.GetTui(),
-		s.GetConfigManager(),
+		s.GetConfig(),
 		s.GetGit(),
 	)
 

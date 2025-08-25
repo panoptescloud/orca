@@ -262,17 +262,16 @@ func getWorkingDirParent() string {
 }
 
 func init() {
-	var err error
-	configManager := svcContainer.GetConfigManager()
+	cfg := svcContainer.GetConfig()
 
-	appCfg, err := configManager.LoadOrCreate()
+	err := cfg.LoadOrCreate()
 	cobra.CheckErr(err)
 
 	cobra.OnInitialize(bootstrap)
 
 	// Persistent flags
-	rootCmd.PersistentFlags().String("log-level", appCfg.Logging.Level, "Log level to use, one of: debug, info, warn, error, none. Defaults to none, as most errors are already surfaced anyway.")
-	rootCmd.PersistentFlags().String("log-format", appCfg.Logging.Format, "log format to use")
+	rootCmd.PersistentFlags().String("log-level", cfg.GetLoggingLevel(), "Log level to use, one of: debug, info, warn, error, none. Defaults to none, as most errors are already surfaced anyway.")
+	rootCmd.PersistentFlags().String("log-format", cfg.GetLoggingFormat(), "log format to use")
 
 	cobra.CheckErr(viper.BindPFlag("logging.level", rootCmd.PersistentFlags().Lookup("log-level")))
 	cobra.CheckErr(viper.BindPFlag("logging.format", rootCmd.PersistentFlags().Lookup("log-format")))
@@ -351,6 +350,8 @@ func addProjectOption(cmd *cobra.Command) {
 }
 
 func bootstrap() {
+	cfg := svcContainer.GetConfig()
+
 	// Tell viper to replace . in nested path with underscores
 	// e.g. logging.level becomes LOGGING_LEVEL
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -358,11 +359,10 @@ func bootstrap() {
 	viper.SetEnvPrefix("orca")
 	viper.AutomaticEnv()
 
-	cfgManager := svcContainer.GetConfigManager()
-	err := viper.Unmarshal(cfgManager.Get())
+	err := viper.Unmarshal(cfg.GetRuntimeConfig())
 	cobra.CheckErr(err)
 
-	h, err := logging.NewSlogHandler(cfgManager.Get())
+	h, err := logging.NewSlogHandler(cfg)
 
 	cobra.CheckErr(err)
 

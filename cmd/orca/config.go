@@ -8,7 +8,7 @@ import (
 )
 
 func handleConfigShow(cmd *cobra.Command, _ []string) error {
-	contents, err := yaml.Marshal(svcContainer.GetConfigManager().Get())
+	contents, err := yaml.Marshal(svcContainer.GetConfig().GetRuntimeConfig())
 
 	cobra.CheckErr(err)
 
