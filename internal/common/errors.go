@@ -120,5 +120,95 @@ func (err ErrUnsupportedArchitecture) Error() string {
 type ErrInvalidArchive struct{}
 
 func (err ErrInvalidArchive) Error() string {
-	return fmt.Sprintf("invalid archive used")
+	return "invalid archive used"
+}
+
+type ErrUnknownWorkspace struct {
+	Name string
+}
+
+func (err ErrUnknownWorkspace) Error() string {
+	return fmt.Sprintf("unknown workspace: %s", err.Name)
+}
+
+type ErrUnknownProject struct {
+	Name string
+}
+
+func (err ErrUnknownProject) Error() string {
+	return fmt.Sprintf("unknown project: %s", err.Name)
+}
+
+type ErrUnknownTool struct {
+	Tool string
+}
+
+func (err ErrUnknownTool) Error() string {
+	return fmt.Sprintf("unknown tool: %s", err.Tool)
+}
+
+type ErrArgumentRequired struct {
+	Name  string
+	Index int
+}
+
+func (err ErrArgumentRequired) Error() string {
+	return fmt.Sprintf("the '%s' argument must be supplied at position %d", err.Name, err.Index)
+}
+
+type ErrTooManyArguments struct {
+	Expected int
+}
+
+func (err ErrTooManyArguments) Error() string {
+	return fmt.Sprintf("too many arguments supplied, expected only %d", err.Expected)
+}
+
+type ErrInvalidInput struct {
+	To  string
+	Msg string
+}
+
+func (err ErrInvalidInput) Error() string {
+	return fmt.Sprintf("invalid input to '%s': %s", err.To, err.Msg)
+}
+
+type ErrNotImplemented struct {
+	Msg string
+}
+
+func (err ErrNotImplemented) Error() string {
+	return fmt.Sprintf("not implemented: %s", err.Msg)
+}
+
+type ErrFileNotFound struct {
+	Path string
+}
+
+func (err ErrFileNotFound) Error() string {
+	return fmt.Sprintf("file not found: %s", err.Path)
+}
+
+type ErrWorkspaceAlreadyExists struct {
+	Name string
+}
+
+func (err ErrWorkspaceAlreadyExists) Error() string {
+	return fmt.Sprintf("workspace already exists: %s", err.Name)
+}
+
+type ErrDirectoryAlreadyExists struct {
+	Path string
+}
+
+func (err ErrDirectoryAlreadyExists) Error() string {
+	return fmt.Sprintf("directory already exists: %s", err.Path)
+}
+
+type ErrRepositoryAlreadyCloned struct {
+	RepoURL string
+}
+
+func (err ErrRepositoryAlreadyCloned) Error() string {
+	return fmt.Sprintf("repository already cloned: %s", err.RepoURL)
 }

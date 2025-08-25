@@ -43,7 +43,7 @@ func WithStderr() (ExecOpt, *bytes.Buffer) {
 	var stderr bytes.Buffer
 	ptr := &stderr
 	return func(cmd *exec.Cmd) error {
-		cmd.Stdout = ptr
+		cmd.Stderr = ptr
 
 		return nil
 	}, ptr
