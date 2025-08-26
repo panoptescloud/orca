@@ -1,3 +1,5 @@
+![coverage](https://raw.githubusercontent.com/panoptescloud/orca/badges/.badges/main/coverage.svg)
+
 # Home
 
 Whalecome!
