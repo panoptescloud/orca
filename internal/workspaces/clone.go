@@ -14,7 +14,7 @@ type CloneDTO struct {
 	To            string
 }
 
-func (self *Manager) cloneAllProjects(ws *common.Workspace, into string) error {
+func (self *Manager) setupAllProjects(ws *common.Workspace, into string) error {
 	for _, project := range ws.Projects {
 		dir := fmt.Sprintf("%s/%s", into, project.Name)
 
@@ -26,11 +26,36 @@ func (self *Manager) cloneAllProjects(ws *common.Workspace, into string) error {
 	return nil
 }
 
+func (self *Manager) registerWorkspaceProject(ws *common.Workspace, project common.Project) error {
+	wsLocation, err := self.configManager.GetWorkspaceLocation(ws.Name)
+
+	if err != nil {
+		return err
+	}
+
+	root, err := self.git.GetRepositoryRootFromPath(wsLocation.Path)
+
+	if err != nil {
+		return err
+	}
+
+	return self.configManager.SetProjectPath(ws.Name, project.Name, root)
+}
+
 func (self *Manager) cloneSingleProject(ws *common.Workspace, project common.Project, into string) error {
 	projectExists, err := self.configManager.ProjectExists(ws.Name, project.Name)
 
 	if err != nil {
 		return err
+	}
+
+	if project.Repository.Self {
+		self.tui.Info(fmt.Sprintf("Registering workspace as project: %s", project.Name))
+
+		return self.tui.RecordIfError(
+			"Failed to register workspace as a project!",
+			self.registerWorkspaceProject(ws, project),
+		)
 	}
 
 	exists, err := afero.Exists(self.fs, into)
@@ -125,7 +150,7 @@ func (self *Manager) Clone(dto CloneDTO) error {
 
 		cloneErr = self.cloneSingleProject(cfg, *project, targetDir)
 	} else {
-		cloneErr = self.cloneAllProjects(cfg, targetDir)
+		cloneErr = self.setupAllProjects(cfg, targetDir)
 	}
 
 	if cloneErr != nil {

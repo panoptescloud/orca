@@ -2,6 +2,10 @@ package common
 
 type ProjectRepository struct {
 	SSH string
+
+	// Self signifies that this project is actually the same repo as the workspace
+	// itself.
+	Self bool
 }
 
 type Project struct {

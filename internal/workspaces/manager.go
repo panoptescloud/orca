@@ -14,8 +14,8 @@ type tui interface {
 	RecordIfError(msg string, err error) error
 }
 
-type configManager interface {
-	AddWorkspace(path string, ws common.Workspace) error
+type config interface {
+	AddWorkspace(configFilePath string, ws common.Workspace) error
 	GetWorkspaceLocations() common.WorkspaceLocations
 	GetWorkspaceLocation(name string) (common.WorkspaceLocation, error)
 	SetProjectPath(wsName string, name string, into string) error
@@ -30,11 +30,11 @@ type git interface {
 type Manager struct {
 	fs            afero.Fs
 	tui           tui
-	configManager configManager
+	configManager config
 	git           git
 }
 
-func NewManager(fs afero.Fs, tui tui, configManager configManager, git git) *Manager {
+func NewManager(fs afero.Fs, tui tui, configManager config, git git) *Manager {
 	return &Manager{
 		fs:            fs,
 		tui:           tui,
