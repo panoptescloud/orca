@@ -1,6 +1,14 @@
 package hostsys
 
-import "github.com/spf13/afero"
+import (
+	"github.com/Masterminds/semver/v3"
+	"github.com/spf13/afero"
+)
+
+const orcaRepoOrg = "panoptescloud"
+const orcaRepoName = "orca"
+
+// const orcaRepo = "panoptescloud/orca"
 
 type tui interface {
 	Info(msg ...string)
@@ -9,16 +17,23 @@ type tui interface {
 	RecordIfError(msg string, err error) error
 }
 
+type githubClient interface {
+	VersionExists(owner string, repo string, v string) (bool, error)
+	LatestVersion(owner string, repo string) (*semver.Version, error)
+}
+
 type HostSystem struct {
 	tui      tui
 	fs       afero.Fs
 	toolsDir string
+	github   githubClient
 }
 
-func NewHostSystem(tui tui, fs afero.Fs, toolsDir string) *HostSystem {
+func NewHostSystem(tui tui, fs afero.Fs, github githubClient, toolsDir string) *HostSystem {
 	return &HostSystem{
 		tui:      tui,
 		fs:       fs,
+		github:   github,
 		toolsDir: toolsDir,
 	}
 }

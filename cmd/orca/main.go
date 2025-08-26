@@ -113,13 +113,6 @@ var utilGenDocsCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleUtilGenDocs, 1),
 }
 
-var utilSelfUpdateCmd = &cobra.Command{
-	Use:   "self-update",
-	Short: "Updates this tool.",
-	Long:  `By default will update to the latest available version. A specific version can be specified if a specific version is required.`,
-	Run:   errorHandlerWrapper(handleUtilSelfUpdate, 1),
-}
-
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Commands for managing configuration",
@@ -196,6 +189,13 @@ var sysInstallCmd = &cobra.Command{
 The first argument must be one of: %s`, getToolsDir(), hostsys.AllAvailableToolsCsv()),
 	Run:          errorHandlerWrapper(handleSysInstall, 1),
 	SilenceUsage: true,
+}
+
+var sysSelfUpdateCmd = &cobra.Command{
+	Use:   "self-update",
+	Short: "Updates this tool.",
+	Long:  `By default will update to the latest available version. A specific version can be specified if a specific version is required.`,
+	Run:   errorHandlerWrapper(handleSysSelfUpdate, 1),
 }
 
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
@@ -281,6 +281,9 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 
 	// Sys
+	sysSelfUpdateCmd.Flags().String("to", "", "The version you wish to switch to. If left blank will download latest avaialable")
+	sysCmd.AddCommand(sysSelfUpdateCmd)
+
 	sysCmd.AddCommand(sysCheckCmd)
 	sysCmd.AddCommand(sysInstallCmd)
 	rootCmd.AddCommand(sysCmd)
@@ -310,9 +313,6 @@ func init() {
 
 	// Utils
 	utilCmd.AddCommand(utilGenDocsCmd)
-
-	utilSelfUpdateCmd.Flags().String("to", "", "The version you wish to switch to. If left blank will download latest avaialable")
-	utilCmd.AddCommand(utilSelfUpdateCmd)
 
 	rootCmd.AddCommand(utilCmd)
 

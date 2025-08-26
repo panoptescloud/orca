@@ -10,14 +10,12 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/minio/selfupdate"
 	"github.com/panoptescloud/orca/internal/common"
 	"github.com/spf13/afero"
 )
 
 const hostCtlVersion = "1.1.4"
 const sopsVersion = "3.10.2"
-const orcaRepo = "panoptescloud/orca"
 
 type AvailableTool string
 
@@ -325,36 +323,4 @@ func (self *HostSystem) getOrcaArchForDownload() (string, error) {
 			Arch: arch,
 		}
 	}
-}
-
-func (self *HostSystem) ReplaceSelf(version string) error {
-	os, err := self.getOrcaOSForDownload()
-
-	if err != nil {
-		return err
-	}
-
-	arch, err := self.getOrcaArchForDownload()
-
-	if err != nil {
-		return err
-	}
-
-	url := fmt.Sprintf(
-		"https://github.com/%s/releases/download/v%s/orca_%s_%s.tar.gz",
-		orcaRepo,
-		version,
-		os,
-		arch,
-	)
-
-	contents, err := self.getExecutableFromArchiveUrl(url, "orca")
-
-	if err != nil {
-		return err
-	}
-
-	reader := bytes.NewReader(contents)
-
-	return selfupdate.Apply(reader, selfupdate.Options{})
 }

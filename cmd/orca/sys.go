@@ -44,3 +44,20 @@ func handleSysInstall(_ *cobra.Command, args []string) error {
 		Tool: hostsys.AvailableTool(args[0]),
 	})
 }
+
+func handleSysSelfUpdate(cmd *cobra.Command, _ []string) error {
+	sys := svcContainer.GetHostSystem()
+
+	to, err := cmd.Flags().GetString("to")
+	cobra.CheckErr(err)
+
+	strategy := hostsys.VersioningStrategyLatest
+
+	if to != "" {
+		strategy = hostsys.VersioningStrategySpecific
+	}
+	return sys.UpdateSelf(hostsys.UpdateSelfDTO{
+		Strategy:         strategy,
+		SpecifiedVersion: to,
+	})
+}
