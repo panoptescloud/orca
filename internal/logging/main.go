@@ -3,18 +3,21 @@ package logging
 import (
 	"log/slog"
 	"os"
-
-	"github.com/panoptescloud/orca/internal/config"
 )
 
 const LogLevelNone = 10
 const LogLevelNoneName = "none"
 
-func NewSlogHandler(cfg *config.Config) (slog.Handler, error) {
+type config interface {
+	GetLoggingLevel() string
+	GetLoggingFormat() string
+}
+
+func NewSlogHandler(cfg config) (slog.Handler, error) {
 	l := slog.Level(LogLevelNone)
 
-	if cfg.Logging.Level != LogLevelNoneName {
-		err := l.UnmarshalText([]byte(cfg.Logging.Level))
+	if cfg.GetLoggingLevel() != LogLevelNoneName {
+		err := l.UnmarshalText([]byte(cfg.GetLoggingLevel()))
 
 		if err != nil {
 			return nil, err
@@ -28,7 +31,7 @@ func NewSlogHandler(cfg *config.Config) (slog.Handler, error) {
 
 	var handler slog.Handler
 
-	if cfg.Logging.Format == "text" {
+	if cfg.GetLoggingFormat() == "text" {
 		handler = slog.NewTextHandler(os.Stderr, opts)
 	} else {
 		handler = slog.NewJSONHandler(os.Stderr, opts)

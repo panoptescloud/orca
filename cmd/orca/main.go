@@ -4,15 +4,21 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path"
 	"strings"
 
-	"github.com/panoptescloud/orca/internal/config"
+	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/panoptescloud/orca/internal/logging"
+	"github.com/panoptescloud/orca/internal/workspaces"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-type runEHandlerFunc func(cmd *cobra.Command, args []string, config *config.Config) error
+const configFileName = "orca.yaml"
+const configFileOverrideEnv = "ORCA_CONFIG_PATH"
+const configToolsPathOverrideEnv = "ORCA_TOOLS_PATH"
+
+type runEHandlerFunc func(cmd *cobra.Command, args []string) error
 type runHandlerFunc func(cmd *cobra.Command, args []string)
 
 var (
@@ -21,7 +27,6 @@ var (
 	date    string = "unknown"
 )
 
-var appCfg *config.Config
 var svcContainer *services = &services{}
 
 var rootCmd = &cobra.Command{
@@ -108,11 +113,58 @@ var utilGenDocsCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleUtilGenDocs, 1),
 }
 
-var utilSelfUpdateCmd = &cobra.Command{
-	Use:   "self-update",
-	Short: "Updates this tool.",
-	Long:  `By default will update to the latest available version. A specific version can be specified if a specific version is required.`,
-	Run:   errorHandlerWrapper(handleUtilSelfUpdate, 1),
+var configCmd = &cobra.Command{
+	Use:   "config",
+	Short: "Commands for managing configuration",
+	RunE:  handleGroup,
+}
+
+var configShowCmd = &cobra.Command{
+	Use:   "show",
+	Short: "Show the config",
+	Run:   errorHandlerWrapper(handleConfigShow, 1),
+}
+
+var configPathCmd = &cobra.Command{
+	Use:   "path",
+	Short: "Show the path to config being used.",
+	Run:   errorHandlerWrapper(handleConfigPath, 1),
+}
+
+var wsCmd = &cobra.Command{
+	Use:   "ws",
+	Short: "Commands related to managing workspaces.",
+	RunE:  handleGroup,
+}
+
+var wsSwitchCmd = &cobra.Command{
+	Use:   "switch",
+	Short: "Switch to another workspace",
+	Run:   errorHandlerWrapper(handleWsSwitch, 1),
+}
+
+var wsInitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Initialises a workspace.",
+	Long: `Initialises a new workspace with orca. Either a local directory or a git repository can be supplied.
+When using a local directory, will locate an orca workspace config and clone the relevant projects.
+When using a git url, will clone the given repository, and then clone any other required repositories based on an orca workspace file within the repo.`,
+	Run: errorHandlerWrapper(handleWsInit, 1),
+}
+
+var wsLsCmd = &cobra.Command{
+	Use:   "ls",
+	Short: "Lists all available workspaces.",
+	Run:   errorHandlerWrapper(handleWsLs, 1),
+}
+
+var wsCloneCmd = &cobra.Command{
+	Use:   "clone",
+	Short: "Clones all the projects required for this workspace.",
+	Long: `Based on the workspace config will clone each repository required by the workspace.
+This can be run at any time to clone any projects that have not already been cloned.
+The project option allows you to clone only a specific project.`,
+	Run: errorHandlerWrapper(handleWsClone, 1),
 }
 
 var sysCmd = &cobra.Command{
@@ -129,9 +181,26 @@ var sysCheckCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
+var sysInstallCmd = &cobra.Command{
+	Use:   "install",
+	Short: "Installs a tool system tool that is needed.",
+	Long: fmt.Sprintf(`Tools are installed 'locally' rather than globally, they will be stored within %s.
+
+The first argument must be one of: %s`, getToolsDir(), hostsys.AllAvailableToolsCsv()),
+	Run:          errorHandlerWrapper(handleSysInstall, 1),
+	SilenceUsage: true,
+}
+
+var sysSelfUpdateCmd = &cobra.Command{
+	Use:   "self-update",
+	Short: "Updates this tool.",
+	Long:  `By default will update to the latest available version. A specific version can be specified if a specific version is required.`,
+	Run:   errorHandlerWrapper(handleSysSelfUpdate, 1),
+}
+
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 	return func(cmd *cobra.Command, args []string) {
-		err := f(cmd, args, appCfg)
+		err := f(cmd, args)
 
 		if err != nil {
 			// Set as a debug level here as it should already be logged earlier
@@ -146,12 +215,63 @@ func handleGroup(cmd *cobra.Command, _ []string) error {
 	return cmd.Help()
 }
 
+func getToolsDir() string {
+	homeDir, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	configFile := fmt.Sprintf("%s/.orca/bin", homeDir)
+
+	if override, found := os.LookupEnv(configToolsPathOverrideEnv); found {
+		configFile = override
+	}
+
+	return configFile
+}
+
+func getConfigFilePath() string {
+	homeDir, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	configFile := fmt.Sprintf("%s/.orca/%s", homeDir, configFileName)
+
+	if override, found := os.LookupEnv(configFileOverrideEnv); found {
+		configFile = override
+	}
+
+	return configFile
+}
+
+func getWorkingDir() string {
+	wd, err := os.Getwd()
+
+	cobra.CheckErr(err)
+
+	return wd
+}
+
+func getWorkingDirParent() string {
+	wd := getWorkingDir()
+
+	dir := path.Dir(fmt.Sprintf("%s/../", wd))
+
+	_, err := os.Stat(dir)
+
+	cobra.CheckErr(err)
+
+	return dir
+}
+
 func init() {
+	cfg := svcContainer.GetConfig()
+
+	err := cfg.LoadOrCreate()
+	cobra.CheckErr(err)
+
 	cobra.OnInitialize(bootstrap)
 
 	// Persistent flags
-	rootCmd.PersistentFlags().String("log-level", logging.LogLevelNoneName, "Log level to use, one of: debug, info, warn, error, none. Defaults to none, as most errors are already surfaced anyway.")
-	rootCmd.PersistentFlags().String("log-format", "text", "log format to use")
+	rootCmd.PersistentFlags().String("log-level", cfg.GetLoggingLevel(), "Log level to use, one of: debug, info, warn, error, none. Defaults to none, as most errors are already surfaced anyway.")
+	rootCmd.PersistentFlags().String("log-format", cfg.GetLoggingFormat(), "log format to use")
 
 	cobra.CheckErr(viper.BindPFlag("logging.level", rootCmd.PersistentFlags().Lookup("log-level")))
 	cobra.CheckErr(viper.BindPFlag("logging.format", rootCmd.PersistentFlags().Lookup("log-format")))
@@ -161,7 +281,11 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 
 	// Sys
+	sysSelfUpdateCmd.Flags().String("to", "", "The version you wish to switch to. If left blank will download latest avaialable")
+	sysCmd.AddCommand(sysSelfUpdateCmd)
+
 	sysCmd.AddCommand(sysCheckCmd)
+	sysCmd.AddCommand(sysInstallCmd)
 	rootCmd.AddCommand(sysCmd)
 
 	// Git
@@ -190,38 +314,43 @@ func init() {
 	// Utils
 	utilCmd.AddCommand(utilGenDocsCmd)
 
-	utilSelfUpdateCmd.Flags().String("to", "", "The version you wish to switch to. If left blank will download latest avaialable")
-	utilCmd.AddCommand(utilSelfUpdateCmd)
-
 	rootCmd.AddCommand(utilCmd)
+
+	// config
+	configCmd.AddCommand(configPathCmd)
+	configCmd.AddCommand(configShowCmd)
+	rootCmd.AddCommand(configCmd)
+
+	// workspaces
+	wsCmd.AddCommand(wsSwitchCmd)
+
+	wsInitCmd.Flags().StringP("source", "s", getWorkingDir(), "The directory of the workspace configuration.")
+	wsInitCmd.Flags().StringP("target", "t", getWorkingDirParent(), "The directory to store the workspace projects.")
+	wsInitCmd.Flags().StringP("config", "c", workspaces.DefaultWorkspaceFileName, "The name of the workspace config file within the source.")
+	wsCmd.AddCommand(wsInitCmd)
+
+	wsCmd.AddCommand(wsLsCmd)
+
+	wsCloneCmd.Flags().StringP("target", "t", "", `The directory in which to clone the project(s). 
+If multiple projects are being cloned, then it will place them in {target}/{repo name}.
+If a single project is being clone then it will be cloned into {target}.`)
+	addWorkspaceOption(wsCloneCmd)
+	addProjectOption(wsCloneCmd)
+	wsCloneCmd.MarkFlagRequired("workspace")
+	wsCmd.AddCommand(wsCloneCmd)
+	rootCmd.AddCommand(wsCmd)
 }
 
-func buildConfig() *config.Config {
-	if appCfg != nil {
-		return appCfg
-	}
+func addWorkspaceOption(cmd *cobra.Command) {
+	cmd.Flags().StringP("workspace", "w", "", "The name of the workspace to run this command for.")
+}
 
-	c := config.NewDefault()
-	err := viper.Unmarshal(c)
-	cobra.CheckErr(err)
-
-	appCfg = c
-	return appCfg
+func addProjectOption(cmd *cobra.Command) {
+	cmd.Flags().StringP("project", "p", "", "The name of the project within the workspace to run this command for.")
 }
 
 func bootstrap() {
-	// if cfgFile != "" {
-	// 	// Use config file from the flag.
-	// 	viper.SetConfigFile(cfgFile)
-	// } else {
-	// 	// Find home directory.
-	// 	currentDir, err := os.Getwd()
-	// 	cobra.CheckErr(err)
-
-	// 	viper.AddConfigPath(currentDir)
-	// 	viper.SetConfigType("yaml")
-	// 	viper.SetConfigName("config")
-	// }
+	cfg := svcContainer.GetConfig()
 
 	// Tell viper to replace . in nested path with underscores
 	// e.g. logging.level becomes LOGGING_LEVEL
@@ -230,11 +359,8 @@ func bootstrap() {
 	viper.SetEnvPrefix("orca")
 	viper.AutomaticEnv()
 
-	// err := viper.ReadInConfig()
-
-	// cobra.CheckErr(err)
-
-	cfg := buildConfig()
+	err := viper.Unmarshal(cfg.GetRuntimeConfig())
+	cobra.CheckErr(err)
 
 	h, err := logging.NewSlogHandler(cfg)
 

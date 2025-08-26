@@ -1,27 +1,29 @@
 DC_PROJECT=pc_orca
 DC=docker compose -f ./docker-compose.yml -p $(DC_PROJECT)
 NOW=$(shell date '+%Y-%m-%d %H:%M:%S')
+TESTS?=./...
+.PHONY: build fmt vet lint-last-commit dc-up dc-down test
 
-.PHONY: build
 build: fmt
 	@VERSION="dev" COMMIT="wip-commit" DATE="$(NOW)" ./scripts/build.sh
 
-.PHONY: fmt
+build-global: fmt
+	@OUTDIR=/usr/local/bin/orca VERSION="dev" COMMIT="wip-commit" DATE="$(NOW)" ./scripts/build.sh
+
 fmt:
 	@./scripts/fmt.sh
 
-.PHONY: vet
+test:
+	@./scripts/test.sh $(TESTS)
+
 vet:
 	@./scripts/vet.sh
 
-.PHONY: lint-last-commit
 lint-last-commit:
 	@npx commitlint --last
 
-.PHONY: dc-up
 dc-up:
 	$(DC) up -d
 
-.PHONY: dc-down
 dc-down:
 	$(DC) down --remove-orphans

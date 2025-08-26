@@ -1,0 +1,31 @@
+# See: https://goreleaser.com/ci/actions/#workflow
+name: "CI: Test"
+run-name: "CI: Test #${{ github.event.pull_request.number }}"
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Install reporter
+        run: |
+          export GOPATH="$HOME/go/"
+          export PATH=$PATH:$GOPATH/bin
+          go install github.com/jstemmer/go-junit-report@latest
+      - name: Run tests
+        run: go test ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
+      - name: check test coverage
+        uses: vladopajic/go-test-coverage@v2
+        if: always()
+        with:
+          config: ./.testcoverage.yml

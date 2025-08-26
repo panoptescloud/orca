@@ -3,11 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/panoptescloud/orca/internal/config"
 	"github.com/spf13/cobra"
 )
 
-func handleVersion(cmd *cobra.Command, _ []string, _ *config.Config) error {
+func handleVersion(cmd *cobra.Command, _ []string) error {
 	short, err := cmd.Flags().GetBool("short")
 
 	if err != nil {

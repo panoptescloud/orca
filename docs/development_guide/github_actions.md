@@ -77,3 +77,7 @@ This workflow runs a series of static checks across the full codebase. As it sta
 
 This workflow isn't contained within the repository, but is managed by Github when we enable the github pages deployment. It will run whenever the `gh-pages` branch is updated.
 
+
+### NOTES
+
+For testing look at: https://github.com/vakenbolt/go-test-report

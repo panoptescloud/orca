@@ -3,14 +3,18 @@ package main
 import (
 	"os"
 
+	"github.com/panoptescloud/orca/internal/config"
 	"github.com/panoptescloud/orca/internal/git"
 	"github.com/panoptescloud/orca/internal/github"
 	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/panoptescloud/orca/internal/tui"
-	"github.com/panoptescloud/orca/internal/updater"
+	"github.com/panoptescloud/orca/internal/workspaces"
+	"github.com/spf13/afero"
 )
 
 type services struct {
+	config *config.Config
+
 	tui *tui.Tui
 
 	hostSystem *hostsys.HostSystem
@@ -21,7 +25,20 @@ type services struct {
 
 	githubClient *github.GithubClient
 
-	selfUpdater *updater.SelfUpdater
+	workspaceManager *workspaces.Manager
+}
+
+func (s *services) GetConfig() *config.Config {
+	if s.config != nil {
+		return s.config
+	}
+
+	s.config = config.NewDefaultConfig(
+		afero.NewOsFs(),
+		getConfigFilePath(),
+	)
+
+	return s.config
 }
 
 func (s *services) GetTui() *tui.Tui {
@@ -44,6 +61,9 @@ func (s *services) GetHostSystem() *hostsys.HostSystem {
 
 	s.hostSystem = hostsys.NewHostSystem(
 		s.GetTui(),
+		afero.NewOsFs(),
+		s.GetGithubClient(),
+		getToolsDir(),
 	)
 
 	return s.hostSystem
@@ -82,15 +102,17 @@ func (s *services) GetGithubClient() *github.GithubClient {
 	return s.githubClient
 }
 
-func (s *services) GetSelfUpdater() *updater.SelfUpdater {
-	if s.selfUpdater != nil {
-		return s.selfUpdater
+func (s *services) GetWorkspaceManager() *workspaces.Manager {
+	if s.workspaceManager != nil {
+		return s.workspaceManager
 	}
 
-	s.selfUpdater = updater.NewSelfUpdater(
-		s.GetGithubClient(),
+	s.workspaceManager = workspaces.NewManager(
+		afero.NewOsFs(),
 		s.GetTui(),
+		s.GetConfig(),
+		s.GetGit(),
 	)
 
-	return s.selfUpdater
+	return s.workspaceManager
 }
