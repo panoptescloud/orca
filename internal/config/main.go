@@ -69,15 +69,15 @@ func (self *Config) SwitchWorkspace(workspaceName string) error {
 // AddWorkspace adds a new workspace to the configuration on disk. In the case of
 // adding a new workspace it should also update the workspaces for the inUse
 // config as it cannot be overridden by any CLI arguments or environment variables.
-func (self *Config) AddWorkspace(path string, ws common.Workspace) error {
-	if self.persisted.workspaceExists(ws.Name) {
+func (self *Config) AddWorkspace(path string, name string) error {
+	if self.persisted.workspaceExists(name) {
 		return common.ErrWorkspaceAlreadyExists{
-			Name: ws.Name,
+			Name: name,
 		}
 	}
 
 	self.persisted.Workspaces = append(self.persisted.Workspaces, configWorkspace{
-		Name: ws.Name,
+		Name: name,
 		Path: path,
 	})
 
@@ -86,29 +86,67 @@ func (self *Config) AddWorkspace(path string, ws common.Workspace) error {
 	return self.save()
 }
 
+func (self *Config) GetAllProjectMeta() []common.ProjectMeta {
+	projects := []common.ProjectMeta{}
+
+	for _, ws := range self.runtimeConfig.Workspaces {
+		for _, p := range ws.Projects {
+			projects = append(projects, common.ProjectMeta{
+				Name:          p.Name,
+				WorkspaceName: ws.Name,
+				Path:          p.Path,
+			})
+		}
+	}
+
+	return projects
+}
+
+func (self *Config) GetProjectMeta(wsName string, projectName string) (common.ProjectMeta, error) {
+	ws, err := self.runtimeConfig.getWorkspace(wsName)
+
+	if err != nil {
+		return common.ProjectMeta{}, err
+	}
+
+	p := slices.GetNamedElement(ws.Projects, projectName)
+
+	if p == nil {
+		return common.ProjectMeta{}, common.ErrUnknownProject{
+			Name: projectName,
+		}
+	}
+
+	return common.ProjectMeta{
+		WorkspaceName: ws.Name,
+		Name:          p.Name,
+		Path:          p.Path,
+	}, nil
+}
+
 // GetWorkspaceLocation returns a tuple with name and path for the given namespace
 // if it does in fact exist. If it doesn't exist an error is returned.
-func (self *Config) GetWorkspaceLocation(name string) (common.WorkspaceLocation, error) {
+func (self *Config) GetWorkspaceMeta(name string) (common.WorkspaceMeta, error) {
 	v := slices.GetNamedElement(self.persisted.Workspaces, name)
 
 	if v == nil {
-		return common.WorkspaceLocation{}, common.ErrUnknownWorkspace{
+		return common.WorkspaceMeta{}, common.ErrUnknownWorkspace{
 			Name: name,
 		}
 	}
 
-	return common.WorkspaceLocation{
+	return common.WorkspaceMeta{
 		Name: v.Name,
 		Path: v.Path,
 	}, nil
 }
 
 // GetWorkspaceLocations returns a tuple with the name and path for each workspace.
-func (self *Config) GetWorkspaceLocations() common.WorkspaceLocations {
-	locs := make(common.WorkspaceLocations, len(self.runtimeConfig.Workspaces))
+func (self *Config) GetAllWorkspaceMeta() []common.WorkspaceMeta {
+	locs := make([]common.WorkspaceMeta, len(self.runtimeConfig.Workspaces))
 
 	for i, ws := range self.runtimeConfig.Workspaces {
-		locs[i] = common.WorkspaceLocation{
+		locs[i] = common.WorkspaceMeta{
 			Name: ws.Name,
 			Path: ws.Path,
 		}
@@ -159,6 +197,11 @@ func (self *Config) GetLoggingFormat() string {
 
 func (self *Config) GetRuntimeConfig() *config {
 	return self.runtimeConfig
+}
+
+// TODO: add a test
+func (self *Config) GetCurrentWorkspace() string {
+	return self.runtimeConfig.CurrentWorkspace
 }
 
 func (self *Config) loadFromFile() (config, error) {

@@ -212,3 +212,37 @@ type ErrRepositoryAlreadyCloned struct {
 func (err ErrRepositoryAlreadyCloned) Error() string {
 	return fmt.Sprintf("repository already cloned: %s", err.RepoURL)
 }
+
+type ErrInvalidProjectDependency struct {
+	ProjectName        string
+	InvalidRequirement string
+}
+
+func (err ErrInvalidProjectDependency) Error() string {
+	return fmt.Sprintf("project '%s' requires unknown project: '%s'", err.ProjectName, err.InvalidRequirement)
+}
+
+type ErrProjectConfigNotFound struct {
+	Path string
+}
+
+func (err ErrProjectConfigNotFound) Error() string {
+	return fmt.Sprintf("project config expected at '%s' was not found", err.Path)
+}
+
+type ErrWorkspaceConfigNotFound struct {
+	Path string
+}
+
+func (err ErrWorkspaceConfigNotFound) Error() string {
+	return fmt.Sprintf("workspace config expected at '%s' was not found", err.Path)
+}
+
+type ErrConfigIsNotValidYAML struct {
+	Path       string
+	ParseError string
+}
+
+func (err ErrConfigIsNotValidYAML) Error() string {
+	return fmt.Sprintf("config at '%s' was not valid yaml: %s", err.Path, err.ParseError)
+}

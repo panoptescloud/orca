@@ -43,5 +43,4 @@ func UpsertNamedElement[T namedElement](items []T, item T) []T {
 	right := items[(idx + 1):]
 
 	return slices.Concat(left, []T{item}, right)
-
 }

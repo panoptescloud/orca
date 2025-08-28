@@ -198,6 +198,13 @@ var sysSelfUpdateCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleSysSelfUpdate, 1),
 }
 
+var upCmd = &cobra.Command{
+	Use:   "up",
+	Short: "Starts the workspace or project.",
+	Long:  `...TBD...`,
+	Run:   errorHandlerWrapper(handleUp, 1),
+}
+
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 	return func(cmd *cobra.Command, args []string) {
 		err := f(cmd, args)
@@ -338,7 +345,14 @@ If a single project is being clone then it will be cloned into {target}.`)
 	addProjectOption(wsCloneCmd)
 	wsCloneCmd.MarkFlagRequired("workspace")
 	wsCmd.AddCommand(wsCloneCmd)
+
 	rootCmd.AddCommand(wsCmd)
+
+	// up
+	addWorkspaceOption(upCmd)
+	addProjectOption(upCmd)
+
+	rootCmd.AddCommand(upCmd)
 }
 
 func addWorkspaceOption(cmd *cobra.Command) {

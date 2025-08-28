@@ -4,15 +4,19 @@ import (
 	"os"
 
 	"github.com/panoptescloud/orca/internal/config"
+	"github.com/panoptescloud/orca/internal/controller"
 	"github.com/panoptescloud/orca/internal/git"
 	"github.com/panoptescloud/orca/internal/github"
 	"github.com/panoptescloud/orca/internal/hostsys"
+	"github.com/panoptescloud/orca/internal/repository"
 	"github.com/panoptescloud/orca/internal/tui"
 	"github.com/panoptescloud/orca/internal/workspaces"
 	"github.com/spf13/afero"
 )
 
 type services struct {
+	fs afero.Fs
+
 	config *config.Config
 
 	tui *tui.Tui
@@ -26,6 +30,20 @@ type services struct {
 	githubClient *github.GithubClient
 
 	workspaceManager *workspaces.Manager
+
+	controller *controller.Controller
+
+	workspaceRepo *repository.WorkspaceRepository
+}
+
+func (s *services) GetFs() afero.Fs {
+	if s.fs != nil {
+		return s.fs
+	}
+
+	s.fs = afero.NewOsFs()
+
+	return s.fs
 }
 
 func (s *services) GetConfig() *config.Config {
@@ -34,7 +52,7 @@ func (s *services) GetConfig() *config.Config {
 	}
 
 	s.config = config.NewDefaultConfig(
-		afero.NewOsFs(),
+		s.GetFs(),
 		getConfigFilePath(),
 	)
 
@@ -61,7 +79,7 @@ func (s *services) GetHostSystem() *hostsys.HostSystem {
 
 	s.hostSystem = hostsys.NewHostSystem(
 		s.GetTui(),
-		afero.NewOsFs(),
+		s.GetFs(),
 		s.GetGithubClient(),
 		getToolsDir(),
 	)
@@ -108,11 +126,38 @@ func (s *services) GetWorkspaceManager() *workspaces.Manager {
 	}
 
 	s.workspaceManager = workspaces.NewManager(
-		afero.NewOsFs(),
+		s.GetFs(),
 		s.GetTui(),
 		s.GetConfig(),
 		s.GetGit(),
+		s.GetWorkspaceRepository(),
 	)
 
 	return s.workspaceManager
+}
+
+func (s *services) GetController() *controller.Controller {
+	if s.controller != nil {
+		return s.controller
+	}
+
+	s.controller = controller.NewController(
+		s.GetConfig(),
+		s.GetWorkspaceRepository(),
+	)
+
+	return s.controller
+}
+
+func (s *services) GetWorkspaceRepository() *repository.WorkspaceRepository {
+	if s.workspaceRepo != nil {
+		return s.workspaceRepo
+	}
+
+	s.workspaceRepo = repository.NewWorkspaceRepository(
+		s.GetFs(),
+		s.GetConfig(),
+	)
+
+	return s.workspaceRepo
 }
