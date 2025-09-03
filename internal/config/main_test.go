@@ -110,9 +110,7 @@ func useExistingConfig(t *testing.T) (afero.Fs, *Config) {
 }
 
 func useAddWorkspace(t *testing.T, fs afero.Fs, cfg *Config) {
-	err := cfg.AddWorkspace("/path/meh", common.Workspace{
-		Name: "meh",
-	})
+	err := cfg.AddWorkspace("/path/meh", "meh")
 	assertInternalConfigsAreDifferent(t, cfg)
 
 	require.Nil(t, err)
@@ -146,9 +144,7 @@ currentWorkspace: blah
 	require.Nil(t, err)
 	assert.Equal(t, expectedContents, string(contents))
 
-	err = cfg.AddWorkspace("/other/path/meh", common.Workspace{
-		Name: "meh",
-	})
+	err = cfg.AddWorkspace("/other/path/meh", "meh")
 
 	assert.Equal(t, common.ErrWorkspaceAlreadyExists{
 		Name: "meh",
@@ -187,7 +183,7 @@ currentWorkspace: meh
 	assertInternalConfigsAreDifferent(t, cfg)
 }
 
-func Test_GetWorkspaceLocations(t *testing.T) {
+func Test_GetAllWorkspaceMeta(t *testing.T) {
 	fs := afero.NewMemMapFs()
 	err := afero.WriteFile(fs, configFilePath, []byte(existingWithMultipleWorkspaces), 0755)
 	require.Nil(t, err)
@@ -199,9 +195,9 @@ func Test_GetWorkspaceLocations(t *testing.T) {
 	err = cfg.LoadOrCreate()
 	require.Nil(t, err)
 
-	locations := cfg.GetWorkspaceLocations()
+	locations := cfg.GetAllWorkspaceMeta()
 
-	assert.Equal(t, common.WorkspaceLocations{
+	assert.Equal(t, []common.WorkspaceMeta{
 		{
 			Name: "meh",
 			Path: "/path/meh",
@@ -213,7 +209,7 @@ func Test_GetWorkspaceLocations(t *testing.T) {
 	}, locations)
 }
 
-func Test_GetWorkspaceLocation(t *testing.T) {
+func Test_GetWorkspaceMeta(t *testing.T) {
 	fs := afero.NewMemMapFs()
 	err := afero.WriteFile(fs, configFilePath, []byte(existingWithMultipleWorkspaces), 0755)
 	require.Nil(t, err)
@@ -225,15 +221,15 @@ func Test_GetWorkspaceLocation(t *testing.T) {
 	err = cfg.LoadOrCreate()
 	require.Nil(t, err)
 
-	location, err := cfg.GetWorkspaceLocation("blah")
+	location, err := cfg.GetWorkspaceMeta("blah")
 
 	require.Nil(t, err)
-	assert.Equal(t, common.WorkspaceLocation{
+	assert.Equal(t, common.WorkspaceMeta{
 		Name: "blah",
 		Path: "/path/blah",
 	}, location)
 
-	_, err = cfg.GetWorkspaceLocation("missing")
+	_, err = cfg.GetWorkspaceMeta("missing")
 	require.Equal(t, common.ErrUnknownWorkspace{
 		Name: "missing",
 	}, err)
@@ -320,6 +316,44 @@ func Test_ProjectExists(t *testing.T) {
 		Name: "missing",
 	}, err)
 	assert.False(t, exists)
+}
+
+func Test_GetAllProjectMeta(t *testing.T) {
+	fs := afero.NewMemMapFs()
+	err := afero.WriteFile(fs, configFilePath, []byte(existingWithMultipleWorkspacesAndProjects), 0755)
+	require.Nil(t, err)
+	cfg := NewDefaultConfig(
+		fs,
+		configFilePath,
+	)
+
+	err = cfg.LoadOrCreate()
+	require.Nil(t, err)
+
+	res := cfg.GetAllProjectMeta()
+
+	assert.Equal(t, []common.ProjectMeta{
+		{
+			Name:          "meh1",
+			WorkspaceName: "meh",
+			Path:          "/projects/meh/1",
+		},
+		{
+			Name:          "meh2",
+			WorkspaceName: "meh",
+			Path:          "/projects/meh/2",
+		},
+		{
+			Name:          "blah1",
+			WorkspaceName: "blah",
+			Path:          "/projects/blah/1",
+		},
+		{
+			Name:          "blah2",
+			WorkspaceName: "blah",
+			Path:          "/projects/blah/2",
+		},
+	}, res)
 }
 
 func Test_SetProjectPath(t *testing.T) {

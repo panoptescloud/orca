@@ -3,6 +3,7 @@ package git
 import (
 	"log/slog"
 	"path/filepath"
+	"strings"
 
 	"github.com/panoptescloud/orca/internal/common"
 	"github.com/panoptescloud/orca/internal/hostsys"
@@ -69,7 +70,7 @@ func (self *Git) GetRepositoryRootFromPath(path string) (string, error) {
 		}
 	}
 
-	return stdout.String(), nil
+	return strings.TrimSpace(stdout.String()), nil
 }
 
 func NewGit(exec executor, tui tui) *Git {
