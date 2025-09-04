@@ -12,7 +12,6 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"crypto/rsa"
 	"crypto/sha1"
 	"crypto/x509"
 	"crypto/x509/pkix"
@@ -23,7 +22,6 @@ import (
 	"math"
 	"math/big"
 	"net"
-	"os"
 	"strings"
 	"time"
 
@@ -82,19 +80,12 @@ func (cm *CertificateManager) createKey(path string) (crypto.Signer, error) {
 		return nil, err
 	}
 
-	file, err := cm.fs.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
-
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	err = pem.Encode(file, &pem.Block{
+	b := pem.EncodeToMemory(&pem.Block{
 		Type:  "PRIVATE KEY",
 		Bytes: der,
 	})
 
-	if err != nil {
+	if err := afero.WriteFile(cm.fs, path, b, 0600); err != nil {
 		return nil, err
 	}
 
@@ -155,20 +146,12 @@ func (cm *CertificateManager) createRootCert(key crypto.Signer, filename string)
 		return nil, err
 	}
 
-	file, err := os.OpenFile(filename, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer file.Close()
-
-	err = pem.Encode(file, &pem.Block{
+	b := pem.EncodeToMemory(&pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: der,
 	})
 
-	if err != nil {
+	if err := afero.WriteFile(cm.fs, filename, b, 0600); err != nil {
 		return nil, err
 	}
 
@@ -207,19 +190,10 @@ func (cm *CertificateManager) readKey(path string) (crypto.Signer, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse PKCS8: %w", err)
 		}
-		switch t := signer.(type) {
-		case *rsa.PrivateKey:
-			return signer.(*rsa.PrivateKey), nil
-		case *ecdsa.PrivateKey:
-			return signer.(*ecdsa.PrivateKey), nil
-		default:
-			return nil, fmt.Errorf("unsupported PKCS8 key type: %t", t)
-		}
-	} else if block.Type == "RSA PRIVATE KEY" {
-		return x509.ParsePKCS1PrivateKey(block.Bytes)
-	} else if block.Type == "EC PRIVATE KEY" || block.Type == "ECDSA PRIVATE KEY" {
-		return x509.ParseECPrivateKey(block.Bytes)
+
+		return signer.(*ecdsa.PrivateKey), nil
 	}
+
 	return nil, fmt.Errorf("incorrect PEM type %s", block.Type)
 }
 
@@ -338,6 +312,7 @@ func (cm *CertificateManager) generateCertificateIfNotPresent(issuer *issuer, do
 		return nil
 	}
 
+	cm.tui.Info(fmt.Sprintf("Creating certificate: %s", certPath))
 	serial, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
 
 	if err != nil {
@@ -370,19 +345,12 @@ func (cm *CertificateManager) generateCertificateIfNotPresent(issuer *issuer, do
 		return returnErrMessage(err)
 	}
 
-	file, err := os.OpenFile(certPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
-
-	if err != nil {
-		return returnErrMessage(err)
-	}
-
-	defer file.Close()
-	err = pem.Encode(file, &pem.Block{
+	b := pem.EncodeToMemory(&pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: der,
 	})
 
-	if err != nil {
+	if err := afero.WriteFile(cm.fs, certPath, b, 0600); err != nil {
 		return returnErrMessage(err)
 	}
 
@@ -415,7 +383,7 @@ func (cm *CertificateManager) Generate(dto GenerateDTO) error {
 
 	for _, c := range certsToGenerate {
 		cm.tui.NewLine()
-		cm.tui.Info(fmt.Sprintf("Generating key for '%s'...", c))
+		cm.tui.Info(fmt.Sprintf("Generating certificate for '%s'...", c))
 		if err := cm.generateCertificateIfNotPresent(issuer, c); err != nil {
 			return err
 		}

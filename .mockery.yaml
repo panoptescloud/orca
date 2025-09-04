@@ -1,0 +1,12 @@
+packages:
+    github.com/panoptescloud/orca/internal/tls:
+        # place your package-specific config here
+        config:
+            dir: 'tests/mocks/tls'
+            pkgname: "{{ .SrcPackageName }}_mocks"
+            filename: "{{ .InterfaceName }}.go"
+            structname: "Mock{{ .InterfaceName | firstUpper }}"
+        interfaces:
+            # select the interfaces you want mocked
+            tui:
+            workspaceRepo:

@@ -20,6 +20,13 @@ The usage of some of the features in mkdocs will result in the docs not renderin
 
 If you're writing docs locally and wanna see what the rendered result looks like you can use the mkdocs server in watch mode. This is all hooked up in the `docker-compose.yml` file. Simply run `make dc-up` in the root of this repository, and you'll be able to see the rendered docs on [http://localhost:9898](http://localhost:9898). Every time either the `mkdocs.yml` config or a file in the `docs` directory changes, it will be re-rendered and any browsers will reload the page.
 
+## Requirements
+
+The only requirements for developing this tool are shown below (linked to the installation instructions):
+
+- [golang >= 1.24](https://go.dev/doc/install)
+- [vektra/mockery >= 3.5.4](https://vektra.github.io/mockery/latest/installation/)
+
 ## Why npm?
 
 NPM isn't actually used by the app in any way, but a couple of the tools we're using require it. We need to install some plugins for [semantic-release](https://semantic-release.gitbook.io/semantic-release/) and [commitlintjs](https://commitlint.js.org/), so we have an npm file structure to enable these tools.
