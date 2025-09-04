@@ -9,6 +9,7 @@ import (
 	"github.com/panoptescloud/orca/internal/github"
 	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/panoptescloud/orca/internal/repository"
+	"github.com/panoptescloud/orca/internal/tls"
 	"github.com/panoptescloud/orca/internal/tui"
 	"github.com/panoptescloud/orca/internal/workspaces"
 	"github.com/spf13/afero"
@@ -34,6 +35,8 @@ type services struct {
 	controller *controller.Controller
 
 	workspaceRepo *repository.WorkspaceRepository
+
+	certificateManager *tls.CertificateManager
 }
 
 func (s *services) GetFs() afero.Fs {
@@ -160,4 +163,19 @@ func (s *services) GetWorkspaceRepository() *repository.WorkspaceRepository {
 	)
 
 	return s.workspaceRepo
+}
+
+func (s *services) GetCertificateManager() *tls.CertificateManager {
+	if s.certificateManager != nil {
+		return s.certificateManager
+	}
+
+	s.certificateManager = tls.NewCertificateManager(
+		s.GetFs(),
+		s.GetWorkspaceRepository(),
+		s.GetTui(),
+		getTLSDir(),
+	)
+
+	return s.certificateManager
 }

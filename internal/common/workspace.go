@@ -1,6 +1,10 @@
 package common
 
-import "github.com/panoptescloud/orca/pkg/slices"
+import (
+	stdslices "slices"
+
+	"github.com/panoptescloud/orca/pkg/slices"
+)
 
 type LoaderPropertyCondition struct {
 	Name  string
@@ -37,10 +41,11 @@ type Extension struct {
 }
 
 type ProjectConfig struct {
-	ComposeFiles ComposeFiles `yaml:"composeFiles"`
-	Properties   []Property
-	Hosts        []string
-	Extensions   []Extension
+	ComposeFiles    ComposeFiles
+	Properties      []Property
+	Hosts           []string
+	TLSCertificates []string
+	Extensions      []Extension
 }
 
 type ProjectRepositoryConfig struct {
@@ -89,6 +94,20 @@ func (ws *Workspace) GetProject(name string) (*Project, error) {
 	}
 
 	return p, nil
+}
+
+func (ws *Workspace) GetUniqueTLSCertificates() []string {
+	certs := []string{}
+
+	for _, p := range ws.Projects {
+		for _, c := range p.Config.TLSCertificates {
+			if !stdslices.Contains(certs, c) {
+				certs = append(certs, c)
+			}
+		}
+	}
+
+	return certs
 }
 
 // --- unconfigured version

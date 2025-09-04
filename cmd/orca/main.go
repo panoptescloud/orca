@@ -205,6 +205,19 @@ var upCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleUp, 1),
 }
 
+var tlsCmd = &cobra.Command{
+	Use:   "tls",
+	Short: "Commands to do with TLS certificates.",
+	RunE:  handleGroup,
+}
+
+var tlsGenCmd = &cobra.Command{
+	Use: "gen",
+	Short: `Generates TLS certificates for the current workspace.
+If no root certificate has been generated, one will be generated.`,
+	Run: errorHandlerWrapper(handleTLSGen, 1),
+}
+
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 	return func(cmd *cobra.Command, args []string) {
 		err := f(cmd, args)
@@ -233,6 +246,15 @@ func getToolsDir() string {
 	}
 
 	return configFile
+}
+
+func getTLSDir() string {
+	homeDir, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	dir := fmt.Sprintf("%s/.orca/tls", homeDir)
+
+	return dir
 }
 
 func getConfigFilePath() string {
@@ -353,6 +375,11 @@ If a single project is being clone then it will be cloned into {target}.`)
 	addProjectOption(upCmd)
 
 	rootCmd.AddCommand(upCmd)
+
+	//tls
+	addWorkspaceOption(tlsGenCmd)
+	tlsCmd.AddCommand(tlsGenCmd)
+	rootCmd.AddCommand(tlsCmd)
 }
 
 func addWorkspaceOption(cmd *cobra.Command) {

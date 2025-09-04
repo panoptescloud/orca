@@ -107,10 +107,11 @@ func buildProject(wsPCfg model.WorkspaceProjectConfig, pCfg model.ProjectConfig)
 		ProjectDir:   wsPCfg.Path,
 		Requires:     wsPCfg.Requires,
 		Config: common.ProjectConfig{
-			ComposeFiles: convertComposeFiles(pCfg.ComposeFiles),
-			Properties:   convertProperties(pCfg.Properties),
-			Hosts:        pCfg.Hosts,
-			Extensions:   convertExtensions(pCfg.Extensions),
+			ComposeFiles:    convertComposeFiles(pCfg.ComposeFiles),
+			Properties:      convertProperties(pCfg.Properties),
+			Hosts:           pCfg.Hosts,
+			TLSCertificates: pCfg.TLSCertificates,
+			Extensions:      convertExtensions(pCfg.Extensions),
 		},
 	}
 }
