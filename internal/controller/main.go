@@ -17,9 +17,15 @@ type workspaceRepository interface {
 	Load(path string) (*common.Workspace, error)
 }
 
+type compose interface {
+	Up(*common.Workspace, *common.Project) error
+	Down(ws *common.Workspace, p *common.Project) error
+}
+
 type Controller struct {
 	cfg           config
 	workspaceRepo workspaceRepository
+	compose       compose
 }
 
 type runtimeContext struct {
@@ -111,9 +117,10 @@ func (c *Controller) resolveContext(ws string, project string) (runtimeContext, 
 	return c.buildRuntimeContext(c.cfg.GetCurrentWorkspace(), "")
 }
 
-func NewController(cfg config, wsRepo workspaceRepository) *Controller {
+func NewController(cfg config, wsRepo workspaceRepository, compose compose) *Controller {
 	return &Controller{
 		cfg:           cfg,
 		workspaceRepo: wsRepo,
+		compose:       compose,
 	}
 }

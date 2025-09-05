@@ -5,6 +5,7 @@ import (
 
 	"github.com/panoptescloud/orca/internal/config"
 	"github.com/panoptescloud/orca/internal/controller"
+	"github.com/panoptescloud/orca/internal/docker"
 	"github.com/panoptescloud/orca/internal/git"
 	"github.com/panoptescloud/orca/internal/github"
 	"github.com/panoptescloud/orca/internal/hostsys"
@@ -37,6 +38,8 @@ type services struct {
 	workspaceRepo *repository.WorkspaceRepository
 
 	certificateManager *tls.CertificateManager
+
+	compose *docker.Compose
 }
 
 func (s *services) GetFs() afero.Fs {
@@ -147,6 +150,7 @@ func (s *services) GetController() *controller.Controller {
 	s.controller = controller.NewController(
 		s.GetConfig(),
 		s.GetWorkspaceRepository(),
+		s.GetCompose(),
 	)
 
 	return s.controller
@@ -178,4 +182,17 @@ func (s *services) GetCertificateManager() *tls.CertificateManager {
 	)
 
 	return s.certificateManager
+}
+
+func (s *services) GetCompose() *docker.Compose {
+	if s.compose != nil {
+		return s.compose
+	}
+
+	s.compose = docker.NewCompose(
+		s.GetExecutor(),
+		s.GetTui(),
+	)
+
+	return s.compose
 }

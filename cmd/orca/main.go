@@ -205,6 +205,13 @@ var upCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleUp, 1),
 }
 
+var downCmd = &cobra.Command{
+	Use:   "down",
+	Short: "Stops the workspace or project.",
+	Long:  `...TBD...`,
+	Run:   errorHandlerWrapper(handleDown, 1),
+}
+
 var tlsCmd = &cobra.Command{
 	Use:   "tls",
 	Short: "Commands to do with TLS certificates.",
@@ -375,6 +382,12 @@ If a single project is being clone then it will be cloned into {target}.`)
 	addProjectOption(upCmd)
 
 	rootCmd.AddCommand(upCmd)
+
+	//down
+	addWorkspaceOption(downCmd)
+	addProjectOption(downCmd)
+
+	rootCmd.AddCommand(downCmd)
 
 	//tls
 	addWorkspaceOption(tlsGenCmd)

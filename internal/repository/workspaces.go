@@ -96,15 +96,15 @@ func convertExtensions(cfgExts []model.Extension) []common.Extension {
 	return exts
 }
 
-func buildProject(wsPCfg model.WorkspaceProjectConfig, pCfg model.ProjectConfig) common.Project {
+func buildProject(wsPCfg model.WorkspaceProjectConfig, meta common.ProjectMeta, pCfg model.ProjectConfig) common.Project {
 	return common.Project{
 		Name: wsPCfg.Name,
 		RepositoryConfig: common.ProjectRepositoryConfig{
-			SSH:  wsPCfg.Repository.SSH,
-			Self: wsPCfg.Repository.Self,
+			SSH:  meta.Repository.SSH,
+			Self: meta.Repository.Self,
 		},
 		IsRegistered: true,
-		ProjectDir:   wsPCfg.Path,
+		ProjectDir:   meta.Path,
 		Requires:     wsPCfg.Requires,
 		Config: common.ProjectConfig{
 			ComposeFiles:    convertComposeFiles(pCfg.ComposeFiles),
@@ -257,7 +257,7 @@ func (wcr *WorkspaceRepository) Load(name string) (*common.Workspace, error) {
 			return nil, err
 		}
 
-		ws.Projects[i] = buildProject(pCfg, *p)
+		ws.Projects[i] = buildProject(pCfg, projectMeta, *p)
 	}
 
 	return ws, nil
