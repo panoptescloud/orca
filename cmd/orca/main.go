@@ -247,6 +247,13 @@ including any relevant values from environment variables, or profile changes etc
 	Run: errorHandlerWrapper(handleDebugShowComposeConfig, 1),
 }
 
+var logsCmd = &cobra.Command{
+	Use:   "logs",
+	Short: `Tails logs from docker compose project.`,
+	Long:  `Basically a 'docker compose logs -f', you may supply a service to tail specifically.`,
+	Run:   errorHandlerWrapper(handleLogs, 1),
+}
+
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 	return func(cmd *cobra.Command, args []string) {
 		err := f(cmd, args)
@@ -432,9 +439,22 @@ If a single project is being clone then it will be cloned into {target}.`)
 	// exec
 	addWorkspaceOption(execCmd)
 	addProjectOption(execCmd)
-	execCmd.Flags().StringP("service", "s", "", "The service within the project to exec into")
-	execCmd.MarkFlagRequired("service")
+	addServiceOption(execCmd, true)
 	rootCmd.AddCommand(execCmd)
+
+	// logs
+	addWorkspaceOption(logsCmd)
+	addProjectOption(logsCmd)
+	addServiceOption(logsCmd, false)
+	rootCmd.AddCommand(logsCmd)
+}
+
+func addServiceOption(cmd *cobra.Command, required bool) {
+	cmd.Flags().StringP("service", "s", "", "The service within the project to exec into")
+
+	if required {
+		cmd.MarkFlagRequired("service")
+	}
 }
 
 func addWorkspaceOption(cmd *cobra.Command) {
