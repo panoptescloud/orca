@@ -227,6 +227,12 @@ func (wcr *WorkspaceRepository) Load(name string) (*common.Workspace, error) {
 		Name:       cfg.Name,
 		ConfigPath: wsMeta.Path,
 		Projects:   make([]common.Project, len(cfg.Projects)),
+		OverlayConfig: common.OverlayConfig{
+			Network: common.NetworkOverlayConfig{
+				Enabled:  cfg.Overlays.Network.Enabled,
+				CreateIn: cfg.Overlays.Network.CreateIn,
+			},
+		},
 	}
 
 	for i, pCfg := range cfg.Projects {

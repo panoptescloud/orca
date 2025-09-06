@@ -225,6 +225,21 @@ If no root certificate has been generated, one will be generated.`,
 	Run: errorHandlerWrapper(handleTLSGen, 1),
 }
 
+var debugCmd = &cobra.Command{
+	Use:   "debug",
+	Short: "Commands to aid in debugging or understanding whats happening.",
+	RunE:  handleGroup,
+}
+
+var debugShowComposeConfigCmd = &cobra.Command{
+	Use:   "show-compose-config",
+	Short: `Shows the full generated compose config that will be used for this project.`,
+	Long: `Similar to the 'docker compose config' command (it uses this under the 
+hood), it will show you the resulting config after all files are merged together, 
+including any relevant values from environment variables, or profile changes etc.`,
+	Run: errorHandlerWrapper(handleDebugShowComposeConfig, 1),
+}
+
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 	return func(cmd *cobra.Command, args []string) {
 		err := f(cmd, args)
@@ -253,6 +268,13 @@ func getToolsDir() string {
 	}
 
 	return configFile
+}
+
+func getOverlayDir() string {
+	homeDir, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	return fmt.Sprintf("%s/.orca/overlays", homeDir)
 }
 
 func getTLSDir() string {
@@ -393,6 +415,12 @@ If a single project is being clone then it will be cloned into {target}.`)
 	addWorkspaceOption(tlsGenCmd)
 	tlsCmd.AddCommand(tlsGenCmd)
 	rootCmd.AddCommand(tlsCmd)
+
+	//debug
+	addWorkspaceOption(debugShowComposeConfigCmd)
+	addProjectOption(debugShowComposeConfigCmd)
+	debugCmd.AddCommand(debugShowComposeConfigCmd)
+	rootCmd.AddCommand(debugCmd)
 }
 
 func addWorkspaceOption(cmd *cobra.Command) {

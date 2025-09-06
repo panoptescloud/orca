@@ -7,17 +7,17 @@ import (
 	"github.com/panoptescloud/orca/internal/hostsys"
 )
 
-// TODO: guard against nil arguments
-func (c *Compose) Up(ws *common.Workspace, p *common.Project) error {
+// TODO: guard against nil inputs
+func (c *Compose) Show(ws *common.Workspace, p *common.Project) error {
 	overlay, err := c.getOverlay(ws, p)
 	if err != nil {
 		return err
 	}
 
-	c.tui.Info(fmt.Sprintf("%s:%s[%s] starting...", p.Name, ws.Name, p.ProjectDir))
-	c.tui.NewLine()
 	cmd := buildBaseComposeCommand(ws, p, overlay)
-	cmd = append(cmd, "up", "-d")
+	cmd = append(cmd, "config")
+
+	c.tui.NewLine()
 
 	err = c.cli.Exec(cmd[0], cmd[1:], hostsys.WithHostIO(), hostsys.ChdirOpt(p.ProjectDir))
 
@@ -25,7 +25,6 @@ func (c *Compose) Up(ws *common.Workspace, p *common.Project) error {
 		return c.tui.RecordIfError(fmt.Sprintf("%s:%s[%s] failed!", p.Name, ws.Name, p.ProjectDir), err)
 	}
 
-	c.tui.Success(fmt.Sprintf("%s:%s[%s] complete!", p.Name, ws.Name, p.ProjectDir))
 	c.tui.NewLine()
 
 	return nil

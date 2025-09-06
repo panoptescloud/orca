@@ -39,7 +39,9 @@ type services struct {
 
 	certificateManager *tls.CertificateManager
 
-	compose *docker.Compose
+	compose                 *docker.Compose
+	composeParser           *docker.ComposeParser
+	composeOverlayGenerator *docker.ComposeOverlayGenerator
 }
 
 func (s *services) GetFs() afero.Fs {
@@ -192,7 +194,32 @@ func (s *services) GetCompose() *docker.Compose {
 	s.compose = docker.NewCompose(
 		s.GetExecutor(),
 		s.GetTui(),
+		s.GetComposeOverlayGenerator(),
 	)
 
 	return s.compose
+}
+
+func (s *services) GetComposeParser() *docker.ComposeParser {
+	if s.composeParser != nil {
+		return s.composeParser
+	}
+
+	s.composeParser = docker.NewComposeParser()
+
+	return s.composeParser
+}
+
+func (s *services) GetComposeOverlayGenerator() *docker.ComposeOverlayGenerator {
+	if s.composeOverlayGenerator != nil {
+		return s.composeOverlayGenerator
+	}
+
+	s.composeOverlayGenerator = docker.NewComposeOverlayGenerator(
+		s.GetFs(),
+		s.GetComposeParser(),
+		getOverlayDir(),
+	)
+
+	return s.composeOverlayGenerator
 }

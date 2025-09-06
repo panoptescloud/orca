@@ -15,7 +15,17 @@ type WorkspaceProjectConfig struct {
 	Requires   []string
 }
 
+type NetworkOverlay struct {
+	Enabled  bool
+	CreateIn string `yaml:"createIn"`
+}
+
+type Overlays struct {
+	Network NetworkOverlay
+}
+
 type WorkspaceConfig struct {
 	Name     string
 	Projects []WorkspaceProjectConfig
+	Overlays Overlays
 }

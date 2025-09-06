@@ -78,10 +78,20 @@ func (p Project) GetChildren() []string {
 	return []string{}
 }
 
+type NetworkOverlayConfig struct {
+	Enabled  bool
+	CreateIn string
+}
+
+type OverlayConfig struct {
+	Network NetworkOverlayConfig
+}
+
 type Workspace struct {
-	Name       string
-	ConfigPath string
-	Projects   []Project
+	Name          string
+	ConfigPath    string
+	Projects      []Project
+	OverlayConfig OverlayConfig `yaml:"overlays"`
 }
 
 func (ws *Workspace) GetProject(name string) (*Project, error) {
