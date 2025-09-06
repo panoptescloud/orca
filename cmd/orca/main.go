@@ -212,6 +212,13 @@ var downCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleDown, 1),
 }
 
+var restartCmd = &cobra.Command{
+	Use:   "restart",
+	Short: "Alias for running down && up.",
+	Long:  `...TBD...`,
+	Run:   errorHandlerWrapper(handleRestart, 1),
+}
+
 var execCmd = &cobra.Command{
 	Use:   "exec",
 	Short: "Runs a command inside one of the containers in the environment",
@@ -424,6 +431,12 @@ If a single project is being clone then it will be cloned into {target}.`)
 	addProjectOption(downCmd)
 
 	rootCmd.AddCommand(downCmd)
+
+	// restart
+	addWorkspaceOption(restartCmd)
+	addProjectOption(restartCmd)
+
+	rootCmd.AddCommand(restartCmd)
 
 	// tls
 	addWorkspaceOption(tlsGenCmd)
