@@ -96,21 +96,22 @@ func convertExtensions(cfgExts []model.Extension) []common.Extension {
 	return exts
 }
 
-func buildProject(wsPCfg model.WorkspaceProjectConfig, pCfg model.ProjectConfig) common.Project {
+func buildProject(wsPCfg model.WorkspaceProjectConfig, meta common.ProjectMeta, pCfg model.ProjectConfig) common.Project {
 	return common.Project{
 		Name: wsPCfg.Name,
 		RepositoryConfig: common.ProjectRepositoryConfig{
-			SSH:  wsPCfg.Repository.SSH,
-			Self: wsPCfg.Repository.Self,
+			SSH:  meta.Repository.SSH,
+			Self: meta.Repository.Self,
 		},
 		IsRegistered: true,
-		ProjectDir:   wsPCfg.Path,
+		ProjectDir:   meta.Path,
 		Requires:     wsPCfg.Requires,
 		Config: common.ProjectConfig{
-			ComposeFiles: convertComposeFiles(pCfg.ComposeFiles),
-			Properties:   convertProperties(pCfg.Properties),
-			Hosts:        pCfg.Hosts,
-			Extensions:   convertExtensions(pCfg.Extensions),
+			ComposeFiles:    convertComposeFiles(pCfg.ComposeFiles),
+			Properties:      convertProperties(pCfg.Properties),
+			Hosts:           pCfg.Hosts,
+			TLSCertificates: pCfg.TLSCertificates,
+			Extensions:      convertExtensions(pCfg.Extensions),
 		},
 	}
 }
@@ -226,6 +227,14 @@ func (wcr *WorkspaceRepository) Load(name string) (*common.Workspace, error) {
 		Name:       cfg.Name,
 		ConfigPath: wsMeta.Path,
 		Projects:   make([]common.Project, len(cfg.Projects)),
+		OverlayConfig: common.OverlayConfig{
+			Network: common.NetworkOverlayConfig{
+				Enabled:        cfg.Overlays.Network.Enabled,
+				CreateIn:       cfg.Overlays.Network.CreateIn,
+				DisableAliases: cfg.Overlays.Network.DisableAliases,
+				AliasPattern:   cfg.Overlays.Network.AliasPattern,
+			},
+		},
 	}
 
 	for i, pCfg := range cfg.Projects {
@@ -256,7 +265,7 @@ func (wcr *WorkspaceRepository) Load(name string) (*common.Workspace, error) {
 			return nil, err
 		}
 
-		ws.Projects[i] = buildProject(pCfg, *p)
+		ws.Projects[i] = buildProject(pCfg, projectMeta, *p)
 	}
 
 	return ws, nil

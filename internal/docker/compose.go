@@ -1,0 +1,55 @@
+package docker
+
+import (
+	"fmt"
+
+	"github.com/panoptescloud/orca/internal/common"
+	"github.com/panoptescloud/orca/internal/hostsys"
+)
+
+type composeOverlayGenerator interface {
+	CreateOrRetrieve(ws *common.Workspace, p *common.Project) (string, error)
+}
+
+type tui interface {
+	Info(msg ...string)
+	Error(msg ...string)
+	Success(msg ...string)
+	NewLine()
+	RecordIfError(msg string, err error) error
+}
+
+type cli interface {
+	Exec(cmdName string, args []string, opts ...hostsys.ExecOpt) (err error)
+}
+
+type Compose struct {
+	cli              cli
+	tui              tui
+	overlayGenerator composeOverlayGenerator
+}
+
+func (c *Compose) getOverlay(ws *common.Workspace, p *common.Project) (string, error) {
+	return c.overlayGenerator.CreateOrRetrieve(ws, p)
+}
+
+func buildBaseComposeCommand(ws *common.Workspace, p *common.Project, overlayPath string) []string {
+	return []string{
+		"docker",
+		"compose",
+		"-f",
+		p.Config.ComposeFiles.Primary,
+		"-f",
+		overlayPath,
+		"-p",
+		fmt.Sprintf("orca-%s-%s", ws.Name, p.Name),
+	}
+}
+
+func NewCompose(cli cli, tui tui, overlayGenerator composeOverlayGenerator) *Compose {
+	return &Compose{
+		cli:              cli,
+		tui:              tui,
+		overlayGenerator: overlayGenerator,
+	}
+}

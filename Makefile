@@ -2,7 +2,11 @@ DC_PROJECT=pc_orca
 DC=docker compose -f ./docker-compose.yml -p $(DC_PROJECT)
 NOW=$(shell date '+%Y-%m-%d %H:%M:%S')
 TESTS?=./...
-.PHONY: build fmt vet lint-last-commit dc-up dc-down test
+.PHONY: build fmt vet lint-last-commit dc-up dc-down test gen-mocks
+
+
+gen-mocks:
+	@mockery
 
 build: fmt
 	@VERSION="dev" COMMIT="wip-commit" DATE="$(NOW)" ./scripts/build.sh

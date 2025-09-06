@@ -5,10 +5,12 @@ import (
 
 	"github.com/panoptescloud/orca/internal/config"
 	"github.com/panoptescloud/orca/internal/controller"
+	"github.com/panoptescloud/orca/internal/docker"
 	"github.com/panoptescloud/orca/internal/git"
 	"github.com/panoptescloud/orca/internal/github"
 	"github.com/panoptescloud/orca/internal/hostsys"
 	"github.com/panoptescloud/orca/internal/repository"
+	"github.com/panoptescloud/orca/internal/tls"
 	"github.com/panoptescloud/orca/internal/tui"
 	"github.com/panoptescloud/orca/internal/workspaces"
 	"github.com/spf13/afero"
@@ -34,6 +36,12 @@ type services struct {
 	controller *controller.Controller
 
 	workspaceRepo *repository.WorkspaceRepository
+
+	certificateManager *tls.CertificateManager
+
+	compose                 *docker.Compose
+	composeParser           *docker.ComposeParser
+	composeOverlayGenerator *docker.ComposeOverlayGenerator
 }
 
 func (s *services) GetFs() afero.Fs {
@@ -144,6 +152,7 @@ func (s *services) GetController() *controller.Controller {
 	s.controller = controller.NewController(
 		s.GetConfig(),
 		s.GetWorkspaceRepository(),
+		s.GetCompose(),
 	)
 
 	return s.controller
@@ -160,4 +169,57 @@ func (s *services) GetWorkspaceRepository() *repository.WorkspaceRepository {
 	)
 
 	return s.workspaceRepo
+}
+
+func (s *services) GetCertificateManager() *tls.CertificateManager {
+	if s.certificateManager != nil {
+		return s.certificateManager
+	}
+
+	s.certificateManager = tls.NewCertificateManager(
+		s.GetFs(),
+		s.GetWorkspaceRepository(),
+		s.GetTui(),
+		getTLSDir(),
+	)
+
+	return s.certificateManager
+}
+
+func (s *services) GetCompose() *docker.Compose {
+	if s.compose != nil {
+		return s.compose
+	}
+
+	s.compose = docker.NewCompose(
+		s.GetExecutor(),
+		s.GetTui(),
+		s.GetComposeOverlayGenerator(),
+	)
+
+	return s.compose
+}
+
+func (s *services) GetComposeParser() *docker.ComposeParser {
+	if s.composeParser != nil {
+		return s.composeParser
+	}
+
+	s.composeParser = docker.NewComposeParser()
+
+	return s.composeParser
+}
+
+func (s *services) GetComposeOverlayGenerator() *docker.ComposeOverlayGenerator {
+	if s.composeOverlayGenerator != nil {
+		return s.composeOverlayGenerator
+	}
+
+	s.composeOverlayGenerator = docker.NewComposeOverlayGenerator(
+		s.GetFs(),
+		s.GetComposeParser(),
+		getOverlayDir(),
+	)
+
+	return s.composeOverlayGenerator
 }

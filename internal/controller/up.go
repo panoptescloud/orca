@@ -1,9 +1,6 @@
 package controller
 
 import (
-	"fmt"
-
-	"github.com/panoptescloud/orca/internal/common"
 	"github.com/panoptescloud/orca/pkg/dag"
 )
 
@@ -45,11 +42,6 @@ func determineStartupOrder(ctx runtimeContext) ([]string, error) {
 // 	return g.TopologicalKeysFromLeaves()
 // }
 
-func (c *Controller) startProject(cfg *common.Project) error {
-	fmt.Printf("starting:\n %#v\n\n", cfg)
-	return nil
-}
-
 func (c *Controller) startServices(ctx runtimeContext) error {
 	ordered, err := determineStartupOrder(ctx)
 
@@ -66,7 +58,7 @@ func (c *Controller) startServices(ctx runtimeContext) error {
 			return err
 		}
 
-		if err := c.startProject(projectConfig); err != nil {
+		if err := c.compose.Up(ctx.Workspace, projectConfig); err != nil {
 			return err
 		}
 	}

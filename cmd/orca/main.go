@@ -205,6 +205,62 @@ var upCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleUp, 1),
 }
 
+var downCmd = &cobra.Command{
+	Use:   "down",
+	Short: "Stops the workspace or project.",
+	Long:  `...TBD...`,
+	Run:   errorHandlerWrapper(handleDown, 1),
+}
+
+var restartCmd = &cobra.Command{
+	Use:   "restart",
+	Short: "Alias for running down && up.",
+	Long:  `...TBD...`,
+	Run:   errorHandlerWrapper(handleRestart, 1),
+}
+
+var execCmd = &cobra.Command{
+	Use:   "exec",
+	Short: "Runs a command inside one of the containers in the environment",
+	Long:  `...TBD...`,
+	Run:   errorHandlerWrapper(handleExec, 1),
+}
+
+var tlsCmd = &cobra.Command{
+	Use:   "tls",
+	Short: "Commands to do with TLS certificates.",
+	RunE:  handleGroup,
+}
+
+var tlsGenCmd = &cobra.Command{
+	Use: "gen",
+	Short: `Generates TLS certificates for the current workspace.
+If no root certificate has been generated, one will be generated.`,
+	Run: errorHandlerWrapper(handleTLSGen, 1),
+}
+
+var debugCmd = &cobra.Command{
+	Use:   "debug",
+	Short: "Commands to aid in debugging or understanding whats happening.",
+	RunE:  handleGroup,
+}
+
+var debugShowComposeConfigCmd = &cobra.Command{
+	Use:   "show-compose-config",
+	Short: `Shows the full generated compose config that will be used for this project.`,
+	Long: `Similar to the 'docker compose config' command (it uses this under the 
+hood), it will show you the resulting config after all files are merged together, 
+including any relevant values from environment variables, or profile changes etc.`,
+	Run: errorHandlerWrapper(handleDebugShowComposeConfig, 1),
+}
+
+var logsCmd = &cobra.Command{
+	Use:   "logs",
+	Short: `Tails logs from docker compose project.`,
+	Long:  `Basically a 'docker compose logs -f', you may supply a service to tail specifically.`,
+	Run:   errorHandlerWrapper(handleLogs, 1),
+}
+
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 	return func(cmd *cobra.Command, args []string) {
 		err := f(cmd, args)
@@ -233,6 +289,22 @@ func getToolsDir() string {
 	}
 
 	return configFile
+}
+
+func getOverlayDir() string {
+	homeDir, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	return fmt.Sprintf("%s/.orca/overlays", homeDir)
+}
+
+func getTLSDir() string {
+	homeDir, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	dir := fmt.Sprintf("%s/.orca/tls", homeDir)
+
+	return dir
 }
 
 func getConfigFilePath() string {
@@ -353,6 +425,49 @@ If a single project is being clone then it will be cloned into {target}.`)
 	addProjectOption(upCmd)
 
 	rootCmd.AddCommand(upCmd)
+
+	// down
+	addWorkspaceOption(downCmd)
+	addProjectOption(downCmd)
+
+	rootCmd.AddCommand(downCmd)
+
+	// restart
+	addWorkspaceOption(restartCmd)
+	addProjectOption(restartCmd)
+
+	rootCmd.AddCommand(restartCmd)
+
+	// tls
+	addWorkspaceOption(tlsGenCmd)
+	tlsCmd.AddCommand(tlsGenCmd)
+	rootCmd.AddCommand(tlsCmd)
+
+	// debug
+	addWorkspaceOption(debugShowComposeConfigCmd)
+	addProjectOption(debugShowComposeConfigCmd)
+	debugCmd.AddCommand(debugShowComposeConfigCmd)
+	rootCmd.AddCommand(debugCmd)
+
+	// exec
+	addWorkspaceOption(execCmd)
+	addProjectOption(execCmd)
+	addServiceOption(execCmd, true)
+	rootCmd.AddCommand(execCmd)
+
+	// logs
+	addWorkspaceOption(logsCmd)
+	addProjectOption(logsCmd)
+	addServiceOption(logsCmd, false)
+	rootCmd.AddCommand(logsCmd)
+}
+
+func addServiceOption(cmd *cobra.Command, required bool) {
+	cmd.Flags().StringP("service", "s", "", "The service within the project to exec into")
+
+	if required {
+		cmd.MarkFlagRequired("service")
+	}
 }
 
 func addWorkspaceOption(cmd *cobra.Command) {

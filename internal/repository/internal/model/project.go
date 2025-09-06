@@ -35,8 +35,9 @@ type Extension struct {
 }
 
 type ProjectConfig struct {
-	ComposeFiles ComposeFiles `yaml:"composeFiles"`
-	Properties   []Property
-	Hosts        []string
-	Extensions   []Extension
+	ComposeFiles    ComposeFiles `yaml:"composeFiles"`
+	Properties      []Property
+	Hosts           []string
+	TLSCertificates []string `yaml:"tlsCerts"`
+	Extensions      []Extension
 }
