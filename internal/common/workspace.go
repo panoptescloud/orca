@@ -79,8 +79,10 @@ func (p Project) GetChildren() []string {
 }
 
 type NetworkOverlayConfig struct {
-	Enabled  bool
-	CreateIn string
+	Enabled        bool
+	CreateIn       string
+	DisableAliases bool
+	AliasPattern   string
 }
 
 type OverlayConfig struct {

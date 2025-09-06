@@ -17,7 +17,7 @@ func (c *Compose) Down(ws *common.Workspace, p *common.Project) error {
 	c.tui.Info(fmt.Sprintf("%s:%s[%s] stopping...", p.Name, ws.Name, p.ProjectDir))
 	c.tui.NewLine()
 	cmd := buildBaseComposeCommand(ws, p, overlay)
-	cmd = append(cmd, "down")
+	cmd = append(cmd, "down", "--remove-orphans")
 
 	err = c.cli.Exec(cmd[0], cmd[1:], hostsys.WithHostIO(), hostsys.ChdirOpt(p.ProjectDir))
 

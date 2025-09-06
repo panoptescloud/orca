@@ -229,8 +229,10 @@ func (wcr *WorkspaceRepository) Load(name string) (*common.Workspace, error) {
 		Projects:   make([]common.Project, len(cfg.Projects)),
 		OverlayConfig: common.OverlayConfig{
 			Network: common.NetworkOverlayConfig{
-				Enabled:  cfg.Overlays.Network.Enabled,
-				CreateIn: cfg.Overlays.Network.CreateIn,
+				Enabled:        cfg.Overlays.Network.Enabled,
+				CreateIn:       cfg.Overlays.Network.CreateIn,
+				DisableAliases: cfg.Overlays.Network.DisableAliases,
+				AliasPattern:   cfg.Overlays.Network.AliasPattern,
 			},
 		},
 	}
