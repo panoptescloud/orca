@@ -21,6 +21,7 @@ type compose interface {
 	Up(*common.Workspace, *common.Project) error
 	Down(ws *common.Workspace, p *common.Project) error
 	Show(ws *common.Workspace, p *common.Project) error
+	Exec(ws *common.Workspace, p *common.Project, service string, cmdArgs []string) error
 }
 
 type Controller struct {

@@ -51,7 +51,7 @@ func (cog *ComposeOverlayGenerator) addNetwork(new *types.Project, original *typ
 		new.Services = types.Services{}
 	}
 
-	for name, _ := range original.Services {
+	for name := range original.Services {
 		if _, ok := new.Services[name]; !ok {
 			new.Services[name] = types.ServiceConfig{}
 		}
@@ -71,12 +71,12 @@ func (cog *ComposeOverlayGenerator) addNetwork(new *types.Project, original *typ
 }
 
 func (cog *ComposeOverlayGenerator) CreateOrRetrieve(ws *common.Workspace, p *common.Project) (string, error) {
-	composeProject, err := cog.parser.Parse([]string{p.Config.ComposeFiles.Primary})
+	composeProject, err := cog.parser.Parse([]string{
+		fmt.Sprintf("%s/%s", p.ProjectDir, p.Config.ComposeFiles.Primary),
+	})
 	if err != nil {
 		return "", err
 	}
-
-	// fmt.Printf("ORIGINAL\n\n%#v\n\n", composeProject)
 
 	o := emptyOverlay()
 
@@ -102,11 +102,6 @@ func (cog *ComposeOverlayGenerator) CreateOrRetrieve(ws *common.Workspace, p *co
 	if err := afero.WriteFile(cog.fs, overlayPath, newFile, 0655); err != nil {
 		return "", err
 	}
-
-	// fmt.Printf("NEW\n\n%s\n\n", string(newFile))
-	// if ws.
-
-	// fmt.Printf("overlay:\n%#v\n\n", ws.OverlayConfig)
 
 	return overlayPath, nil
 }

@@ -212,6 +212,13 @@ var downCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleDown, 1),
 }
 
+var execCmd = &cobra.Command{
+	Use:   "exec",
+	Short: "Runs a command inside one of the containers in the environment",
+	Long:  `...TBD...`,
+	Run:   errorHandlerWrapper(handleExec, 1),
+}
+
 var tlsCmd = &cobra.Command{
 	Use:   "tls",
 	Short: "Commands to do with TLS certificates.",
@@ -405,22 +412,29 @@ If a single project is being clone then it will be cloned into {target}.`)
 
 	rootCmd.AddCommand(upCmd)
 
-	//down
+	// down
 	addWorkspaceOption(downCmd)
 	addProjectOption(downCmd)
 
 	rootCmd.AddCommand(downCmd)
 
-	//tls
+	// tls
 	addWorkspaceOption(tlsGenCmd)
 	tlsCmd.AddCommand(tlsGenCmd)
 	rootCmd.AddCommand(tlsCmd)
 
-	//debug
+	// debug
 	addWorkspaceOption(debugShowComposeConfigCmd)
 	addProjectOption(debugShowComposeConfigCmd)
 	debugCmd.AddCommand(debugShowComposeConfigCmd)
 	rootCmd.AddCommand(debugCmd)
+
+	// exec
+	addWorkspaceOption(execCmd)
+	addProjectOption(execCmd)
+	execCmd.Flags().StringP("service", "s", "", "The service within the project to exec into")
+	execCmd.MarkFlagRequired("service")
+	rootCmd.AddCommand(execCmd)
 }
 
 func addWorkspaceOption(cmd *cobra.Command) {
