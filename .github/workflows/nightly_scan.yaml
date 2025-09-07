@@ -1,10 +1,10 @@
 # See: https://commitlint.js.org/guides/ci-setup.html
-name: "SECURITY: Scan repo (main branch)"
-run-name: "SECURITY: Scan repo (main branch)"
+name: "SECURITY: Scan"
+run-name: "SECURITY: Scan ${{ github.ref }}"
 
 on:
   schedule:
-    - cron: "15 4,5 * * *"
+    - cron: "0 23 * * *"
   workflow_dispatch:
 
 permissions:
