@@ -1,6 +1,10 @@
 name: "CI: Scan"
 run-name: "CI: Scan #${{ github.event.pull_request.number }}"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 on:
   pull_request:
 
