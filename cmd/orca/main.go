@@ -261,6 +261,12 @@ var logsCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleLogs, 1),
 }
 
+var hostsCmd = &cobra.Command{
+	Use:   "hosts",
+	Short: `Shows all the required hosts entries for the workspace.`,
+	Run:   errorHandlerWrapper(handleHosts, 1),
+}
+
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 	return func(cmd *cobra.Command, args []string) {
 		err := f(cmd, args)
@@ -413,7 +419,7 @@ func init() {
 	wsCloneCmd.Flags().StringP("target", "t", "", `The directory in which to clone the project(s). 
 If multiple projects are being cloned, then it will place them in {target}/{repo name}.
 If a single project is being clone then it will be cloned into {target}.`)
-	addWorkspaceOption(wsCloneCmd)
+	addWorkspaceOption(wsCloneCmd, false)
 	addProjectOption(wsCloneCmd)
 	wsCloneCmd.MarkFlagRequired("workspace")
 	wsCmd.AddCommand(wsCloneCmd)
@@ -421,45 +427,49 @@ If a single project is being clone then it will be cloned into {target}.`)
 	rootCmd.AddCommand(wsCmd)
 
 	// up
-	addWorkspaceOption(upCmd)
+	addWorkspaceOption(upCmd, false)
 	addProjectOption(upCmd)
 
 	rootCmd.AddCommand(upCmd)
 
 	// down
-	addWorkspaceOption(downCmd)
+	addWorkspaceOption(downCmd, false)
 	addProjectOption(downCmd)
 
 	rootCmd.AddCommand(downCmd)
 
 	// restart
-	addWorkspaceOption(restartCmd)
+	addWorkspaceOption(restartCmd, false)
 	addProjectOption(restartCmd)
 
 	rootCmd.AddCommand(restartCmd)
 
 	// tls
-	addWorkspaceOption(tlsGenCmd)
+	addWorkspaceOption(tlsGenCmd, false)
 	tlsCmd.AddCommand(tlsGenCmd)
 	rootCmd.AddCommand(tlsCmd)
 
 	// debug
-	addWorkspaceOption(debugShowComposeConfigCmd)
+	addWorkspaceOption(debugShowComposeConfigCmd, false)
 	addProjectOption(debugShowComposeConfigCmd)
 	debugCmd.AddCommand(debugShowComposeConfigCmd)
 	rootCmd.AddCommand(debugCmd)
 
 	// exec
-	addWorkspaceOption(execCmd)
+	addWorkspaceOption(execCmd, false)
 	addProjectOption(execCmd)
 	addServiceOption(execCmd, true)
 	rootCmd.AddCommand(execCmd)
 
 	// logs
-	addWorkspaceOption(logsCmd)
+	addWorkspaceOption(logsCmd, false)
 	addProjectOption(logsCmd)
 	addServiceOption(logsCmd, false)
 	rootCmd.AddCommand(logsCmd)
+
+	// hosts
+	addWorkspaceOption(hostsCmd, true)
+	rootCmd.AddCommand(hostsCmd)
 }
 
 func addServiceOption(cmd *cobra.Command, required bool) {
@@ -470,8 +480,12 @@ func addServiceOption(cmd *cobra.Command, required bool) {
 	}
 }
 
-func addWorkspaceOption(cmd *cobra.Command) {
+func addWorkspaceOption(cmd *cobra.Command, required bool) {
 	cmd.Flags().StringP("workspace", "w", "", "The name of the workspace to run this command for.")
+
+	if required {
+		cmd.MarkFlagRequired("workspace")
+	}
 }
 
 func addProjectOption(cmd *cobra.Command) {

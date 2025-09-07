@@ -13,8 +13,16 @@ type config interface {
 	GetWorkspaceMeta(name string) (common.WorkspaceMeta, error)
 }
 
+type tui interface {
+	Info(msg ...string)
+	Error(msg ...string)
+	Success(msg ...string)
+	NewLine()
+	RecordIfError(msg string, err error) error
+}
+
 type workspaceRepository interface {
-	Load(path string) (*common.Workspace, error)
+	Load(name string) (*common.Workspace, error)
 }
 
 type compose interface {
@@ -29,6 +37,7 @@ type Controller struct {
 	cfg           config
 	workspaceRepo workspaceRepository
 	compose       compose
+	tui           tui
 }
 
 type runtimeContext struct {
@@ -120,10 +129,11 @@ func (c *Controller) resolveContext(ws string, project string) (runtimeContext, 
 	return c.buildRuntimeContext(c.cfg.GetCurrentWorkspace(), "")
 }
 
-func NewController(cfg config, wsRepo workspaceRepository, compose compose) *Controller {
+func NewController(cfg config, wsRepo workspaceRepository, compose compose, tui tui) *Controller {
 	return &Controller{
 		cfg:           cfg,
 		workspaceRepo: wsRepo,
 		compose:       compose,
+		tui:           tui,
 	}
 }

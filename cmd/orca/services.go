@@ -153,6 +153,7 @@ func (s *services) GetController() *controller.Controller {
 		s.GetConfig(),
 		s.GetWorkspaceRepository(),
 		s.GetCompose(),
+		s.GetTui(),
 	)
 
 	return s.controller

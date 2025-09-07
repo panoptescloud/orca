@@ -122,6 +122,20 @@ func (ws *Workspace) GetUniqueTLSCertificates() []string {
 	return certs
 }
 
+func (ws *Workspace) GetUniqueHosts() []string {
+	hosts := []string{}
+
+	for _, p := range ws.Projects {
+		for _, c := range p.Config.Hosts {
+			if !stdslices.Contains(hosts, c) {
+				hosts = append(hosts, c)
+			}
+		}
+	}
+
+	return hosts
+}
+
 // --- unconfigured version
 
 type UnconfiguredProject struct {
