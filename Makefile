@@ -2,7 +2,7 @@ DC_PROJECT=pc_orca
 DC=docker compose -f ./docker-compose.yml -p $(DC_PROJECT)
 NOW=$(shell date '+%Y-%m-%d %H:%M:%S')
 TESTS?=./...
-.PHONY: build fmt vet lint-last-commit dc-up dc-down test gen-mocks
+.PHONY: build fmt vet lint-last-commit dc-up dc-down test gen-mocks trivy-scan
 
 
 gen-mocks:
@@ -31,3 +31,6 @@ dc-up:
 
 dc-down:
 	$(DC) down --remove-orphans
+
+trivy-scan:
+	@trivy fs .
