@@ -2,9 +2,11 @@ package docker
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"path/filepath"
+	"strings"
 
 	"github.com/compose-spec/compose-go/v2/types"
 	"github.com/panoptescloud/orca/internal/common"
@@ -13,6 +15,8 @@ import (
 
 const networkOverlaidLabel = "orca.panoptescloud.overlay-enabled/network"
 const aliasesOverlaidLabel = "orca.panoptescloud.overlay-enabled/aliases"
+
+const tlsInjectCertsLabel = "orca.pantoptescloud.tls/inject-certs"
 
 const defaultAliasTemplate = "{{ .Service }}.{{ .Project }}.{{ .Workspace }}.local"
 
@@ -132,9 +136,10 @@ type overlayComposeParser interface {
 }
 
 type ComposeOverlayGenerator struct {
-	fs         afero.Fs
-	parser     overlayComposeParser
-	overlayDir string
+	fs          afero.Fs
+	parser      overlayComposeParser
+	overlayDir  string
+	tlsCertsDir string
 }
 
 func emptyOverlay() *types.Project {
@@ -148,6 +153,69 @@ func (cog *ComposeOverlayGenerator) addNetwork(ctx *overlayGenerationContext) er
 	ctx.AddRootNetworkConfig()
 
 	if err := ctx.AddServiceNetworkConfig(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateBindMountTarget(path string) error {
+	switch path {
+	case "":
+		return errors.New("cannot be empty")
+	case "/":
+		return errors.New("cannot be root directory (/)")
+	default:
+		return nil
+	}
+}
+
+func (cog *ComposeOverlayGenerator) addTLSInjectionOverlay(ctx *overlayGenerationContext, s string, path string) error {
+	svc := ctx.new.Services[s]
+
+	// Ensure it has a trailing slash
+	// TODO: Consider validation for this, almost anything could be a valid path, right?
+	path = fmt.Sprintf("%s/", strings.TrimSuffix(path, "/"))
+
+	if err := validateBindMountTarget(path); err != nil {
+		return common.ErrInvalidValueForOverlayModifier{
+			Service: s,
+			Message: err.Error(),
+			Label:   tlsInjectCertsLabel,
+		}
+	}
+
+	svc.Volumes = append(svc.Volumes, types.ServiceVolumeConfig{
+		Type:   types.VolumeTypeBind,
+		Source: fmt.Sprintf("%s/", strings.TrimSuffix(cog.tlsCertsDir, "/")),
+		Target: path,
+	})
+
+	ctx.new.Services[s] = svc
+
+	return nil
+}
+
+func (cog *ComposeOverlayGenerator) addTLSOverlays(ctx *overlayGenerationContext) error {
+	for k, s := range ctx.original.Services {
+		if v, ok := s.Labels[tlsInjectCertsLabel]; ok {
+			if err := cog.addTLSInjectionOverlay(ctx, k, v); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func (cog *ComposeOverlayGenerator) buildOverlay(ctx *overlayGenerationContext) error {
+	if ctx.ws.OverlayConfig.Network.Enabled {
+		if err := cog.addNetwork(ctx); err != nil {
+			return err
+		}
+	}
+
+	if err := cog.addTLSOverlays(ctx); err != nil {
 		return err
 	}
 
@@ -169,15 +237,15 @@ func (cog *ComposeOverlayGenerator) CreateOrRetrieve(ws *common.Workspace, p *co
 		new:      emptyOverlay(),
 	}
 
-	if ws.OverlayConfig.Network.Enabled {
-		if err := cog.addNetwork(ctx); err != nil {
-			return "", err
-		}
+	if err := cog.buildOverlay(ctx); err != nil {
+
+		return "", err
 	}
 
 	newFile, err := ctx.new.MarshalYAML()
 
 	if err != nil {
+
 		return "", err
 	}
 
@@ -195,10 +263,11 @@ func (cog *ComposeOverlayGenerator) CreateOrRetrieve(ws *common.Workspace, p *co
 	return overlayPath, nil
 }
 
-func NewComposeOverlayGenerator(fs afero.Fs, parser overlayComposeParser, overlayDir string) *ComposeOverlayGenerator {
+func NewComposeOverlayGenerator(fs afero.Fs, parser overlayComposeParser, overlayDir string, tlsCertsDir string) *ComposeOverlayGenerator {
 	return &ComposeOverlayGenerator{
-		fs:         fs,
-		parser:     parser,
-		overlayDir: overlayDir,
+		fs:          fs,
+		parser:      parser,
+		overlayDir:  overlayDir,
+		tlsCertsDir: tlsCertsDir,
 	}
 }

@@ -52,15 +52,15 @@ type CertificateManager struct {
 	tlsDir        string
 }
 
-func (cm *CertificateManager) getCertsDir() string {
+func (cm *CertificateManager) GetCertsDir() string {
 	return fmt.Sprintf("%s/%s", strings.TrimSuffix(cm.tlsDir, "/"), "certs")
 }
 
-func (cm *CertificateManager) getRootKeyPath() string {
+func (cm *CertificateManager) GetRootKeyPath() string {
 	return fmt.Sprintf("%s/%s", strings.TrimSuffix(cm.tlsDir, "/"), "key.pem")
 }
 
-func (cm *CertificateManager) getRootCertPath() string {
+func (cm *CertificateManager) GetRootCertPath() string {
 	return fmt.Sprintf("%s/%s", strings.TrimSuffix(cm.tlsDir, "/"), "cert.pem")
 }
 
@@ -224,7 +224,7 @@ func (cm *CertificateManager) getOrCreateKey(path string) (crypto.Signer, error)
 }
 
 func (cm *CertificateManager) getOrCreateRootCert(key crypto.Signer) (*x509.Certificate, error) {
-	path := cm.getRootCertPath()
+	path := cm.GetRootCertPath()
 	exists, err := afero.Exists(cm.fs, path)
 
 	if err != nil {
@@ -250,7 +250,7 @@ func (cm *CertificateManager) getOrCreateRootCert(key crypto.Signer) (*x509.Cert
 }
 
 func (cm *CertificateManager) getRootIssuer() (*issuer, error) {
-	key, err := cm.getOrCreateKey(cm.getRootKeyPath())
+	key, err := cm.getOrCreateKey(cm.GetRootKeyPath())
 
 	if err != nil {
 		return nil, err
@@ -269,7 +269,7 @@ func (cm *CertificateManager) getRootIssuer() (*issuer, error) {
 }
 
 func (cm *CertificateManager) createTLSDirsIfMissing() error {
-	exists, err := afero.DirExists(cm.fs, cm.getCertsDir())
+	exists, err := afero.DirExists(cm.fs, cm.GetCertsDir())
 
 	if err != nil {
 		return err
@@ -279,7 +279,7 @@ func (cm *CertificateManager) createTLSDirsIfMissing() error {
 		return nil
 	}
 
-	return cm.fs.MkdirAll(cm.getCertsDir(), 0700)
+	return cm.fs.MkdirAll(cm.GetCertsDir(), 0700)
 }
 
 func (cm *CertificateManager) generateCertificateIfNotPresent(issuer *issuer, domain string) error {
@@ -287,7 +287,7 @@ func (cm *CertificateManager) generateCertificateIfNotPresent(issuer *issuer, do
 	cn := domain
 	var certName = strings.Replace(cn, "*", "_", -1)
 
-	keyPath := fmt.Sprintf("%s/%s.key", cm.getCertsDir(), certName)
+	keyPath := fmt.Sprintf("%s/%s.key", cm.GetCertsDir(), certName)
 
 	key, err := cm.getOrCreateKey(keyPath)
 
@@ -295,7 +295,7 @@ func (cm *CertificateManager) generateCertificateIfNotPresent(issuer *issuer, do
 		return err
 	}
 
-	certPath := fmt.Sprintf("%s/%s.cert", cm.getCertsDir(), certName)
+	certPath := fmt.Sprintf("%s/%s.cert", cm.GetCertsDir(), certName)
 
 	returnErrMessage := func(err error) error {
 		return cm.tui.RecordIfError(fmt.Sprintf("Failed to create certificate %s", certPath), err)
@@ -365,7 +365,7 @@ type GenerateDTO struct {
 func (cm *CertificateManager) Generate(dto GenerateDTO) error {
 	cm.tui.Info("Generating Root certificate if required...")
 	if err := cm.createTLSDirsIfMissing(); err != nil {
-		return cm.tui.RecordIfError(fmt.Sprintf("Failed to create certificates directory at: %s", cm.getCertsDir()), err)
+		return cm.tui.RecordIfError(fmt.Sprintf("Failed to create certificates directory at: %s", cm.GetCertsDir()), err)
 	}
 
 	issuer, err := cm.getRootIssuer()

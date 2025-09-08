@@ -9,7 +9,7 @@ import (
 func (c *Compose) Logs(ws *common.Workspace, p *common.Project, service string) error {
 	overlay, err := c.getOverlay(ws, p)
 	if err != nil {
-		return err
+		return c.tui.RecordIfError("Failed to generate overlays!", err)
 	}
 
 	cmd := buildBaseComposeCommand(ws, p, overlay)
