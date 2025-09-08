@@ -216,10 +216,13 @@ func (s *services) GetComposeOverlayGenerator() *docker.ComposeOverlayGenerator 
 		return s.composeOverlayGenerator
 	}
 
+	cm := s.GetCertificateManager()
+
 	s.composeOverlayGenerator = docker.NewComposeOverlayGenerator(
 		s.GetFs(),
 		s.GetComposeParser(),
 		getOverlayDir(),
+		cm.GetCertsDir(),
 	)
 
 	return s.composeOverlayGenerator

@@ -246,3 +246,19 @@ type ErrConfigIsNotValidYAML struct {
 func (err ErrConfigIsNotValidYAML) Error() string {
 	return fmt.Sprintf("config at '%s' was not valid yaml: %s", err.Path, err.ParseError)
 }
+
+type ErrInvalidValueForOverlayModifier struct {
+	Label   string
+	Message string
+	Service string
+}
+
+func (err ErrInvalidValueForOverlayModifier) Error() string {
+	svc := ""
+
+	if err.Service != "" {
+		svc = fmt.Sprintf("(service=%s) ", err.Service)
+	}
+
+	return fmt.Sprintf("invalid value for label '%s' modifier in compose file %s: %s", err.Label, svc, err.Message)
+}

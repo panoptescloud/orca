@@ -11,7 +11,7 @@ import (
 func (c *Compose) Down(ws *common.Workspace, p *common.Project) error {
 	overlay, err := c.getOverlay(ws, p)
 	if err != nil {
-		return err
+		return c.tui.RecordIfError("Failed to generate overlays!", err)
 	}
 
 	c.tui.Info(fmt.Sprintf("%s:%s[%s] stopping...", p.Name, ws.Name, p.ProjectDir))

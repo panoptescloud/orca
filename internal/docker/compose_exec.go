@@ -11,7 +11,7 @@ import (
 func (c *Compose) Exec(ws *common.Workspace, p *common.Project, service string, cmdArgs []string) error {
 	overlay, err := c.getOverlay(ws, p)
 	if err != nil {
-		return err
+		return c.tui.RecordIfError("Failed to generate overlays!", err)
 	}
 
 	cmd := buildBaseComposeCommand(ws, p, overlay)
