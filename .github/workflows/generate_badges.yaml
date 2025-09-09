@@ -30,7 +30,7 @@ jobs:
           export PATH=$PATH:$GOPATH/bin
           go install github.com/jstemmer/go-junit-report@latest
       - name: Run tests
-        run: go test ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
+        run: go test ./... -coverprofile=./cover.out -covermode=set -coverpkg=./...
       - name: check test coverage
         uses: vladopajic/go-test-coverage@v2
         if: always()
