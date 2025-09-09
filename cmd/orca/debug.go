@@ -18,3 +18,17 @@ func handleDebugShowComposeConfig(cmd *cobra.Command, args []string) error {
 		Project:   project,
 	})
 }
+
+func handleDebugShowComposeCommand(cmd *cobra.Command, args []string) error {
+	ctrl := svcContainer.GetController()
+
+	ws, err := cmd.Flags().GetString("workspace")
+	cobra.CheckErr(err)
+	project, err := cmd.Flags().GetString("project")
+	cobra.CheckErr(err)
+
+	return ctrl.ShowComposeCommand(controller.ShowComposeCommandDTO{
+		Workspace: ws,
+		Project:   project,
+	})
+}

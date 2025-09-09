@@ -2,12 +2,12 @@ package controller
 
 import "github.com/panoptescloud/orca/internal/common"
 
-type ShowComposeConfigDTO struct {
+type ShowComposeCommandDTO struct {
 	Workspace string
 	Project   string
 }
 
-func (c *Controller) ShowComposeConfig(dto ShowComposeConfigDTO) error {
+func (c *Controller) ShowComposeCommand(dto ShowComposeCommandDTO) error {
 	ctx, err := c.resolveContext(dto.Workspace, dto.Project)
 
 	if err != nil {
@@ -20,5 +20,5 @@ func (c *Controller) ShowComposeConfig(dto ShowComposeConfigDTO) error {
 		}
 	}
 
-	return c.compose.ShowConfig(ctx.Workspace, ctx.Project)
+	return c.compose.ShowCommand(ctx.Workspace, ctx.Project)
 }

@@ -132,7 +132,7 @@ func (ogc *overlayGenerationContext) AddServiceNetworkConfig() error {
 }
 
 type overlayComposeParser interface {
-	Parse(paths []string) (*types.Project, error)
+	Parse(paths []string, envFiles []string) (*types.Project, error)
 }
 
 type ComposeOverlayGenerator struct {
@@ -223,9 +223,13 @@ func (cog *ComposeOverlayGenerator) buildOverlay(ctx *overlayGenerationContext) 
 }
 
 func (cog *ComposeOverlayGenerator) CreateOrRetrieve(ws *common.Workspace, p *common.Project) (string, error) {
-	composeProject, err := cog.parser.Parse([]string{
-		fmt.Sprintf("%s/%s", p.ProjectDir, p.Config.ComposeFiles.Primary),
-	})
+	composeProject, err := cog.parser.Parse(
+		[]string{
+			fmt.Sprintf("%s/%s", p.ProjectDir, p.Config.ComposeFiles.Primary),
+		},
+		p.EnvFilePaths(),
+	)
+
 	if err != nil {
 		return "", err
 	}

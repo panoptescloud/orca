@@ -10,12 +10,17 @@ import (
 type ComposeParser struct {
 }
 
-func (cp *ComposeParser) Parse(paths []string) (*types.Project, error) {
+func (cp *ComposeParser) Parse(paths []string, envFiles []string) (*types.Project, error) {
 	opts, err := composecli.NewProjectOptions(
 		paths,
+		composecli.WithEnvFiles(envFiles...),
 	)
 
 	if err != nil {
+		return nil, err
+	}
+
+	if err := composecli.WithDotEnv(opts); err != nil {
 		return nil, err
 	}
 

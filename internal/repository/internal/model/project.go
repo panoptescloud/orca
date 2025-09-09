@@ -34,8 +34,13 @@ type Extension struct {
 	Service string
 }
 
+type EnvFile struct {
+	Path string
+}
+
 type ProjectConfig struct {
 	ComposeFiles    ComposeFiles `yaml:"composeFiles"`
+	EnvFiles        []EnvFile    `yaml:"envFiles"`
 	Properties      []Property
 	Hosts           []string
 	TLSCertificates []string `yaml:"tlsCerts"`
