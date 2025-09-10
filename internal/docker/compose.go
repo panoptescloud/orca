@@ -34,7 +34,13 @@ func (c *Compose) getOverlay(ws *common.Workspace, p *common.Project) (string, e
 }
 
 func buildBaseComposeCommand(ws *common.Workspace, p *common.Project, overlayPath string) []string {
-	return []string{
+	envArgs := []string{}
+
+	for _, e := range p.Config.EnvFiles {
+		envArgs = append(envArgs, "--env-file", e.Path)
+	}
+
+	args := []string{
 		"docker",
 		"compose",
 		"-f",
@@ -44,6 +50,10 @@ func buildBaseComposeCommand(ws *common.Workspace, p *common.Project, overlayPat
 		"-p",
 		fmt.Sprintf("orca-%s-%s", ws.Name, p.Name),
 	}
+
+	args = append(args, envArgs...)
+
+	return args
 }
 
 func NewCompose(cli cli, tui tui, overlayGenerator composeOverlayGenerator) *Compose {

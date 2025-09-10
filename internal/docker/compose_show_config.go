@@ -8,7 +8,7 @@ import (
 )
 
 // TODO: guard against nil inputs
-func (c *Compose) Show(ws *common.Workspace, p *common.Project) error {
+func (c *Compose) ShowConfig(ws *common.Workspace, p *common.Project) error {
 	overlay, err := c.getOverlay(ws, p)
 	if err != nil {
 		return c.tui.RecordIfError("Failed to generate overlays!", err)

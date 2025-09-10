@@ -254,6 +254,13 @@ including any relevant values from environment variables, or profile changes etc
 	Run: errorHandlerWrapper(handleDebugShowComposeConfig, 1),
 }
 
+var debugShowComposeCommandCmd = &cobra.Command{
+	Use:   "show-compose-command",
+	Short: `Shows the compose command being used for this project.`,
+	Long:  `Can be used to run generic commands via: ` + "`$(orca debug show-compose-command) ps`",
+	Run:   errorHandlerWrapper(handleDebugShowComposeCommand, 1),
+}
+
 var logsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: `Tails logs from docker compose project.`,
@@ -453,6 +460,10 @@ If a single project is being clone then it will be cloned into {target}.`)
 	addWorkspaceOption(debugShowComposeConfigCmd, false)
 	addProjectOption(debugShowComposeConfigCmd)
 	debugCmd.AddCommand(debugShowComposeConfigCmd)
+
+	addWorkspaceOption(debugShowComposeCommandCmd, false)
+	addProjectOption(debugShowComposeCommandCmd)
+	debugCmd.AddCommand(debugShowComposeCommandCmd)
 	rootCmd.AddCommand(debugCmd)
 
 	// exec

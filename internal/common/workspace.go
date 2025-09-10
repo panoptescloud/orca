@@ -40,8 +40,13 @@ type Extension struct {
 	Service string
 }
 
+type EnvFile struct {
+	Path string
+}
+
 type ProjectConfig struct {
 	ComposeFiles    ComposeFiles
+	EnvFiles        []EnvFile
 	Properties      []Property
 	Hosts           []string
 	TLSCertificates []string
@@ -76,6 +81,15 @@ func (p Project) GetParents() []string {
 
 func (p Project) GetChildren() []string {
 	return []string{}
+}
+
+func (p Project) EnvFilePaths() []string {
+	paths := make([]string, len(p.Config.EnvFiles))
+	for i, e := range p.Config.EnvFiles {
+		paths[i] = e.Path
+	}
+
+	return paths
 }
 
 type NetworkOverlayConfig struct {

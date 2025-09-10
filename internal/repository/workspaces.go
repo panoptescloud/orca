@@ -96,6 +96,22 @@ func convertExtensions(cfgExts []model.Extension) []common.Extension {
 	return exts
 }
 
+func convertEnvFile(e model.EnvFile) common.EnvFile {
+	return common.EnvFile{
+		Path: e.Path,
+	}
+}
+
+func convertEnvFiles(cfgEnvFiles []model.EnvFile) []common.EnvFile {
+	envFiles := make([]common.EnvFile, len(cfgEnvFiles))
+
+	for i, e := range cfgEnvFiles {
+		envFiles[i] = convertEnvFile(e)
+	}
+
+	return envFiles
+}
+
 func buildProject(wsPCfg model.WorkspaceProjectConfig, meta common.ProjectMeta, pCfg model.ProjectConfig) common.Project {
 	return common.Project{
 		Name: wsPCfg.Name,
@@ -112,6 +128,7 @@ func buildProject(wsPCfg model.WorkspaceProjectConfig, meta common.ProjectMeta, 
 			Hosts:           pCfg.Hosts,
 			TLSCertificates: pCfg.TLSCertificates,
 			Extensions:      convertExtensions(pCfg.Extensions),
+			EnvFiles:        convertEnvFiles(pCfg.EnvFiles),
 		},
 	}
 }

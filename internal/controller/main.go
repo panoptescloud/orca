@@ -28,7 +28,8 @@ type workspaceRepository interface {
 type compose interface {
 	Up(*common.Workspace, *common.Project) error
 	Down(ws *common.Workspace, p *common.Project) error
-	Show(ws *common.Workspace, p *common.Project) error
+	ShowConfig(ws *common.Workspace, p *common.Project) error
+	ShowCommand(ws *common.Workspace, p *common.Project) error
 	Exec(ws *common.Workspace, p *common.Project, service string, cmdArgs []string) error
 	Logs(ws *common.Workspace, p *common.Project, service string) error
 }
