@@ -2,6 +2,7 @@ package docker
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/panoptescloud/orca/internal/common"
 	"github.com/panoptescloud/orca/internal/hostsys"
@@ -31,6 +32,11 @@ type Compose struct {
 
 func (c *Compose) getOverlay(ws *common.Workspace, p *common.Project) (string, error) {
 	return c.overlayGenerator.CreateOrRetrieve(ws, p)
+}
+
+// TODO: gaurd against nil values
+func (c *Compose) goToProject(p *common.Project) error {
+	return os.Chdir(p.ProjectDir)
 }
 
 func buildBaseComposeCommand(ws *common.Workspace, p *common.Project, overlayPath string) []string {
