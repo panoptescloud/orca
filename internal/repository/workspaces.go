@@ -79,10 +79,11 @@ func convertProperties(cfgProps []model.Property) []common.Property {
 
 func convertExtension(e model.Extension) common.Extension {
 	return common.Extension{
-		Name:    e.Name,
-		Chdir:   e.Chdir,
-		Command: e.Command,
-		Service: e.Service,
+		Name:        e.Name,
+		Chdir:       e.Chdir,
+		Command:     e.Command,
+		Service:     e.Service,
+		DefaultArgs: e.DefaultArgs,
 	}
 }
 

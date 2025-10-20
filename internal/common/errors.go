@@ -262,3 +262,11 @@ func (err ErrInvalidValueForOverlayModifier) Error() string {
 
 	return fmt.Sprintf("invalid value for label '%s' modifier in compose file %s: %s", err.Label, svc, err.Message)
 }
+
+type ErrUnknownExtension struct {
+	Name string
+}
+
+func (err ErrUnknownExtension) Error() string {
+	return fmt.Sprintf("extension '%s' not found in project", err.Name)
+}

@@ -274,6 +274,12 @@ var hostsCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleHosts, 1),
 }
 
+var extCmd = &cobra.Command{
+	Use:   "ext",
+	Short: "Execute a custom extension, defined in the project configuration",
+	Run:   errorHandlerWrapper(handleExt, 1),
+}
+
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 	return func(cmd *cobra.Command, args []string) {
 		err := f(cmd, args)
@@ -481,6 +487,11 @@ If a single project is being clone then it will be cloned into {target}.`)
 	// hosts
 	addWorkspaceOption(hostsCmd, true)
 	rootCmd.AddCommand(hostsCmd)
+
+	// ext
+	addWorkspaceOption(extCmd, false)
+	addProjectOption(extCmd)
+	rootCmd.AddCommand(extCmd)
 }
 
 func addServiceOption(cmd *cobra.Command, required bool) {
