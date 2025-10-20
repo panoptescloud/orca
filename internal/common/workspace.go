@@ -34,10 +34,11 @@ type Property struct {
 }
 
 type Extension struct {
-	Name    string
-	Chdir   string
-	Command string
-	Service string
+	Name        string
+	Chdir       string
+	Command     string
+	Service     string
+	DefaultArgs []string
 }
 
 type EnvFile struct {
@@ -90,6 +91,18 @@ func (p Project) EnvFilePaths() []string {
 	}
 
 	return paths
+}
+
+func (p Project) FindExtension(name string) (Extension, error) {
+	for _, ext := range p.Config.Extensions {
+		if ext.Name == name {
+			return ext, nil
+		}
+	}
+
+	return Extension{}, ErrUnknownExtension{
+		Name: name,
+	}
 }
 
 type NetworkOverlayConfig struct {

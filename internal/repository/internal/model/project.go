@@ -28,10 +28,11 @@ type Property struct {
 }
 
 type Extension struct {
-	Name    string
-	Chdir   string
-	Command string
-	Service string
+	Name        string
+	Chdir       string
+	Command     string
+	Service     string
+	DefaultArgs []string `yaml:"defaultArgs"`
 }
 
 type EnvFile struct {
