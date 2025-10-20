@@ -9,6 +9,10 @@ import (
 
 // TODO: guard against nil arguments
 func (c *Compose) Up(ws *common.Workspace, p *common.Project) error {
+	if err := c.goToProject(p); err != nil {
+		return err
+	}
+
 	overlay, err := c.getOverlay(ws, p)
 	if err != nil {
 		return c.tui.RecordIfError("Failed to generate overlays!", err)

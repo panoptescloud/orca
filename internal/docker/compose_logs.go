@@ -7,6 +7,10 @@ import (
 
 // TODO: guard against nil arguments
 func (c *Compose) Logs(ws *common.Workspace, p *common.Project, service string) error {
+	if err := c.goToProject(p); err != nil {
+		return err
+	}
+
 	overlay, err := c.getOverlay(ws, p)
 	if err != nil {
 		return c.tui.RecordIfError("Failed to generate overlays!", err)
