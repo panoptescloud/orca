@@ -14,6 +14,7 @@ type ExecuteExtensionDTO struct {
 	Args      []string
 }
 
+// TODO: de-dupe this by reusing the ExecOrRun method
 func (c *Controller) executeExtensionInService(dto ExecuteExtensionDTO, ctx runtimeContext, ext common.Extension) error {
 	cmdArgs := strings.Split(ext.Command, " ")
 
@@ -23,14 +24,17 @@ func (c *Controller) executeExtensionInService(dto ExecuteExtensionDTO, ctx runt
 		cmdArgs = append(cmdArgs, ext.DefaultArgs...)
 	}
 
-	c.compose.Exec(
-		ctx.Workspace,
-		ctx.Project,
-		ext.Service,
-		cmdArgs,
-	)
+	isRunning, err := c.compose.IsSvcRunning(ctx.Workspace, ctx.Project, ext.Service)
 
-	return nil
+	if err != nil {
+		return err
+	}
+
+	if !isRunning {
+		return c.compose.Run(ctx.Workspace, ctx.Project, ext.Service, cmdArgs)
+	}
+
+	return c.compose.Exec(ctx.Workspace, ctx.Project, ext.Service, cmdArgs)
 }
 
 func (c *Controller) ExecuteExtension(dto ExecuteExtensionDTO) error {

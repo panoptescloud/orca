@@ -14,6 +14,11 @@ func (cp *ComposeParser) Parse(paths []string, envFiles []string) (*types.Projec
 	opts, err := composecli.NewProjectOptions(
 		paths,
 		composecli.WithEnvFiles(envFiles...),
+		// Pass all profiles when generating overlays. If not certain services may
+		// be skipped, but we still want them in the overlay. This is mostly to
+		// handle scenarios for one-off commands, that may not be running at all
+		// unless manually invoked.
+		composecli.WithProfiles([]string{"*"}),
 	)
 
 	if err != nil {
