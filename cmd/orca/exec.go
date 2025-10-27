@@ -15,7 +15,7 @@ func handleExec(cmd *cobra.Command, args []string) error {
 	service, err := cmd.Flags().GetString("service")
 	cobra.CheckErr(err)
 
-	return ctrl.Exec(controller.ExecDTO{
+	return ctrl.ExecOrRun(controller.ExecDTO{
 		Workspace: ws,
 		Project:   project,
 		Service:   service,
