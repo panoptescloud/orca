@@ -1,6 +1,6 @@
 {
     "name": "panoptescloud/orca",
-    "image": "golang:1.24",
+    "image": "golang:1.25",
     "workspaceMount": "source=${localWorkspaceFolder},target=/srv,type=bind",
     "workspaceFolder": "/srv",
     "remoteUser": "root",
