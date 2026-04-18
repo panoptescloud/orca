@@ -36,4 +36,4 @@ dc-down:
 	$(DC) down --remove-orphans
 
 trivy-scan:
-	@trivy fs .
+	$(DC) run --rm trivy fs .
