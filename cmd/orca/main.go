@@ -484,7 +484,7 @@ If a single project is being clone then it will be cloned into {target}.`)
 	rootCmd.AddCommand(logsCmd)
 
 	// hosts
-	addWorkspaceOption(hostsCmd, true)
+	addWorkspaceOption(hostsCmd, false)
 	rootCmd.AddCommand(hostsCmd)
 
 	// ext

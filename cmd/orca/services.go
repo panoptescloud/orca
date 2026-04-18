@@ -15,6 +15,7 @@ import (
 	"github.com/panoptescloud/orca/internal/tui"
 	"github.com/panoptescloud/orca/internal/workspaces"
 	"github.com/spf13/afero"
+	"github.com/spf13/cobra"
 )
 
 type services struct {
@@ -26,7 +27,8 @@ type services struct {
 
 	tui *tui.Tui
 
-	hostSystem *hostsys.HostSystem
+	hostSystem      *hostsys.HostSystem
+	etcHostsManager *hostsys.EtcHostsManager
 
 	executor *hostsys.Executor
 
@@ -108,6 +110,20 @@ func (s *services) GetExecutor() *hostsys.Executor {
 	return s.executor
 }
 
+func (s *services) GetEtcHostsManager() *hostsys.EtcHostsManager {
+	if s.etcHostsManager != nil {
+		return s.etcHostsManager
+	}
+
+	mgr, err := hostsys.NewEtcHostsManager()
+
+	cobra.CheckErr(err)
+
+	s.etcHostsManager = mgr
+
+	return s.etcHostsManager
+}
+
 func (s *services) GetGit() *git.Git {
 	if s.git != nil {
 		return s.git
@@ -172,6 +188,7 @@ func (s *services) GetController() *controller.Controller {
 		s.GetCompose(),
 		s.GetTui(),
 		s.GetContextResolver(),
+		s.GetEtcHostsManager(),
 	)
 
 	return s.controller

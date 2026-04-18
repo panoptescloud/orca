@@ -1,23 +1,27 @@
 package controller
 
-import (
-	"fmt"
-)
-
 type HostsDTO struct {
 	Workspace string
 }
 
 func (c *Controller) Hosts(dto HostsDTO) error {
-	ws, err := c.workspaceRepo.Load(dto.Workspace)
+	ctx, err := c.contextResolver.Resolve(dto.Workspace, "")
 
 	if err != nil {
 		return err
 	}
 
-	for _, h := range ws.GetUniqueHosts() {
-		c.tui.Info(fmt.Sprintf("127.0.0.1    %s", h))
+	ws, err := c.workspaceRepo.Load(ctx.Workspace.Name)
+
+	if err != nil {
+		return err
 	}
+
+	if err := c.etcHostsManager.SyncForWorkspace(ws); err != nil {
+		return c.tui.RecordIfError("Failed to save /etc/hosts file!", err)
+	}
+
+	c.tui.Success("Hosts are now added to the /etc/hosts file!")
 
 	return nil
 }
