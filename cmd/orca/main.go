@@ -434,7 +434,6 @@ If multiple projects are being cloned, then it will place them in {target}/{repo
 If a single project is being clone then it will be cloned into {target}.`)
 	addWorkspaceOption(wsCloneCmd, false)
 	addProjectOption(wsCloneCmd)
-	wsCloneCmd.MarkFlagRequired("workspace")
 	wsCmd.AddCommand(wsCloneCmd)
 
 	rootCmd.AddCommand(wsCmd)

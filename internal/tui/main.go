@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 )
 
 const (
@@ -49,6 +50,26 @@ func (t *Tui) RecordIfError(msg string, err error) error {
 	slog.Error(err.Error())
 
 	return err
+}
+
+func (t *Tui) Table(header []string, rows [][]string) {
+	var (
+		headerStyle = lipgloss.NewStyle().Bold(true).Align(lipgloss.Center)
+		cellStyle   = lipgloss.NewStyle().Padding(0, 1)
+	)
+
+	tbl := table.New().
+		Border(lipgloss.NormalBorder()).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			if row == table.HeaderRow {
+				return headerStyle
+			}
+			return cellStyle
+		}).
+		Headers(header...).
+		Rows(rows...)
+
+	fmt.Fprintln(t.std, tbl.Render())
 }
 
 func NewTui(std io.Writer, err io.Writer) *Tui {

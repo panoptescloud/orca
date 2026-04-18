@@ -110,7 +110,13 @@ func (m *Manager) getCloneTargetDir(wsConfigPath string, target string) (string,
 }
 
 func (m *Manager) Clone(dto CloneDTO) error {
-	wsMeta, err := m.configManager.GetWorkspaceMeta(dto.WorkspaceName)
+	ctx, err := m.contextResolver.Resolve(dto.WorkspaceName, "")
+
+	if err != nil {
+		return m.tui.RecordIfError("could not resolve execution context", err)
+	}
+
+	wsMeta, err := m.configManager.GetWorkspaceMeta(ctx.Workspace.Name)
 
 	if err != nil {
 		if _, ok := err.(common.ErrUnknownWorkspace); ok {

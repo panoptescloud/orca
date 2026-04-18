@@ -7,7 +7,7 @@ type LogsDTO struct {
 }
 
 func (c *Controller) Logs(dto LogsDTO) error {
-	ctx, err := c.resolveContext(dto.Workspace, dto.Project)
+	ctx, err := c.contextResolver.Resolve(dto.Workspace, dto.Project)
 
 	if err != nil {
 		return err

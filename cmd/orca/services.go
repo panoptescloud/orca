@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/panoptescloud/orca/internal/common"
 	"github.com/panoptescloud/orca/internal/config"
 	"github.com/panoptescloud/orca/internal/controller"
 	"github.com/panoptescloud/orca/internal/docker"
@@ -18,6 +19,8 @@ import (
 
 type services struct {
 	fs afero.Fs
+
+	contextResolver *common.ContextResolver
 
 	config *config.Config
 
@@ -128,6 +131,19 @@ func (s *services) GetGithubClient() *github.GithubClient {
 	return s.githubClient
 }
 
+func (s *services) GetContextResolver() *common.ContextResolver {
+	if s.contextResolver != nil {
+		return s.contextResolver
+	}
+
+	s.contextResolver = common.NewContextResolver(
+		s.GetConfig(),
+		s.GetWorkspaceRepository(),
+	)
+
+	return s.contextResolver
+}
+
 func (s *services) GetWorkspaceManager() *workspaces.Manager {
 	if s.workspaceManager != nil {
 		return s.workspaceManager
@@ -139,6 +155,7 @@ func (s *services) GetWorkspaceManager() *workspaces.Manager {
 		s.GetConfig(),
 		s.GetGit(),
 		s.GetWorkspaceRepository(),
+		s.GetContextResolver(),
 	)
 
 	return s.workspaceManager
@@ -154,6 +171,7 @@ func (s *services) GetController() *controller.Controller {
 		s.GetWorkspaceRepository(),
 		s.GetCompose(),
 		s.GetTui(),
+		s.GetContextResolver(),
 	)
 
 	return s.controller

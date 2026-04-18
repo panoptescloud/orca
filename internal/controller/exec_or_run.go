@@ -8,7 +8,7 @@ type ExecDTO struct {
 }
 
 func (c *Controller) ExecOrRun(dto ExecDTO) error {
-	ctx, err := c.resolveContext(dto.Workspace, dto.Project)
+	ctx, err := c.contextResolver.Resolve(dto.Workspace, dto.Project)
 
 	if err != nil {
 		return err

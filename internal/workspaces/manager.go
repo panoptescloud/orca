@@ -12,11 +12,13 @@ type tui interface {
 	Error(msg ...string)
 	Success(msg ...string)
 	RecordIfError(msg string, err error) error
+	Table(header []string, rows [][]string)
 }
 
 type config interface {
 	AddWorkspace(configFilePath string, name string) error
 	GetAllWorkspaceMeta() []common.WorkspaceMeta
+	GetCurrentWorkspace() string
 	GetWorkspaceMeta(name string) (common.WorkspaceMeta, error)
 	SetProjectPath(wsName string, name string, into string) error
 	ProjectExists(wsName string, name string) (bool, error)
@@ -32,40 +34,26 @@ type workspaceRepo interface {
 	LoadUnconfiguredWorkspace(path string) (*common.UnconfiguredWorkspace, error)
 }
 
-type Manager struct {
-	fs            afero.Fs
-	tui           tui
-	configManager config
-	git           git
-	workspaceRepo workspaceRepo
+type contextResolver interface {
+	Resolve(ws string, project string) (common.ExecutionContext, error)
 }
 
-// func (self *Manager) loadConfigFromPath(path string) (*common.WorkspaceMeta, error) {
-// 	contents, err := afero.ReadFile(self.fs, path)
+type Manager struct {
+	fs              afero.Fs
+	tui             tui
+	configManager   config
+	git             git
+	workspaceRepo   workspaceRepo
+	contextResolver contextResolver
+}
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	cfg := &common.WorkspaceMeta{}
-
-// 	if err := yaml.Unmarshal(contents, cfg); err != nil {
-// 		return nil, err
-// 	}
-
-// 	return cfg, nil
-// }
-
-// func (self *Manager) LoadWorkspaceMeta(loc common.WorkspaceMeta) (*common.WorkspaceMeta, error) {
-// 	return self.loadConfigFromPath(loc.Path)
-// }
-
-func NewManager(fs afero.Fs, tui tui, configManager config, git git, workspaceRepo workspaceRepo) *Manager {
+func NewManager(fs afero.Fs, tui tui, configManager config, git git, workspaceRepo workspaceRepo, contextResolver contextResolver) *Manager {
 	return &Manager{
-		fs:            fs,
-		tui:           tui,
-		configManager: configManager,
-		git:           git,
-		workspaceRepo: workspaceRepo,
+		fs:              fs,
+		tui:             tui,
+		configManager:   configManager,
+		git:             git,
+		workspaceRepo:   workspaceRepo,
+		contextResolver: contextResolver,
 	}
 }
