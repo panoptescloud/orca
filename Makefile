@@ -24,7 +24,7 @@ vet:
 	@./scripts/vet.sh
 
 lint-last-commit:
-	@npx commitlint --last
+	@npx --yes --package @commitlint/cli@20 --package @commitlint/config-conventional@20 commitlint --last
 
 dc-up:
 	$(DC) up -d
