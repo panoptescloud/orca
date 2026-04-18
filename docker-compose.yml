@@ -7,3 +7,11 @@ services:
       - "9898:8000"
     volumes:
       - .:/docs
+
+  trivy:
+    profiles:
+    - manual
+    image: aquasec/trivy:0.69.3
+    working_dir: /srv
+    volumes:
+      - .:/srv

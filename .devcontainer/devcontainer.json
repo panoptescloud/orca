@@ -1,0 +1,14 @@
+{
+    "name": "panoptescloud/orca",
+    "image": "golang:1.26",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/srv,type=bind",
+    "workspaceFolder": "/srv",
+    "remoteUser": "root",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "Anthropic.claude-code"
+            ]
+        }
+    }
+}

@@ -18,6 +18,16 @@ The groups are:
 | **_INC** | In some cases there are workflows that are never directly triggered, but are there only to be used by other workflows. Within the repository any file that is intended to be an "includable workflow" and not triggered by any typical event, is prefixed with an `_` e.g. `_publish_release_for_tag.yaml`. |
 
 
+## Variables
+
+Github actions variables are used sparingly; the ones that do exist are noted below.
+
+| Variable | Purpose |
+| -------- | ------- |
+| `GO_VERSION` | Defines the version of Go to be used in any CI workflows. This may be problematic during updates as it will upgrade everywhere at once, but thats a problem for a team; not an individual so for now it's manageable. This also does not actually define the versions used in go.mod or local development so it may need to be changed in a couple of places. |
+
+
+
 ## Workflows
 
 This section gives a little more info on each workflow.

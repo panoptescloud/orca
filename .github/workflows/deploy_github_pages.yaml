@@ -17,11 +17,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
-          go-version: stable
+          go-version: ${{ vars.GO_VERSION }}
       - name: "build cli"
         run: make build
       - name: "generate CLI docs"
