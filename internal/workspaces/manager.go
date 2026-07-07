@@ -22,6 +22,7 @@ type config interface {
 	GetWorkspaceMeta(name string) (common.WorkspaceMeta, error)
 	SetProjectPath(wsName string, name string, into string) error
 	ProjectExists(wsName string, name string) (bool, error)
+	ClearCurrentWorkspace() error
 }
 
 type git interface {

@@ -158,6 +158,18 @@ var wsLsCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleWsLs, 1),
 }
 
+var wsCurrentCmd = &cobra.Command{
+	Use:   "current",
+	Short: "Shows the current workspace",
+	Run:   errorHandlerWrapper(handleWsCurrent, 1),
+}
+
+var wsClearCurrentCmd = &cobra.Command{
+	Use:   "clear-current",
+	Short: "Deselects the current workspace at a global level",
+	Run:   errorHandlerWrapper(handleWsClearCurrent, 1),
+}
+
 var wsCloneCmd = &cobra.Command{
 	Use:   "clone",
 	Short: "Clones all the projects required for this workspace.",
@@ -428,6 +440,8 @@ func init() {
 	wsCmd.AddCommand(wsInitCmd)
 
 	wsCmd.AddCommand(wsLsCmd)
+	wsCmd.AddCommand(wsCurrentCmd)
+	wsCmd.AddCommand(wsClearCurrentCmd)
 
 	wsCloneCmd.Flags().StringP("target", "t", "", `The directory in which to clone the project(s). 
 If multiple projects are being cloned, then it will place them in {target}/{repo name}.
