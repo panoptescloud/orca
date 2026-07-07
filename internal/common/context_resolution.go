@@ -83,7 +83,26 @@ func (c *ContextResolver) Resolve(ws string, project string) (ExecutionContext, 
 	// No workspace, but a project was specified, so we'll assume that it's the
 	// current workspace
 	if ws == "" && project != "" {
-		return c.buildExecutionContext(c.cfg.GetCurrentWorkspace(), project)
+		p, err := c.getProjectFromWorkdir()
+
+		if err != nil {
+			return ExecutionContext{}, err
+		}
+
+		if p == nil {
+			ws = c.cfg.GetCurrentWorkspace()
+		} else {
+			ws = p.WorkspaceName
+		}
+
+		// If the current workspace is not defined
+		if ws == "" {
+			return ExecutionContext{}, ErrCouldNotDetermineWorkspace{
+				Message: "no global workspace chosen, and not in an orca project directory",
+			}
+		}
+
+		return c.buildExecutionContext(ws, project)
 	}
 
 	// The workspace was specified, but not project was so we'll use that workspace

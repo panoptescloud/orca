@@ -131,6 +131,14 @@ func (err ErrUnknownWorkspace) Error() string {
 	return fmt.Sprintf("unknown workspace: %s", err.Name)
 }
 
+type ErrCouldNotDetermineWorkspace struct {
+	Message string
+}
+
+func (err ErrCouldNotDetermineWorkspace) Error() string {
+	return fmt.Sprintf("could not determine workspace: %s", err.Message)
+}
+
 type ErrUnknownProject struct {
 	Name string
 }
