@@ -37,6 +37,7 @@ type compose interface {
 	ShowCommand(ws *common.Workspace, p *common.Project) error
 	Exec(ws *common.Workspace, p *common.Project, service string, cmdArgs []string) error
 	Logs(ws *common.Workspace, p *common.Project, service string) error
+	DoesSvcExist(ws *common.Workspace, p *common.Project, service string) (bool, error)
 	IsSvcRunning(ws *common.Workspace, p *common.Project, service string) (bool, error)
 	Run(ws *common.Workspace, p *common.Project, service string, cmdArgs []string) error
 }

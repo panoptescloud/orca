@@ -147,6 +147,14 @@ func (err ErrUnknownProject) Error() string {
 	return fmt.Sprintf("unknown project: %s", err.Name)
 }
 
+type ErrUnknownService struct {
+	Name string
+}
+
+func (err ErrUnknownService) Error() string {
+	return fmt.Sprintf("unknown service: %s", err.Name)
+}
+
 type ErrUnknownTool struct {
 	Tool string
 }

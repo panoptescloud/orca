@@ -1,5 +1,11 @@
 package controller
 
+import (
+	"fmt"
+
+	"github.com/panoptescloud/orca/internal/common"
+)
+
 type ExecDTO struct {
 	Workspace string
 	Project   string
@@ -12,6 +18,19 @@ func (c *Controller) ExecOrRun(dto ExecDTO) error {
 
 	if err != nil {
 		return err
+	}
+
+	svcExists, err := c.compose.DoesSvcExist(ctx.Workspace, ctx.Project, dto.Service)
+
+	if err != nil {
+		return err
+	}
+
+	if !svcExists {
+		c.tui.Error(fmt.Sprintf("No such service: %s", dto.Service))
+		return common.ErrUnknownService{
+			Name: dto.Service,
+		}
 	}
 
 	isRunning, err := c.compose.IsSvcRunning(ctx.Workspace, ctx.Project, dto.Service)
