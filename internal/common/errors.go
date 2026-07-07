@@ -205,6 +205,15 @@ func (err ErrDirectoryAlreadyExists) Error() string {
 	return fmt.Sprintf("directory already exists: %s", err.Path)
 }
 
+type ErrDirectoryDoesNotMatchOrigin struct {
+	Path   string
+	Origin string
+}
+
+func (err ErrDirectoryDoesNotMatchOrigin) Error() string {
+	return fmt.Sprintf("directory '%s' does not contain repo with origin: %s", err.Path, err.Origin)
+}
+
 type ErrRepositoryAlreadyCloned struct {
 	RepoURL string
 }

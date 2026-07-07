@@ -70,8 +70,27 @@ func (m *Manager) cloneSingleProject(ws *common.Workspace, project common.Projec
 			return nil
 		}
 
-		return common.ErrDirectoryAlreadyExists{
-			Path: into,
+		isCloned, err := m.projectIsAlreadyClonedAtLocation(project, into)
+
+		if err != nil {
+			return m.tui.RecordIfError(
+				"Failed to verify existing directory!",
+				err,
+			)
+		}
+
+		if isCloned {
+			m.tui.Info(fmt.Sprintf("Skipping '%s' already cloned at '%s'!", project.Name, into))
+
+			return m.tui.RecordIfError(
+				"Failed to save config, you will have to edit this manually but adding the path into your orca config!",
+				m.configManager.SetProjectPath(ws.Name, project.Name, into),
+			)
+		}
+
+		return common.ErrDirectoryDoesNotMatchOrigin{
+			Path:   into,
+			Origin: project.RepositoryConfig.SSH,
 		}
 	}
 
@@ -93,6 +112,20 @@ func (m *Manager) cloneSingleProject(ws *common.Workspace, project common.Projec
 		"Failed to save config, you will have to edit this manually but adding the path into your orca config!",
 		m.configManager.SetProjectPath(ws.Name, project.Name, into),
 	)
+}
+
+func (m *Manager) projectIsAlreadyClonedAtLocation(proj common.Project, into string) (bool, error) {
+	exists, err := afero.DirExists(m.fs, into)
+
+	if err != nil {
+		return false, err
+	}
+
+	if !exists {
+		return false, nil
+	}
+
+	return m.git.DirectoryHasOrigin(into, proj.RepositoryConfig.SSH)
 }
 
 func (m *Manager) getCloneTargetDir(wsConfigPath string, target string) (string, error) {
