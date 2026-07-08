@@ -117,6 +117,14 @@ func (err ErrUnsupportedArchitecture) Error() string {
 	return fmt.Sprintf("unsupported architecture: %s", err.Arch)
 }
 
+type ErrUnsupportedProvisioner struct {
+	Message string
+}
+
+func (err ErrUnsupportedProvisioner) Error() string {
+	return fmt.Sprintf("unsupported provisioner: %s", err.Message)
+}
+
 type ErrInvalidArchive struct{}
 
 func (err ErrInvalidArchive) Error() string {

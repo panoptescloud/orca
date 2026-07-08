@@ -42,22 +42,36 @@ type compose interface {
 	Run(ws *common.Workspace, p *common.Project, service string, cmdArgs []string) error
 }
 
-type Controller struct {
-	cfg             config
-	workspaceRepo   workspaceRepository
-	compose         compose
-	tui             tui
-	contextResolver contextResolver
-	etcHostsManager etcHostsManager
+type provisionerRunner interface {
+	RunAll(ws *common.Workspace, p *common.Project) error
 }
 
-func NewController(cfg config, wsRepo workspaceRepository, compose compose, tui tui, contextResolver contextResolver, etcHostsManager etcHostsManager) *Controller {
+type Controller struct {
+	cfg               config
+	workspaceRepo     workspaceRepository
+	compose           compose
+	tui               tui
+	contextResolver   contextResolver
+	etcHostsManager   etcHostsManager
+	provisionerRunner provisionerRunner
+}
+
+func NewController(
+	cfg config,
+	wsRepo workspaceRepository,
+	compose compose,
+	tui tui,
+	contextResolver contextResolver,
+	etcHostsManager etcHostsManager,
+	provisionerRunner provisionerRunner,
+) *Controller {
 	return &Controller{
-		cfg:             cfg,
-		workspaceRepo:   wsRepo,
-		compose:         compose,
-		tui:             tui,
-		contextResolver: contextResolver,
-		etcHostsManager: etcHostsManager,
+		cfg:               cfg,
+		workspaceRepo:     wsRepo,
+		compose:           compose,
+		tui:               tui,
+		contextResolver:   contextResolver,
+		etcHostsManager:   etcHostsManager,
+		provisionerRunner: provisionerRunner,
 	}
 }

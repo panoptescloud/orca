@@ -292,6 +292,12 @@ var extCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleExt, 1),
 }
 
+var provisionCmd = &cobra.Command{
+	Use:   "provision",
+	Short: "Run any provisioning scripts for the given project",
+	Run:   errorHandlerWrapper(handleProvision, 1),
+}
+
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 	return func(cmd *cobra.Command, args []string) {
 		err := f(cmd, args)
@@ -505,6 +511,9 @@ If a single project is being clone then it will be cloned into {target}.`)
 	addWorkspaceOption(extCmd, false)
 	addProjectOption(extCmd)
 	rootCmd.AddCommand(extCmd)
+
+	// provision
+	rootCmd.AddCommand(provisionCmd)
 }
 
 func addServiceOption(cmd *cobra.Command, required bool) {

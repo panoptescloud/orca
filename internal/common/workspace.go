@@ -6,6 +6,10 @@ import (
 	"github.com/panoptescloud/orca/pkg/slices"
 )
 
+type ExampleFileProvisionerType string
+
+const ExampleFileProvisionerTypeDotenv ExampleFileProvisionerType = "dotenv"
+
 type LoaderPropertyCondition struct {
 	Name  string
 	Value any
@@ -45,8 +49,19 @@ type EnvFile struct {
 	Path string
 }
 
+type ExampleFileProvisioner struct {
+	Src    string
+	Target string
+	Type   ExampleFileProvisionerType
+}
+
+type Provisioner struct {
+	ExampleFile *ExampleFileProvisioner
+}
+
 type ProjectConfig struct {
 	ComposeFiles    ComposeFiles
+	Provisioners    []Provisioner
 	EnvFiles        []EnvFile
 	Properties      []Property
 	Hosts           []string

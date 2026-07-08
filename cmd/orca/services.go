@@ -10,6 +10,7 @@ import (
 	"github.com/panoptescloud/orca/internal/git"
 	"github.com/panoptescloud/orca/internal/github"
 	"github.com/panoptescloud/orca/internal/hostsys"
+	"github.com/panoptescloud/orca/internal/provisioner"
 	"github.com/panoptescloud/orca/internal/repository"
 	"github.com/panoptescloud/orca/internal/tls"
 	"github.com/panoptescloud/orca/internal/tui"
@@ -47,6 +48,8 @@ type services struct {
 	compose                 *docker.Compose
 	composeParser           *docker.ComposeParser
 	composeOverlayGenerator *docker.ComposeOverlayGenerator
+
+	provisionerRunner *provisioner.Runner
 }
 
 func (s *services) GetFs() afero.Fs {
@@ -189,6 +192,7 @@ func (s *services) GetController() *controller.Controller {
 		s.GetTui(),
 		s.GetContextResolver(),
 		s.GetEtcHostsManager(),
+		s.GetProvisionerRunner(),
 	)
 
 	return s.controller
@@ -261,4 +265,17 @@ func (s *services) GetComposeOverlayGenerator() *docker.ComposeOverlayGenerator 
 	)
 
 	return s.composeOverlayGenerator
+}
+
+func (s *services) GetProvisionerRunner() *provisioner.Runner {
+	if s.provisionerRunner != nil {
+		return s.provisionerRunner
+	}
+
+	s.provisionerRunner = provisioner.NewRunner(
+		s.GetFs(),
+		s.GetTui(),
+	)
+
+	return s.provisionerRunner
 }
