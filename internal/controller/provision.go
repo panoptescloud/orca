@@ -1,17 +1,16 @@
 package controller
 
-type LogsDTO struct {
+type ProvisionDTO struct {
 	Workspace string
 	Project   string
-	Service   string
 }
 
-func (c *Controller) Logs(dto LogsDTO) error {
+func (c *Controller) Provision(dto ProvisionDTO) error {
 	ctx, err := c.contextResolver.Resolve(dto.Workspace, dto.Project)
 
 	if err != nil {
 		return err
 	}
 
-	return c.compose.Logs(ctx.Workspace, ctx.Project, dto.Service)
+	return c.provisionerRunner.RunAll(ctx.Workspace, ctx.Project)
 }

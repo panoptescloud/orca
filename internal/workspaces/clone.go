@@ -70,8 +70,27 @@ func (m *Manager) cloneSingleProject(ws *common.Workspace, project common.Projec
 			return nil
 		}
 
-		return common.ErrDirectoryAlreadyExists{
-			Path: into,
+		isCloned, err := m.projectIsAlreadyClonedAtLocation(project, into)
+
+		if err != nil {
+			return m.tui.RecordIfError(
+				"Failed to verify existing directory!",
+				err,
+			)
+		}
+
+		if isCloned {
+			m.tui.Info(fmt.Sprintf("Skipping '%s' already cloned at '%s'!", project.Name, into))
+
+			return m.tui.RecordIfError(
+				"Failed to save config, you will have to edit this manually but adding the path into your orca config!",
+				m.configManager.SetProjectPath(ws.Name, project.Name, into),
+			)
+		}
+
+		return common.ErrDirectoryDoesNotMatchOrigin{
+			Path:   into,
+			Origin: project.RepositoryConfig.SSH,
 		}
 	}
 
@@ -95,6 +114,20 @@ func (m *Manager) cloneSingleProject(ws *common.Workspace, project common.Projec
 	)
 }
 
+func (m *Manager) projectIsAlreadyClonedAtLocation(proj common.Project, into string) (bool, error) {
+	exists, err := afero.DirExists(m.fs, into)
+
+	if err != nil {
+		return false, err
+	}
+
+	if !exists {
+		return false, nil
+	}
+
+	return m.git.DirectoryHasOrigin(into, proj.RepositoryConfig.SSH)
+}
+
 func (m *Manager) getCloneTargetDir(wsConfigPath string, target string) (string, error) {
 	if target != "" {
 		return filepath.Abs(target)
@@ -110,7 +143,13 @@ func (m *Manager) getCloneTargetDir(wsConfigPath string, target string) (string,
 }
 
 func (m *Manager) Clone(dto CloneDTO) error {
-	wsMeta, err := m.configManager.GetWorkspaceMeta(dto.WorkspaceName)
+	ctx, err := m.contextResolver.Resolve(dto.WorkspaceName, "")
+
+	if err != nil {
+		return m.tui.RecordIfError("could not resolve execution context", err)
+	}
+
+	wsMeta, err := m.configManager.GetWorkspaceMeta(ctx.Workspace.Name)
 
 	if err != nil {
 		if _, ok := err.(common.ErrUnknownWorkspace); ok {

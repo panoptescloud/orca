@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/panoptescloud/orca/internal/common"
 	"github.com/panoptescloud/orca/pkg/dag"
 )
 
@@ -9,7 +10,7 @@ type UpDTO struct {
 	Project   string
 }
 
-func determineStartupOrder(ctx runtimeContext) ([]string, error) {
+func determineStartupOrder(ctx common.ExecutionContext) ([]string, error) {
 	if ctx.Project != nil {
 		return []string{
 			ctx.Project.Name,
@@ -25,24 +26,7 @@ func determineStartupOrder(ctx runtimeContext) ([]string, error) {
 	return g.TopologicalKeysFromRoots()
 }
 
-// TODO: Move to down.go when it's added
-// func determineShutdownOrder(ctx runtimeContext) ([]string, error) {
-// 	if ctx.Project != nil {
-// 		return []string{
-// 			ctx.Project.Name,
-// 		}, nil
-// 	}
-
-// 	g, err := dag.NewGraph(ctx.WorkspaceConfig.Projects)
-
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return g.TopologicalKeysFromLeaves()
-// }
-
-func (c *Controller) startServices(ctx runtimeContext) error {
+func (c *Controller) startServices(ctx common.ExecutionContext) error {
 	ordered, err := determineStartupOrder(ctx)
 
 	if err != nil {
@@ -67,7 +51,7 @@ func (c *Controller) startServices(ctx runtimeContext) error {
 }
 
 func (c *Controller) Up(dto UpDTO) error {
-	ctx, err := c.resolveContext(dto.Workspace, dto.Project)
+	ctx, err := c.contextResolver.Resolve(dto.Workspace, dto.Project)
 
 	if err != nil {
 		return err

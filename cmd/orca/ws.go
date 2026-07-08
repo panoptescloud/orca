@@ -53,6 +53,18 @@ func handleWsLs(cmd *cobra.Command, args []string) error {
 	return manager.Ls(workspaces.LsDTO{})
 }
 
+func handleWsCurrent(cmd *cobra.Command, args []string) error {
+	manager := svcContainer.GetWorkspaceManager()
+
+	return manager.ShowCurrent(workspaces.ShowCurrentDTO{})
+}
+
+func handleWsClearCurrent(cmd *cobra.Command, args []string) error {
+	manager := svcContainer.GetWorkspaceManager()
+
+	return manager.ClearCurrent(workspaces.ClearCurrentDTO{})
+}
+
 func handleWsClone(cmd *cobra.Command, args []string) error {
 	manager := svcContainer.GetWorkspaceManager()
 

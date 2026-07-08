@@ -66,6 +66,13 @@ func (self *Config) SwitchWorkspace(workspaceName string) error {
 	return self.save()
 }
 
+// ClearCurrentWorkspace deselects any workspace on a global level.
+func (self *Config) ClearCurrentWorkspace() error {
+	self.persisted.CurrentWorkspace = ""
+
+	return self.save()
+}
+
 // AddWorkspace adds a new workspace to the configuration on disk. In the case of
 // adding a new workspace it should also update the workspaces for the inUse
 // config as it cannot be overridden by any CLI arguments or environment variables.

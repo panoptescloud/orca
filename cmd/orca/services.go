@@ -3,27 +3,33 @@ package main
 import (
 	"os"
 
+	"github.com/panoptescloud/orca/internal/common"
 	"github.com/panoptescloud/orca/internal/config"
 	"github.com/panoptescloud/orca/internal/controller"
 	"github.com/panoptescloud/orca/internal/docker"
 	"github.com/panoptescloud/orca/internal/git"
 	"github.com/panoptescloud/orca/internal/github"
 	"github.com/panoptescloud/orca/internal/hostsys"
+	"github.com/panoptescloud/orca/internal/provisioner"
 	"github.com/panoptescloud/orca/internal/repository"
 	"github.com/panoptescloud/orca/internal/tls"
 	"github.com/panoptescloud/orca/internal/tui"
 	"github.com/panoptescloud/orca/internal/workspaces"
 	"github.com/spf13/afero"
+	"github.com/spf13/cobra"
 )
 
 type services struct {
 	fs afero.Fs
 
+	contextResolver *common.ContextResolver
+
 	config *config.Config
 
 	tui *tui.Tui
 
-	hostSystem *hostsys.HostSystem
+	hostSystem      *hostsys.HostSystem
+	etcHostsManager *hostsys.EtcHostsManager
 
 	executor *hostsys.Executor
 
@@ -42,6 +48,8 @@ type services struct {
 	compose                 *docker.Compose
 	composeParser           *docker.ComposeParser
 	composeOverlayGenerator *docker.ComposeOverlayGenerator
+
+	provisionerRunner *provisioner.Runner
 }
 
 func (s *services) GetFs() afero.Fs {
@@ -105,6 +113,20 @@ func (s *services) GetExecutor() *hostsys.Executor {
 	return s.executor
 }
 
+func (s *services) GetEtcHostsManager() *hostsys.EtcHostsManager {
+	if s.etcHostsManager != nil {
+		return s.etcHostsManager
+	}
+
+	mgr, err := hostsys.NewEtcHostsManager()
+
+	cobra.CheckErr(err)
+
+	s.etcHostsManager = mgr
+
+	return s.etcHostsManager
+}
+
 func (s *services) GetGit() *git.Git {
 	if s.git != nil {
 		return s.git
@@ -128,6 +150,19 @@ func (s *services) GetGithubClient() *github.GithubClient {
 	return s.githubClient
 }
 
+func (s *services) GetContextResolver() *common.ContextResolver {
+	if s.contextResolver != nil {
+		return s.contextResolver
+	}
+
+	s.contextResolver = common.NewContextResolver(
+		s.GetConfig(),
+		s.GetWorkspaceRepository(),
+	)
+
+	return s.contextResolver
+}
+
 func (s *services) GetWorkspaceManager() *workspaces.Manager {
 	if s.workspaceManager != nil {
 		return s.workspaceManager
@@ -139,6 +174,7 @@ func (s *services) GetWorkspaceManager() *workspaces.Manager {
 		s.GetConfig(),
 		s.GetGit(),
 		s.GetWorkspaceRepository(),
+		s.GetContextResolver(),
 	)
 
 	return s.workspaceManager
@@ -154,6 +190,9 @@ func (s *services) GetController() *controller.Controller {
 		s.GetWorkspaceRepository(),
 		s.GetCompose(),
 		s.GetTui(),
+		s.GetContextResolver(),
+		s.GetEtcHostsManager(),
+		s.GetProvisionerRunner(),
 	)
 
 	return s.controller
@@ -226,4 +265,17 @@ func (s *services) GetComposeOverlayGenerator() *docker.ComposeOverlayGenerator 
 	)
 
 	return s.composeOverlayGenerator
+}
+
+func (s *services) GetProvisionerRunner() *provisioner.Runner {
+	if s.provisionerRunner != nil {
+		return s.provisionerRunner
+	}
+
+	s.provisionerRunner = provisioner.NewRunner(
+		s.GetFs(),
+		s.GetTui(),
+	)
+
+	return s.provisionerRunner
 }
