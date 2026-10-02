@@ -407,9 +407,11 @@ func init() {
 	// Git
 	gCoCmd.Flags().Bool("pull", false, "Pulls the branch from origin after checking it out.")
 	gCoCmd.Flags().BoolP("all", "a", false, "Checks out the chosen branch in each project in the workspace.")
+	gCoCmd.Flags().BoolP("create", "b", false, "Creates the branch if it doesn't exist.")
 	addWorkspaceOption(gCoCmd, false)
 	addProjectOption(gCoCmd)
 	gCoCmd.MarkFlagsMutuallyExclusive("all", "project")
+	gCoCmd.MarkFlagsMutuallyExclusive("create", "pull")
 	gCmd.AddCommand(gCoCmd)
 
 	gCmd.AddCommand(gBranchesCmd)

@@ -15,15 +15,47 @@ type CheckoutDTO struct {
 	Workspace   string
 	Project     string
 	Pull        bool
+	Create      bool
 }
 
-func (g *Git) performCheckout(dir string, branch string) error {
-	err := g.exec.Exec("git", []string{
-		"checkout",
-		branch,
-	}, withDir(dir, hostsys.WithHostIO())...)
+func (g *Git) performCheckout(dir string, branch string, create bool) error {
+	args := []string{"checkout"}
 
-	return err
+	if create {
+		args = append(args, "-b")
+	}
+
+	args = append(args, branch)
+
+	return g.exec.Exec("git", args, withDir(dir, hostsys.WithHostIO())...)
+}
+
+// checkoutOrCreate checks out the branch matching name exactly, creating it if
+// it doesn't already exist
+func (g *Git) checkoutOrCreate(dir string, name string) error {
+	branches, err := g.searchBranches(SearchBranchesDTO{
+		Search: name,
+		Dir:    dir,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	existing := branches.Filter(func(b Branch) bool {
+		return b.Name == name
+	})
+
+	if len(existing) == 0 {
+		return g.performCheckout(dir, name, true)
+	}
+
+	if existing[0].Current {
+		g.tui.Info(fmt.Sprintf("Branch is already checked out in '%s'!", dir))
+		return nil
+	}
+
+	return g.performCheckout(dir, name, false)
 }
 
 func (g *Git) checkoutFromDirectory(branch string, dir string) error {
@@ -33,7 +65,7 @@ func (g *Git) checkoutFromDirectory(branch string, dir string) error {
 
 	// Checkout the previously checked out branch, handle it as a special case
 	if branch == previousBranchAlias {
-		err := g.performCheckout(dir, previousBranchAlias)
+		err := g.performCheckout(dir, previousBranchAlias, false)
 
 		if err != nil {
 			return err
@@ -66,7 +98,7 @@ func (g *Git) checkoutFromDirectory(branch string, dir string) error {
 	}
 
 	if branchesLength == 1 {
-		err := g.performCheckout(dir, branches[0].Name)
+		err := g.performCheckout(dir, branches[0].Name, false)
 
 		return g.tui.RecordIfError("Failed to checkout branch", err)
 	}
@@ -81,7 +113,7 @@ func (g *Git) checkoutFromDirectory(branch string, dir string) error {
 		return g.tui.RecordIfError("Something went wrong, this is most likely a bug!", err)
 	}
 
-	err = g.performCheckout(dir, chosen)
+	err = g.performCheckout(dir, chosen, false)
 
 	return g.tui.RecordIfError("Failed to checkout branch", err)
 }
@@ -131,17 +163,47 @@ func (g *Git) chooseBranchesForAllProjects(search string, ctx common.ExecutionCo
 	return chosenBranches, nil
 }
 
+func (g *Git) handleCreate(ctx common.ExecutionContext, dto CheckoutDTO) error {
+	if dto.Name == "" || dto.Name == previousBranchAlias {
+		return g.tui.RecordIfError("A branch name must be supplied when creating a branch!", common.ErrInvalidInput{
+			To:  "co",
+			Msg: "an exact branch name must be supplied when creating a branch",
+		})
+	}
+
+	if !dto.AllProjects {
+		dir := ctx.WorkingDirectory
+
+		if ctx.Project != nil {
+			dir = ctx.Project.ProjectDir
+		}
+
+		return g.tui.RecordIfError("Failed to checkout branch", g.checkoutOrCreate(dir, dto.Name))
+	}
+
+	for _, p := range ctx.Workspace.Projects {
+		if err := g.checkoutOrCreate(p.ProjectDir, dto.Name); err != nil {
+			return g.tui.RecordIfError("Checkout failed, you should check the branches for all projects as this failed mid-flow", err)
+		}
+	}
+
+	return nil
+}
+
 func (g *Git) handleCheckout(ctx common.ExecutionContext, dto CheckoutDTO) error {
+	if dto.Create {
+		return g.handleCreate(ctx, dto)
+	}
 
 	if !dto.AllProjects {
 		return g.checkoutSingle(dto.Name, ctx)
 	}
 
 	if dto.Name == previousBranchAlias {
-		return common.ErrInvalidInput{
+		return g.tui.RecordIfError(fmt.Sprintf("Cannot use '%s' when checking out multiple projects!", previousBranchAlias), common.ErrInvalidInput{
 			To:  "co",
 			Msg: fmt.Sprintf("cannot use '%s' when checking out multiple projects", previousBranchAlias),
-		}
+		})
 	}
 
 	chosenBranches, err := g.chooseBranchesForAllProjects(dto.Name, ctx)
@@ -156,7 +218,7 @@ func (g *Git) handleCheckout(ctx common.ExecutionContext, dto CheckoutDTO) error
 			continue
 		}
 
-		err := g.performCheckout(dir, b.Name)
+		err := g.performCheckout(dir, b.Name, false)
 
 		if err != nil {
 			return g.tui.RecordIfError("Checkout failed, you should check the branches for all projects as this failed mid-flow", err)

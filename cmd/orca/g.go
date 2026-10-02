@@ -22,6 +22,9 @@ func handleGCo(cmd *cobra.Command, args []string) error {
 	allProjects, err := cmd.Flags().GetBool("all")
 	cobra.CheckErr(err)
 
+	shouldCreate, err := cmd.Flags().GetBool("create")
+	cobra.CheckErr(err)
+
 	shouldPull, err := cmd.Flags().GetBool("pull")
 	cobra.CheckErr(err)
 
@@ -31,6 +34,7 @@ func handleGCo(cmd *cobra.Command, args []string) error {
 		Workspace:   ws,
 		Project:     project,
 		Pull:        shouldPull,
+		Create:      shouldCreate,
 	})
 
 	if err != nil {
