@@ -228,28 +228,6 @@ func (g *Git) handleCheckout(ctx common.ExecutionContext, dto CheckoutDTO) error
 	return nil
 }
 
-func (g *Git) handlePull(ctx common.ExecutionContext, dto CheckoutDTO) error {
-	if !dto.Pull {
-		return nil
-	}
-
-	if !dto.AllProjects {
-		if ctx.Project == nil {
-			return g.PullBranch(PullBranchDTO{Dir: ctx.WorkingDirectory})
-		}
-
-		return g.PullBranch(PullBranchDTO{Dir: ctx.Project.ProjectDir})
-	}
-
-	for _, p := range ctx.Workspace.Projects {
-		if err := g.PullBranch(PullBranchDTO{Dir: p.ProjectDir}); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (g *Git) Checkout(dto CheckoutDTO) error {
 	ctx, err := g.contextResolver.Resolve(dto.Workspace, dto.Project)
 
@@ -261,6 +239,10 @@ func (g *Git) Checkout(dto CheckoutDTO) error {
 		return err
 	}
 
-	return g.handlePull(ctx, dto)
+	if !dto.Pull {
+		return nil
+	}
+
+	return g.pullInContext(ctx, dto.AllProjects)
 
 }

@@ -69,7 +69,7 @@ If no search term is given, will list all branches.`,
 var gPullCmd = &cobra.Command{
 	Use:   "pull",
 	Short: "Pulls a branch from origin.",
-	Long:  `Will pull the currently checked out branch`,
+	Long:  `Will pull the currently checked out branch. Use --all to pull the current branch in every project in the workspace.`,
 	Run:   errorHandlerWrapper(handleGPull, 1),
 }
 
@@ -429,6 +429,10 @@ func init() {
 	gLoglCmd.Flags().IntP("number", "n", 10, "The number of commits to remove from the branch.")
 	gCmd.AddCommand(gLoglCmd)
 
+	gPullCmd.Flags().BoolP("all", "a", false, "Pulls the current branch in each project in the workspace.")
+	addWorkspaceOption(gPullCmd, false)
+	addProjectOption(gPullCmd)
+	gPullCmd.MarkFlagsMutuallyExclusive("all", "project")
 	gCmd.AddCommand(gPullCmd)
 
 	rootCmd.AddCommand(gCmd)
