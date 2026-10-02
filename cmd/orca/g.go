@@ -6,6 +6,11 @@ import (
 )
 
 func handleGCo(cmd *cobra.Command, args []string) error {
+	ws, err := cmd.Flags().GetString("workspace")
+	cobra.CheckErr(err)
+	project, err := cmd.Flags().GetString("project")
+	cobra.CheckErr(err)
+
 	g := svcContainer.GetGit()
 
 	searchTerm := ""
@@ -14,21 +19,22 @@ func handleGCo(cmd *cobra.Command, args []string) error {
 		searchTerm = args[0]
 	}
 
-	branch, err := g.Checkout(git.CheckoutDTO{
-		Name: searchTerm,
-	})
-
-	if err != nil {
-		return err
-	}
+	allProjects, err := cmd.Flags().GetBool("all")
+	cobra.CheckErr(err)
 
 	shouldPull, err := cmd.Flags().GetBool("pull")
 	cobra.CheckErr(err)
 
-	if shouldPull {
-		return g.PullBranch(git.PullBranchDTO{
-			Name: branch,
-		})
+	err = g.Checkout(git.CheckoutDTO{
+		Name:        searchTerm,
+		AllProjects: allProjects,
+		Workspace:   ws,
+		Project:     project,
+		Pull:        shouldPull,
+	})
+
+	if err != nil {
+		return err
 	}
 
 	return nil

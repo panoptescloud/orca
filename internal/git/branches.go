@@ -69,6 +69,8 @@ func (branches Branches) StrictSearch(search string) Branches {
 
 type SearchBranchesDTO struct {
 	Search string
+	// The directory to run the command in, defaults to the current directory
+	Dir string
 }
 
 func parseGitBranchOutput(output string) Branches {
@@ -105,7 +107,7 @@ func parseGitBranchOutput(output string) Branches {
 }
 
 func (g *Git) searchBranches(dto SearchBranchesDTO) (Branches, error) {
-	if err := g.mustBeInAGitRepository(); err != nil {
+	if err := g.mustBeInAGitRepository(dto.Dir); err != nil {
 		return nil, err
 	}
 
@@ -113,7 +115,7 @@ func (g *Git) searchBranches(dto SearchBranchesDTO) (Branches, error) {
 	err := g.exec.Exec("git", []string{
 		"branch",
 		"-l",
-	}, opt)
+	}, withDir(dto.Dir, opt)...)
 
 	if err != nil {
 		return nil, common.ErrInvalidExecutionContext{
@@ -156,8 +158,10 @@ func (g *Git) ShowBranches(dto SearchBranchesDTO) error {
 	return nil
 }
 
-func (g *Git) GetCurrentBranch() (string, error) {
-	branches, err := g.searchBranches(SearchBranchesDTO{})
+func (g *Git) GetCurrentBranch(dir string) (string, error) {
+	branches, err := g.searchBranches(SearchBranchesDTO{
+		Dir: dir,
+	})
 
 	if err != nil {
 		return "", err
@@ -171,31 +175,26 @@ func (g *Git) GetCurrentBranch() (string, error) {
 }
 
 type PullBranchDTO struct {
-	Name string
+	// The directory to run the command in, defaults to the current directory
+	Dir string
 }
 
 func (g *Git) PullBranch(dto PullBranchDTO) error {
-	if err := g.mustBeInAGitRepository(); err != nil {
+	if err := g.mustBeInAGitRepository(dto.Dir); err != nil {
 		return err
 	}
 
-	branchToPull := dto.Name
+	current, err := g.GetCurrentBranch(dto.Dir)
 
-	if dto.Name == "" {
-		current, err := g.GetCurrentBranch()
-
-		if err != nil {
-			return err
-		}
-
-		branchToPull = current
+	if err != nil {
+		return err
 	}
 
-	err := g.exec.Exec("git", []string{
+	err = g.exec.Exec("git", []string{
 		"pull",
 		"origin",
-		branchToPull,
-	}, hostsys.WithHostIO())
+		current,
+	}, withDir(dto.Dir, hostsys.WithHostIO())...)
 
 	return g.tui.RecordIfError("Failed to pull branch!", err)
 }

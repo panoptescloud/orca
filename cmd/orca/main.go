@@ -405,7 +405,11 @@ func init() {
 	rootCmd.AddCommand(sysCmd)
 
 	// Git
-	gCoCmd.Flags().BoolP("pull", "p", false, "Pulls the branch from origin after checking it out.")
+	gCoCmd.Flags().Bool("pull", false, "Pulls the branch from origin after checking it out.")
+	gCoCmd.Flags().BoolP("all", "a", false, "Checks out the chosen branch in each project in the workspace.")
+	addWorkspaceOption(gCoCmd, false)
+	addProjectOption(gCoCmd)
+	gCoCmd.MarkFlagsMutuallyExclusive("all", "project")
 	gCmd.AddCommand(gCoCmd)
 
 	gCmd.AddCommand(gBranchesCmd)

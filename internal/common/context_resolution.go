@@ -6,8 +6,9 @@ import (
 )
 
 type ExecutionContext struct {
-	Workspace *Workspace
-	Project   *Project
+	Workspace        *Workspace
+	Project          *Project
+	WorkingDirectory string
 }
 
 type configManager interface {
@@ -44,6 +45,12 @@ func (c *ContextResolver) getProjectFromWorkdir() (*ProjectMeta, error) {
 }
 
 func (c *ContextResolver) buildExecutionContext(wsName string, projectName string) (ExecutionContext, error) {
+	workDir, err := os.Getwd()
+
+	if err != nil {
+		return ExecutionContext{}, err
+	}
+
 	meta, err := c.cfg.GetWorkspaceMeta(wsName)
 
 	if err != nil {
@@ -58,7 +65,8 @@ func (c *ContextResolver) buildExecutionContext(wsName string, projectName strin
 
 	if projectName == "" {
 		return ExecutionContext{
-			Workspace: ws,
+			Workspace:        ws,
+			WorkingDirectory: workDir,
 		}, nil
 	}
 
@@ -69,8 +77,9 @@ func (c *ContextResolver) buildExecutionContext(wsName string, projectName strin
 	}
 
 	return ExecutionContext{
-		Workspace: ws,
-		Project:   project,
+		Workspace:        ws,
+		Project:          project,
+		WorkingDirectory: workDir,
 	}, nil
 }
 

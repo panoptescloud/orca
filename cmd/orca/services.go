@@ -135,6 +135,7 @@ func (s *services) GetGit() *git.Git {
 	s.git = git.NewGit(
 		s.GetExecutor(),
 		s.GetTui(),
+		s.GetContextResolver(),
 	)
 
 	return s.git
