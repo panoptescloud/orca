@@ -119,6 +119,23 @@ func handleGLogl(cmd *cobra.Command, args []string) error {
 	})
 }
 
+func handleGStatus(cmd *cobra.Command, args []string) error {
+	ws, err := cmd.Flags().GetString("workspace")
+	cobra.CheckErr(err)
+	project, err := cmd.Flags().GetString("project")
+	cobra.CheckErr(err)
+	allProjects, err := cmd.Flags().GetBool("all")
+	cobra.CheckErr(err)
+
+	g := svcContainer.GetGit()
+
+	return g.Status(git.StatusDTO{
+		AllProjects: allProjects,
+		Workspace:   ws,
+		Project:     project,
+	})
+}
+
 func handleGPull(cmd *cobra.Command, args []string) error {
 	ws, err := cmd.Flags().GetString("workspace")
 	cobra.CheckErr(err)

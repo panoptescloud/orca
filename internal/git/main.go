@@ -23,6 +23,7 @@ type tui interface {
 	RecordIfError(msg string, err error) error
 	NewLine()
 	PresentChoices(opts []string, title string) (string, error)
+	Table(header []string, rows [][]string)
 }
 
 type executor interface {

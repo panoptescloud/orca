@@ -104,6 +104,13 @@ var gUndoCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleGUndo, 1),
 }
 
+var gStatusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "Shows the checked out branch for projects.",
+	Long:  `Shows a table of the currently checked out branch. Use --all to show every project in the workspace.`,
+	Run:   errorHandlerWrapper(handleGStatus, 1),
+}
+
 var gLoglCmd = &cobra.Command{
 	Use:   "logl",
 	Short: "Shows the last X commits.",
@@ -443,6 +450,12 @@ func init() {
 
 	gLoglCmd.Flags().IntP("number", "n", 10, "The number of commits to remove from the branch.")
 	gCmd.AddCommand(gLoglCmd)
+
+	gStatusCmd.Flags().BoolP("all", "a", false, "Shows the current branch for each project in the workspace.")
+	addWorkspaceOption(gStatusCmd, false)
+	addProjectOption(gStatusCmd)
+	gStatusCmd.MarkFlagsMutuallyExclusive("all", "project")
+	gCmd.AddCommand(gStatusCmd)
 
 	gPullCmd.Flags().BoolP("all", "a", false, "Pulls the current branch in each project in the workspace.")
 	gPullCmd.Flags().BoolP("rebase", "r", false, "Passes --rebase to git pull.")
