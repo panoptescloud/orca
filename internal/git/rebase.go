@@ -3,7 +3,7 @@ package git
 import (
 	"fmt"
 
-	"github.com/panoptescloud/orca/internal/hostsys"
+	"github.com/adamkirk/orca/internal/hostsys"
 )
 
 type RebaseInteractivelyDTO struct {

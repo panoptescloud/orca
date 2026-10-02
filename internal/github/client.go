@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/adamkirk/orca/internal/common"
 	"github.com/google/go-github/v74/github"
-	"github.com/panoptescloud/orca/internal/common"
 )
 
 type GithubClient struct {

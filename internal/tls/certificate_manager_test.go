@@ -3,9 +3,9 @@ package tls_test
 import (
 	"testing"
 
-	"github.com/panoptescloud/orca/internal/common"
-	"github.com/panoptescloud/orca/internal/tls"
-	tls_mocks "github.com/panoptescloud/orca/tests/mocks/tls"
+	"github.com/adamkirk/orca/internal/common"
+	"github.com/adamkirk/orca/internal/tls"
+	tls_mocks "github.com/adamkirk/orca/tests/mocks/tls"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 )

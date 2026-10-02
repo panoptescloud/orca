@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/panoptescloud/orca/internal/common"
-	"github.com/panoptescloud/orca/internal/workspaces"
+	"github.com/adamkirk/orca/internal/common"
+	"github.com/adamkirk/orca/internal/workspaces"
 	"github.com/spf13/cobra"
 )
 

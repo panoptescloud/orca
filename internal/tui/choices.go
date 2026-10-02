@@ -5,10 +5,10 @@ import (
 	"io"
 	"strings"
 
+	"github.com/adamkirk/orca/internal/common"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/panoptescloud/orca/internal/common"
 )
 
 var (

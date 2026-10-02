@@ -1,5 +1,5 @@
 {
-    "name": "panoptescloud/orca",
+    "name": "adamkirk/orca",
     "image": "golang:1.27",
     "workspaceMount": "source=${localWorkspaceFolder},target=/srv,type=bind",
     "workspaceFolder": "/srv",

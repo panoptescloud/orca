@@ -1,6 +1,6 @@
 package controller
 
-import "github.com/panoptescloud/orca/internal/common"
+import "github.com/adamkirk/orca/internal/common"
 
 type ShowComposeCommandDTO struct {
 	Workspace string

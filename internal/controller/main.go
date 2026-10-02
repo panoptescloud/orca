@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/panoptescloud/orca/internal/common"
+	"github.com/adamkirk/orca/internal/common"
 )
 
 type config interface {

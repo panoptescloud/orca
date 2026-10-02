@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/panoptescloud/orca/internal/git"
+	"github.com/adamkirk/orca/internal/git"
 	"github.com/spf13/cobra"
 )
 

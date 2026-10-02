@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"github.com/panoptescloud/orca/internal/common"
-	"github.com/panoptescloud/orca/pkg/dag"
+	"github.com/adamkirk/orca/internal/common"
+	"github.com/adamkirk/orca/pkg/dag"
 )
 
 type DownDTO struct {

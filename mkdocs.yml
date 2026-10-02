@@ -1,6 +1,6 @@
 site_name: "Orca"
-repo_url: https://github.com/panoptescloud/orca/
-repo_name: "PanoptesCloud/Orca"
+repo_url: https://github.com/adamkirk/orca/
+repo_name: "adamkirk/Orca"
 
 theme:
   name: 'material'
