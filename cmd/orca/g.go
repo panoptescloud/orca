@@ -76,11 +76,20 @@ func handleGRebaseInteractively(cmd *cobra.Command, args []string) error {
 func handleGPush(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
+	ws, err := cmd.Flags().GetString("workspace")
+	cobra.CheckErr(err)
+	project, err := cmd.Flags().GetString("project")
+	cobra.CheckErr(err)
+	allProjects, err := cmd.Flags().GetBool("all")
+	cobra.CheckErr(err)
 	force, err := cmd.Flags().GetBool("force")
 	cobra.CheckErr(err)
 
 	return g.Push(git.PushDTO{
-		Force: force,
+		AllProjects: allProjects,
+		Workspace:   ws,
+		Project:     project,
+		Force:       force,
 	})
 }
 

@@ -93,7 +93,7 @@ var gRbiCmd = &cobra.Command{
 var gPushCmd = &cobra.Command{
 	Use:   "push",
 	Short: "Pushes the branch to origin.",
-	Long:  `Pushes the current branch to origin, using the current branches name as the target on the origin.`,
+	Long:  `Pushes the current branch to origin, using the current branches name as the target on the origin. Use --all to push the current branch in every project in the workspace.`,
 	Run:   errorHandlerWrapper(handleGPush, 1),
 }
 
@@ -431,6 +431,10 @@ func init() {
 	gCmd.AddCommand(gRbiCmd)
 
 	gPushCmd.Flags().BoolP("force", "f", false, "Whether force push the branch.")
+	gPushCmd.Flags().BoolP("all", "a", false, "Pushes the current branch in each project in the workspace.")
+	addWorkspaceOption(gPushCmd, false)
+	addProjectOption(gPushCmd)
+	gPushCmd.MarkFlagsMutuallyExclusive("all", "project")
 	gCmd.AddCommand(gPushCmd)
 
 	gUndoCmd.Flags().BoolP("yes", "y", false, "Skip the confirmation prompt, and just delete them. #YOLO")
