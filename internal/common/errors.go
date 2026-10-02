@@ -117,6 +117,14 @@ func (err ErrUnsupportedArchitecture) Error() string {
 	return fmt.Sprintf("unsupported architecture: %s", err.Arch)
 }
 
+type ErrUnsupportedProvisioner struct {
+	Message string
+}
+
+func (err ErrUnsupportedProvisioner) Error() string {
+	return fmt.Sprintf("unsupported provisioner: %s", err.Message)
+}
+
 type ErrInvalidArchive struct{}
 
 func (err ErrInvalidArchive) Error() string {
@@ -131,12 +139,28 @@ func (err ErrUnknownWorkspace) Error() string {
 	return fmt.Sprintf("unknown workspace: %s", err.Name)
 }
 
+type ErrCouldNotDetermineWorkspace struct {
+	Message string
+}
+
+func (err ErrCouldNotDetermineWorkspace) Error() string {
+	return fmt.Sprintf("could not determine workspace: %s", err.Message)
+}
+
 type ErrUnknownProject struct {
 	Name string
 }
 
 func (err ErrUnknownProject) Error() string {
 	return fmt.Sprintf("unknown project: %s", err.Name)
+}
+
+type ErrUnknownService struct {
+	Name string
+}
+
+func (err ErrUnknownService) Error() string {
+	return fmt.Sprintf("unknown service: %s", err.Name)
 }
 
 type ErrUnknownTool struct {
@@ -203,6 +227,15 @@ type ErrDirectoryAlreadyExists struct {
 
 func (err ErrDirectoryAlreadyExists) Error() string {
 	return fmt.Sprintf("directory already exists: %s", err.Path)
+}
+
+type ErrDirectoryDoesNotMatchOrigin struct {
+	Path   string
+	Origin string
+}
+
+func (err ErrDirectoryDoesNotMatchOrigin) Error() string {
+	return fmt.Sprintf("directory '%s' does not contain repo with origin: %s", err.Path, err.Origin)
 }
 
 type ErrRepositoryAlreadyCloned struct {

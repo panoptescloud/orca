@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/panoptescloud/orca/internal/common"
 	"github.com/panoptescloud/orca/pkg/dag"
 )
 
@@ -9,7 +10,7 @@ type DownDTO struct {
 	Project   string
 }
 
-func determineShutdownOrder(ctx runtimeContext) ([]string, error) {
+func determineShutdownOrder(ctx common.ExecutionContext) ([]string, error) {
 	if ctx.Project != nil {
 		return []string{
 			ctx.Project.Name,
@@ -25,7 +26,7 @@ func determineShutdownOrder(ctx runtimeContext) ([]string, error) {
 	return g.TopologicalKeysFromLeaves()
 }
 
-func (c *Controller) stopServices(ctx runtimeContext) error {
+func (c *Controller) stopServices(ctx common.ExecutionContext) error {
 	ordered, err := determineShutdownOrder(ctx)
 
 	if err != nil {
@@ -50,7 +51,7 @@ func (c *Controller) stopServices(ctx runtimeContext) error {
 }
 
 func (c *Controller) Down(dto DownDTO) error {
-	ctx, err := c.resolveContext(dto.Workspace, dto.Project)
+	ctx, err := c.contextResolver.Resolve(dto.Workspace, dto.Project)
 
 	if err != nil {
 		return err

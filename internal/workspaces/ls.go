@@ -1,11 +1,10 @@
 package workspaces
 
-import "fmt"
-
 type LsDTO struct {
 }
 
 func (m *Manager) Ls(dto LsDTO) error {
+	current := m.configManager.GetCurrentWorkspace()
 	locs := m.configManager.GetAllWorkspaceMeta()
 
 	if len(locs) == 0 {
@@ -14,9 +13,26 @@ func (m *Manager) Ls(dto LsDTO) error {
 		return nil
 	}
 
-	for _, loc := range locs {
-		m.tui.Info(fmt.Sprintf("%s -> %s", loc.Name, loc.Path))
+	rows := make([][]string, len(locs))
+
+	for i, loc := range locs {
+		inUse := "No"
+
+		if loc.Name == current {
+			inUse = "Yes"
+		}
+		rows[i] = []string{
+			inUse,
+			loc.Name,
+			loc.Path,
+		}
 	}
+
+	m.tui.Table([]string{
+		"In Use?",
+		"Project",
+		"Path",
+	}, rows)
 
 	return nil
 }

@@ -15,7 +15,7 @@ type ExecuteExtensionDTO struct {
 }
 
 // TODO: de-dupe this by reusing the ExecOrRun method
-func (c *Controller) executeExtensionInService(dto ExecuteExtensionDTO, ctx runtimeContext, ext common.Extension) error {
+func (c *Controller) executeExtensionInService(dto ExecuteExtensionDTO, ctx common.ExecutionContext, ext common.Extension) error {
 	cmdArgs := strings.Split(ext.Command, " ")
 
 	if len(dto.Args) > 0 {
@@ -38,7 +38,7 @@ func (c *Controller) executeExtensionInService(dto ExecuteExtensionDTO, ctx runt
 }
 
 func (c *Controller) ExecuteExtension(dto ExecuteExtensionDTO) error {
-	ctx, err := c.resolveContext(dto.Workspace, dto.Project)
+	ctx, err := c.contextResolver.Resolve(dto.Workspace, dto.Project)
 
 	if err != nil {
 		return err

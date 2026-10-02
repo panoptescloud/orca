@@ -24,7 +24,7 @@ If you're writing docs locally and wanna see what the rendered result looks like
 
 The only requirements for developing this tool are shown below (linked to the installation instructions):
 
-- [golang >= 1.24](https://go.dev/doc/install)
+- [golang >= 1.27](https://go.dev/doc/install)
 - [vektra/mockery >= 3.5.4](https://vektra.github.io/mockery/latest/installation/)
 
 ## Why npm?

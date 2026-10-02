@@ -8,7 +8,7 @@ type ShowComposeCommandDTO struct {
 }
 
 func (c *Controller) ShowComposeCommand(dto ShowComposeCommandDTO) error {
-	ctx, err := c.resolveContext(dto.Workspace, dto.Project)
+	ctx, err := c.contextResolver.Resolve(dto.Workspace, dto.Project)
 
 	if err != nil {
 		return err

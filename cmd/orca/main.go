@@ -158,6 +158,18 @@ var wsLsCmd = &cobra.Command{
 	Run:   errorHandlerWrapper(handleWsLs, 1),
 }
 
+var wsCurrentCmd = &cobra.Command{
+	Use:   "current",
+	Short: "Shows the current workspace",
+	Run:   errorHandlerWrapper(handleWsCurrent, 1),
+}
+
+var wsClearCurrentCmd = &cobra.Command{
+	Use:   "clear-current",
+	Short: "Deselects the current workspace at a global level",
+	Run:   errorHandlerWrapper(handleWsClearCurrent, 1),
+}
+
 var wsCloneCmd = &cobra.Command{
 	Use:   "clone",
 	Short: "Clones all the projects required for this workspace.",
@@ -278,6 +290,12 @@ var extCmd = &cobra.Command{
 	Use:   "ext",
 	Short: "Execute a custom extension, defined in the project configuration",
 	Run:   errorHandlerWrapper(handleExt, 1),
+}
+
+var provisionCmd = &cobra.Command{
+	Use:   "provision",
+	Short: "Run any provisioning scripts for the given project",
+	Run:   errorHandlerWrapper(handleProvision, 1),
 }
 
 func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
@@ -428,13 +446,14 @@ func init() {
 	wsCmd.AddCommand(wsInitCmd)
 
 	wsCmd.AddCommand(wsLsCmd)
+	wsCmd.AddCommand(wsCurrentCmd)
+	wsCmd.AddCommand(wsClearCurrentCmd)
 
 	wsCloneCmd.Flags().StringP("target", "t", "", `The directory in which to clone the project(s). 
 If multiple projects are being cloned, then it will place them in {target}/{repo name}.
 If a single project is being clone then it will be cloned into {target}.`)
 	addWorkspaceOption(wsCloneCmd, false)
 	addProjectOption(wsCloneCmd)
-	wsCloneCmd.MarkFlagRequired("workspace")
 	wsCmd.AddCommand(wsCloneCmd)
 
 	rootCmd.AddCommand(wsCmd)
@@ -485,13 +504,16 @@ If a single project is being clone then it will be cloned into {target}.`)
 	rootCmd.AddCommand(logsCmd)
 
 	// hosts
-	addWorkspaceOption(hostsCmd, true)
+	addWorkspaceOption(hostsCmd, false)
 	rootCmd.AddCommand(hostsCmd)
 
 	// ext
 	addWorkspaceOption(extCmd, false)
 	addProjectOption(extCmd)
 	rootCmd.AddCommand(extCmd)
+
+	// provision
+	rootCmd.AddCommand(provisionCmd)
 }
 
 func addServiceOption(cmd *cobra.Command, required bool) {

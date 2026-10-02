@@ -113,6 +113,25 @@ func convertEnvFiles(cfgEnvFiles []model.EnvFile) []common.EnvFile {
 	return envFiles
 }
 
+func convertProvisioner(e model.Provisioner) common.Provisioner {
+	return common.Provisioner{
+		ExampleFile: &common.ExampleFileProvisioner{
+			Src:    e.ExampleFile.Src,
+			Target: e.ExampleFile.Target,
+			Type:   common.ExampleFileProvisionerType(e.ExampleFile.Type),
+		},
+	}
+}
+
+func convertProvisioners(cfgProvisioners []model.Provisioner) []common.Provisioner {
+	provisioners := make([]common.Provisioner, len(cfgProvisioners))
+	for i, p := range cfgProvisioners {
+		provisioners[i] = convertProvisioner(p)
+	}
+
+	return provisioners
+}
+
 func buildProject(wsPCfg model.WorkspaceProjectConfig, meta common.ProjectMeta, pCfg model.ProjectConfig) common.Project {
 	return common.Project{
 		Name: wsPCfg.Name,
@@ -130,6 +149,7 @@ func buildProject(wsPCfg model.WorkspaceProjectConfig, meta common.ProjectMeta, 
 			TLSCertificates: pCfg.TLSCertificates,
 			Extensions:      convertExtensions(pCfg.Extensions),
 			EnvFiles:        convertEnvFiles(pCfg.EnvFiles),
+			Provisioners:    convertProvisioners(pCfg.Provisioners),
 		},
 	}
 }

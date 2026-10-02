@@ -38,6 +38,15 @@ type Extension struct {
 type EnvFile struct {
 	Path string
 }
+type ExampleFileProvisioner struct {
+	Src    string
+	Target string
+	Type   string
+}
+
+type Provisioner struct {
+	ExampleFile *ExampleFileProvisioner `yaml:"exampleFile"`
+}
 
 type ProjectConfig struct {
 	ComposeFiles    ComposeFiles `yaml:"composeFiles"`
@@ -46,4 +55,5 @@ type ProjectConfig struct {
 	Hosts           []string
 	TLSCertificates []string `yaml:"tlsCerts"`
 	Extensions      []Extension
+	Provisioners    []Provisioner `yaml:"provisioners"`
 }

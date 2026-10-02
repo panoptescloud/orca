@@ -49,6 +49,16 @@ func (m *Manager) Initialise(dto InitialiseDTO) error {
 		return m.tui.RecordIfError("Failed to register workspace, this is likely a bug!", err)
 	}
 
+	err = m.Clone(CloneDTO{
+		WorkspaceName: cfg.Name,
+		Project:       "",
+		To:            dto.Into,
+	})
+
+	if err != nil {
+		return err
+	}
+
 	m.tui.Success("Workspace initialised!")
 	return nil
 }
