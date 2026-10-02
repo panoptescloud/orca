@@ -3,7 +3,7 @@ package slices_test
 import (
 	"testing"
 
-	"github.com/panoptescloud/orca/pkg/slices"
+	"github.com/adamkirk/orca/pkg/slices"
 	"github.com/stretchr/testify/assert"
 )
 

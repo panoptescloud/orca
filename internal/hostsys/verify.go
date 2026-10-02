@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/panoptescloud/orca/internal/common"
+	"github.com/adamkirk/orca/internal/common"
 )
 
 type Tool struct {

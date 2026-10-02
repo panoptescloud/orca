@@ -4,8 +4,8 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/panoptescloud/orca/internal/common"
-	"github.com/panoptescloud/orca/internal/hostsys"
+	"github.com/adamkirk/orca/internal/common"
+	"github.com/adamkirk/orca/internal/hostsys"
 )
 
 // TODO: guard against nil arguments

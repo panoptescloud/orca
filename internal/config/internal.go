@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/panoptescloud/orca/internal/common"
-	"github.com/panoptescloud/orca/pkg/slices"
+	"github.com/adamkirk/orca/internal/common"
+	"github.com/adamkirk/orca/pkg/slices"
 )
 
 type configLogging struct {

@@ -3,7 +3,7 @@ package common
 import (
 	stdslices "slices"
 
-	"github.com/panoptescloud/orca/pkg/slices"
+	"github.com/adamkirk/orca/pkg/slices"
 )
 
 type ExampleFileProvisionerType string

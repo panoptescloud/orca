@@ -5,10 +5,10 @@ import (
 	"github.com/spf13/afero"
 )
 
-const orcaRepoOrg = "panoptescloud"
+const orcaRepoOrg = "adamkirk"
 const orcaRepoName = "orca"
 
-// const orcaRepo = "panoptescloud/orca"
+// const orcaRepo = "adamkirk/orca"
 
 type tui interface {
 	Info(msg ...string)

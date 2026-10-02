@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"path/filepath"
 
-	"github.com/panoptescloud/orca/internal/common"
+	"github.com/adamkirk/orca/internal/common"
 	"github.com/spf13/afero"
 )
 

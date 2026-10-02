@@ -1,4 +1,4 @@
-![coverage](https://raw.githubusercontent.com/panoptescloud/orca/badges/.badges/main/coverage.svg)
+![coverage](https://raw.githubusercontent.com/adamkirk/orca/badges/.badges/main/coverage.svg)
 
 # Home
 
@@ -6,7 +6,7 @@ Whalecome!
 
 ## Initial installation
 
-Head over to the [latest github release](https://github.com/panoptescloud/orca/releases/latest), and find the URL for the archive that best suits your system. Put into the script below, and you're good to go!
+Head over to the [latest github release](https://github.com/adamkirk/orca/releases/latest), and find the URL for the archive that best suits your system. Put into the script below, and you're good to go!
 
 ```sh
 $ curl -o /tmp/orca.tar.gz -L "{url}"

@@ -37,9 +37,9 @@ There are two ways to enable an overlay, and these depend mostly on whether the 
 
 **service scoped** overlays are configured by adding a label to the service in the original docker-compose file. When orca runs it will parse the docker compose file and if it detects one of these labels will generate the relevant overlay configuration for that service.
 
-## `orca.panoptescloud.overlay-enabled/{overlay}`
+## `orca.adamkirk.overlay-enabled/{overlay}`
 
-Whenever a workspace scoped overlay has been used for a project, you'll se this label `orca.panoptescloud.overlay-enabled/{overlay}` is added to each container that the overlay affected. The `{overlay}` part here, is the name fo the overlay that was enabled. This is to aid in debugging and understanding the affect that orca is having on the compose environment; hopefully everything just works, and it's never needed!
+Whenever a workspace scoped overlay has been used for a project, you'll se this label `orca.adamkirk.overlay-enabled/{overlay}` is added to each container that the overlay affected. The `{overlay}` part here, is the name fo the overlay that was enabled. This is to aid in debugging and understanding the affect that orca is having on the compose environment; hopefully everything just works, and it's never needed!
 
 *Note: only workspace-scoped overlays add this label, as the service scoped overlays are already configure via a label so that information would be present anyway.*
 

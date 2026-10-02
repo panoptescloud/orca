@@ -3,7 +3,7 @@ package docker
 import (
 	"strings"
 
-	"github.com/panoptescloud/orca/internal/common"
+	"github.com/adamkirk/orca/internal/common"
 )
 
 // TODO: guard against nil inputs

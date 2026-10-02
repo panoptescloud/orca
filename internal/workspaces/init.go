@@ -3,7 +3,7 @@ package workspaces
 import (
 	"fmt"
 
-	"github.com/panoptescloud/orca/internal/common"
+	"github.com/adamkirk/orca/internal/common"
 	"github.com/spf13/afero"
 )
 

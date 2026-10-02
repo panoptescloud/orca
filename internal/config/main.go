@@ -3,8 +3,8 @@ package config
 import (
 	"path/filepath"
 
-	"github.com/panoptescloud/orca/internal/common"
-	"github.com/panoptescloud/orca/pkg/slices"
+	"github.com/adamkirk/orca/internal/common"
+	"github.com/adamkirk/orca/pkg/slices"
 	"github.com/spf13/afero"
 	"gopkg.in/yaml.v3"
 )

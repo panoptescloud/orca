@@ -7,9 +7,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/panoptescloud/orca/internal/hostsys"
-	"github.com/panoptescloud/orca/internal/logging"
-	"github.com/panoptescloud/orca/internal/workspaces"
+	"github.com/adamkirk/orca/internal/hostsys"
+	"github.com/adamkirk/orca/internal/logging"
+	"github.com/adamkirk/orca/internal/workspaces"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

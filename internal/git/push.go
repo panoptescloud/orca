@@ -1,6 +1,6 @@
 package git
 
-import "github.com/panoptescloud/orca/internal/hostsys"
+import "github.com/adamkirk/orca/internal/hostsys"
 
 type PushDTO struct {
 	Force bool

@@ -1,5 +1,5 @@
 packages:
-    github.com/panoptescloud/orca/internal/tls:
+    github.com/adamkirk/orca/internal/tls:
         # place your package-specific config here
         config:
             dir: 'tests/mocks/tls'

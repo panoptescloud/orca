@@ -3,7 +3,7 @@ package hostsys
 import (
 	"fmt"
 
-	"github.com/panoptescloud/orca/internal/common"
+	"github.com/adamkirk/orca/internal/common"
 	"github.com/txn2/txeh"
 )
 
@@ -14,9 +14,11 @@ type EtcHostsManager struct {
 func (ehm *EtcHostsManager) SyncForWorkspace(ws *common.Workspace) error {
 	hosts := ws.GetUniqueHosts()
 
-	marker := fmt.Sprintf("panoptescloud/orca:%s", ws.Name)
+	marker := fmt.Sprintf("adamkirk/orca:%s", ws.Name)
 
 	ehm.hostsFile.RemoveByComment(marker)
+	// Clean up entries written before the repo moved from panoptescloud/orca
+	ehm.hostsFile.RemoveByComment(fmt.Sprintf("panoptescloud/orca:%s", ws.Name))
 
 	ehm.hostsFile.AddHostsWithComment("127.0.0.1", hosts, marker)
 

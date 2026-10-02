@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/adamkirk/orca/internal/common"
 	"github.com/minio/selfupdate"
-	"github.com/panoptescloud/orca/internal/common"
 )
 
 type VersioningStrategy string

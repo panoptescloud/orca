@@ -1,8 +1,8 @@
 package docker
 
 import (
+	"github.com/adamkirk/orca/internal/common"
 	"github.com/compose-spec/compose-go/v2/types"
-	"github.com/panoptescloud/orca/internal/common"
 	"go.yaml.in/yaml/v4"
 )
 

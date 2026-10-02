@@ -1,8 +1,8 @@
 package git
 
 import (
-	"github.com/panoptescloud/orca/internal/common"
-	"github.com/panoptescloud/orca/internal/hostsys"
+	"github.com/adamkirk/orca/internal/common"
+	"github.com/adamkirk/orca/internal/hostsys"
 )
 
 func (g *Git) Clone(repoURL string, target string) error {

@@ -1,4 +1,4 @@
-module github.com/panoptescloud/orca
+module github.com/adamkirk/orca
 
 go 1.27.0
 

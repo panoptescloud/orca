@@ -3,7 +3,7 @@ package git
 import (
 	"strings"
 
-	"github.com/panoptescloud/orca/internal/hostsys"
+	"github.com/adamkirk/orca/internal/hostsys"
 )
 
 type LoglDTO struct {

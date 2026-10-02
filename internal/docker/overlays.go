@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/adamkirk/orca/internal/common"
 	"github.com/compose-spec/compose-go/v2/types"
-	"github.com/panoptescloud/orca/internal/common"
 	"github.com/spf13/afero"
 )
 
-const networkOverlaidLabel = "orca.panoptescloud.overlay-enabled/network"
-const aliasesOverlaidLabel = "orca.panoptescloud.overlay-enabled/aliases"
+const networkOverlaidLabel = "orca.adamkirk.overlay-enabled/network"
+const aliasesOverlaidLabel = "orca.adamkirk.overlay-enabled/aliases"
 
 const tlsInjectCertsLabel = "orca.pantoptescloud.tls/inject-certs"
 
