@@ -1,0 +1,4 @@
+# golang.org/x/crypto/openpgp is unmaintained and has no fixed version. It is
+# not compiled into orca; x/crypto is only pulled in for blake2b via
+# minio/selfupdate -> aead.dev/minisign. Verify with: go list -deps ./... | grep openpgp
+GO-2026-5932

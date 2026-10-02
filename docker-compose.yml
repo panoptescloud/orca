@@ -11,7 +11,7 @@ services:
   trivy:
     profiles:
     - manual
-    image: aquasec/trivy:0.69.3
+    image: aquasec/trivy:0.75.0
     working_dir: /srv
     volumes:
       - .:/srv
