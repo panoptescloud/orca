@@ -28,12 +28,16 @@ func handleGCo(cmd *cobra.Command, args []string) error {
 	shouldPull, err := cmd.Flags().GetBool("pull")
 	cobra.CheckErr(err)
 
+	shouldRebase, err := cmd.Flags().GetBool("rebase")
+	cobra.CheckErr(err)
+
 	err = g.Checkout(git.CheckoutDTO{
 		Name:        searchTerm,
 		AllProjects: allProjects,
 		Workspace:   ws,
 		Project:     project,
 		Pull:        shouldPull,
+		Rebase:      shouldRebase,
 		Create:      shouldCreate,
 	})
 
@@ -113,6 +117,8 @@ func handleGPull(cmd *cobra.Command, args []string) error {
 	cobra.CheckErr(err)
 	allProjects, err := cmd.Flags().GetBool("all")
 	cobra.CheckErr(err)
+	rebase, err := cmd.Flags().GetBool("rebase")
+	cobra.CheckErr(err)
 
 	g := svcContainer.GetGit()
 
@@ -120,5 +126,6 @@ func handleGPull(cmd *cobra.Command, args []string) error {
 		AllProjects: allProjects,
 		Workspace:   ws,
 		Project:     project,
+		Rebase:      rebase,
 	})
 }

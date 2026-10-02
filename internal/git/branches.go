@@ -177,6 +177,8 @@ func (g *Git) GetCurrentBranch(dir string) (string, error) {
 type PullBranchDTO struct {
 	// The directory to run the command in, defaults to the current directory
 	Dir string
+	// Passes --rebase to git pull
+	Rebase bool
 }
 
 func (g *Git) PullBranch(dto PullBranchDTO) error {
@@ -190,11 +192,15 @@ func (g *Git) PullBranch(dto PullBranchDTO) error {
 		return err
 	}
 
-	err = g.exec.Exec("git", []string{
-		"pull",
-		"origin",
-		current,
-	}, withDir(dto.Dir, hostsys.WithHostIO())...)
+	args := []string{"pull"}
+
+	if dto.Rebase {
+		args = append(args, "--rebase")
+	}
+
+	args = append(args, "origin", current)
+
+	err = g.exec.Exec("git", args, withDir(dto.Dir, hostsys.WithHostIO())...)
 
 	return g.tui.RecordIfError("Failed to pull branch!", err)
 }

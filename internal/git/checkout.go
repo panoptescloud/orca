@@ -15,6 +15,7 @@ type CheckoutDTO struct {
 	Workspace   string
 	Project     string
 	Pull        bool
+	Rebase      bool
 	Create      bool
 }
 
@@ -243,6 +244,6 @@ func (g *Git) Checkout(dto CheckoutDTO) error {
 		return nil
 	}
 
-	return g.pullInContext(ctx, dto.AllProjects)
+	return g.pullInContext(ctx, dto.AllProjects, dto.Rebase)
 
 }

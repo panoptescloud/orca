@@ -55,6 +55,16 @@ var gCoCmd = &cobra.Command{
 	Short: "Checkout a branch for a git repository.",
 	Long: `Searches for a branch with the name provided as an argument. If a single branch is
 found, it will be checked out. If multiple are found will provide a list to select from.`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		rebase, _ := cmd.Flags().GetBool("rebase")
+		pull, _ := cmd.Flags().GetBool("pull")
+
+		if rebase && !pull {
+			return fmt.Errorf("--rebase can only be used with --pull")
+		}
+
+		return nil
+	},
 	Run: errorHandlerWrapper(handleGCo, 1),
 }
 
@@ -408,6 +418,7 @@ func init() {
 	gCoCmd.Flags().Bool("pull", false, "Pulls the branch from origin after checking it out.")
 	gCoCmd.Flags().BoolP("all", "a", false, "Checks out the chosen branch in each project in the workspace.")
 	gCoCmd.Flags().BoolP("create", "b", false, "Creates the branch if it doesn't exist.")
+	gCoCmd.Flags().BoolP("rebase", "r", false, "Passes --rebase to git pull, only valid with --pull.")
 	addWorkspaceOption(gCoCmd, false)
 	addProjectOption(gCoCmd)
 	gCoCmd.MarkFlagsMutuallyExclusive("all", "project")
@@ -430,6 +441,7 @@ func init() {
 	gCmd.AddCommand(gLoglCmd)
 
 	gPullCmd.Flags().BoolP("all", "a", false, "Pulls the current branch in each project in the workspace.")
+	gPullCmd.Flags().BoolP("rebase", "r", false, "Passes --rebase to git pull.")
 	addWorkspaceOption(gPullCmd, false)
 	addProjectOption(gPullCmd)
 	gPullCmd.MarkFlagsMutuallyExclusive("all", "project")
