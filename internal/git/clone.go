@@ -5,7 +5,7 @@ import (
 	"github.com/adamkirk/orca/internal/hostsys"
 )
 
-func (g *Git) Clone(repoURL string, target string) error {
+func (g *Git) Clone(repoURL string, target string, dir string) error {
 	if repoURL == "" || target == "" {
 		return common.ErrInvalidInput{
 			To:  "git.clone",
@@ -19,6 +19,6 @@ func (g *Git) Clone(repoURL string, target string) error {
 			repoURL,
 			target,
 		},
-		hostsys.WithHostIO(),
+		withDir(dir, hostsys.WithHostIO())...,
 	)
 }

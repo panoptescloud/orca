@@ -27,7 +27,7 @@ type config interface {
 
 type git interface {
 	GetRepositoryRootFromPath(path string) (string, error)
-	Clone(repoUrl string, target string) error
+	Clone(repoUrl string, target string, dir string) error
 	DirectoryHasOrigin(dir string, origin string) (bool, error)
 }
 

@@ -12,6 +12,10 @@ import (
 const ConfirmYes = "Yes"
 const ConfirmNo = "No"
 
+type contextResolver interface {
+	Resolve(ws string, project string) (common.ExecutionContext, error)
+}
+
 type tui interface {
 	Info(msg ...string)
 	Error(msg ...string)
@@ -19,19 +23,30 @@ type tui interface {
 	RecordIfError(msg string, err error) error
 	NewLine()
 	PresentChoices(opts []string, title string) (string, error)
+	Table(header []string, rows [][]string)
 }
 
 type executor interface {
 	Exec(cmdName string, args []string, opts ...hostsys.ExecOpt) error
 }
 
-type Git struct {
-	exec executor
-	tui  tui
+// withDir prepends a ChdirOpt to the given opts when dir is not empty
+func withDir(dir string, opts ...hostsys.ExecOpt) []hostsys.ExecOpt {
+	if dir == "" {
+		return opts
+	}
+
+	return append([]hostsys.ExecOpt{hostsys.ChdirOpt(dir)}, opts...)
 }
 
-func (g *Git) mustBeInAGitRepository() error {
-	if g.isInGitRepository() {
+type Git struct {
+	exec            executor
+	tui             tui
+	contextResolver contextResolver
+}
+
+func (g *Git) mustBeInAGitRepository(dir string) error {
+	if g.isInGitRepository(dir) {
 		return nil
 	}
 
@@ -44,8 +59,8 @@ func (g *Git) mustBeInAGitRepository() error {
 
 }
 
-func (g *Git) isInGitRepository() bool {
-	err := g.exec.Exec("git", []string{"rev-parse", "--is-inside-work-tree"})
+func (g *Git) isInGitRepository(dir string) bool {
+	err := g.exec.Exec("git", []string{"rev-parse", "--is-inside-work-tree"}, withDir(dir)...)
 
 	return err == nil
 }
@@ -89,9 +104,10 @@ func (g *Git) DirectoryHasOrigin(dir string, origin string) (bool, error) {
 	return strings.TrimSpace(stdout.String()) == origin, nil
 }
 
-func NewGit(exec executor, tui tui) *Git {
+func NewGit(exec executor, tui tui, contextResolver contextResolver) *Git {
 	return &Git{
-		exec: exec,
-		tui:  tui,
+		exec:            exec,
+		tui:             tui,
+		contextResolver: contextResolver,
 	}
 }

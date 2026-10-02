@@ -6,6 +6,11 @@ import (
 )
 
 func handleGCo(cmd *cobra.Command, args []string) error {
+	ws, err := cmd.Flags().GetString("workspace")
+	cobra.CheckErr(err)
+	project, err := cmd.Flags().GetString("project")
+	cobra.CheckErr(err)
+
 	g := svcContainer.GetGit()
 
 	searchTerm := ""
@@ -14,21 +19,30 @@ func handleGCo(cmd *cobra.Command, args []string) error {
 		searchTerm = args[0]
 	}
 
-	branch, err := g.Checkout(git.CheckoutDTO{
-		Name: searchTerm,
-	})
+	allProjects, err := cmd.Flags().GetBool("all")
+	cobra.CheckErr(err)
 
-	if err != nil {
-		return err
-	}
+	shouldCreate, err := cmd.Flags().GetBool("create")
+	cobra.CheckErr(err)
 
 	shouldPull, err := cmd.Flags().GetBool("pull")
 	cobra.CheckErr(err)
 
-	if shouldPull {
-		return g.PullBranch(git.PullBranchDTO{
-			Name: branch,
-		})
+	shouldRebase, err := cmd.Flags().GetBool("rebase")
+	cobra.CheckErr(err)
+
+	err = g.Checkout(git.CheckoutDTO{
+		Name:        searchTerm,
+		AllProjects: allProjects,
+		Workspace:   ws,
+		Project:     project,
+		Pull:        shouldPull,
+		Rebase:      shouldRebase,
+		Create:      shouldCreate,
+	})
+
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -62,11 +76,20 @@ func handleGRebaseInteractively(cmd *cobra.Command, args []string) error {
 func handleGPush(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
+	ws, err := cmd.Flags().GetString("workspace")
+	cobra.CheckErr(err)
+	project, err := cmd.Flags().GetString("project")
+	cobra.CheckErr(err)
+	allProjects, err := cmd.Flags().GetBool("all")
+	cobra.CheckErr(err)
 	force, err := cmd.Flags().GetBool("force")
 	cobra.CheckErr(err)
 
 	return g.Push(git.PushDTO{
-		Force: force,
+		AllProjects: allProjects,
+		Workspace:   ws,
+		Project:     project,
+		Force:       force,
 	})
 }
 
@@ -96,8 +119,39 @@ func handleGLogl(cmd *cobra.Command, args []string) error {
 	})
 }
 
-func handleGPull(cmd *cobra.Command, args []string) error {
+func handleGStatus(cmd *cobra.Command, args []string) error {
+	ws, err := cmd.Flags().GetString("workspace")
+	cobra.CheckErr(err)
+	project, err := cmd.Flags().GetString("project")
+	cobra.CheckErr(err)
+	allProjects, err := cmd.Flags().GetBool("all")
+	cobra.CheckErr(err)
+
 	g := svcContainer.GetGit()
 
-	return g.PullBranch(git.PullBranchDTO{})
+	return g.Status(git.StatusDTO{
+		AllProjects: allProjects,
+		Workspace:   ws,
+		Project:     project,
+	})
+}
+
+func handleGPull(cmd *cobra.Command, args []string) error {
+	ws, err := cmd.Flags().GetString("workspace")
+	cobra.CheckErr(err)
+	project, err := cmd.Flags().GetString("project")
+	cobra.CheckErr(err)
+	allProjects, err := cmd.Flags().GetBool("all")
+	cobra.CheckErr(err)
+	rebase, err := cmd.Flags().GetBool("rebase")
+	cobra.CheckErr(err)
+
+	g := svcContainer.GetGit()
+
+	return g.Pull(git.PullDTO{
+		AllProjects: allProjects,
+		Workspace:   ws,
+		Project:     project,
+		Rebase:      rebase,
+	})
 }

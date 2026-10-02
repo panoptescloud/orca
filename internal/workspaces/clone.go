@@ -102,7 +102,7 @@ func (m *Manager) cloneSingleProject(ws *common.Workspace, project common.Projec
 
 	m.tui.Info(fmt.Sprintf("Cloning '%s' into %s...", project.RepositoryConfig.SSH, into))
 
-	err = m.git.Clone(project.RepositoryConfig.SSH, into)
+	err = m.git.Clone(project.RepositoryConfig.SSH, into, "")
 
 	if err != nil {
 		return m.tui.RecordIfError("Clone failed!", err)

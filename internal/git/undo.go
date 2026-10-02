@@ -11,10 +11,12 @@ type UndoLastXCommitsDTO struct {
 	// The amount of commits to remoe
 	Amount           int
 	SkipConfirmation bool
+	// The directory to run the command in, defaults to the current directory
+	Dir string
 }
 
 func (g *Git) UndoLastXCommits(dto UndoLastXCommitsDTO) error {
-	if err := g.mustBeInAGitRepository(); err != nil {
+	if err := g.mustBeInAGitRepository(dto.Dir); err != nil {
 		return err
 	}
 
@@ -42,5 +44,5 @@ func (g *Git) UndoLastXCommits(dto UndoLastXCommitsDTO) error {
 		"reset",
 		"--hard",
 		fmt.Sprintf("HEAD~%d", dto.Amount),
-	}, hostsys.WithHostIO())
+	}, withDir(dto.Dir, hostsys.WithHostIO())...)
 }

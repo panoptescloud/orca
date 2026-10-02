@@ -9,10 +9,12 @@ import (
 type LoglDTO struct {
 	// The amount of commits to show
 	Amount int
+	// The directory to run the command in, defaults to the current directory
+	Dir string
 }
 
 func (g *Git) Logl(dto LoglDTO) error {
-	if err := g.mustBeInAGitRepository(); err != nil {
+	if err := g.mustBeInAGitRepository(dto.Dir); err != nil {
 		return err
 	}
 
@@ -20,7 +22,7 @@ func (g *Git) Logl(dto LoglDTO) error {
 	err := g.exec.Exec("git", []string{
 		"log",
 		"--oneline",
-	}, opt)
+	}, withDir(dto.Dir, opt)...)
 
 	if err != nil {
 		return g.tui.RecordIfError("Something went wrong, this is most likely a bug!", err)
