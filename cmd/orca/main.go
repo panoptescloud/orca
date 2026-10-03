@@ -1,20 +1,25 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path"
 	"strings"
 
 	"github.com/adamkirk/orca/internal/logging"
+	"github.com/adamkirk/orca/internal/plugins"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
 const configFileName = "orca.yaml"
 const configFileOverrideEnv = "ORCA_CONFIG_PATH"
 const configToolsPathOverrideEnv = "ORCA_TOOLS_PATH"
+const configPluginsPathOverrideEnv = "ORCA_PLUGINS_PATH"
 
 type runEHandlerFunc func(cmd *cobra.Command, args []string) error
 type runHandlerFunc func(cmd *cobra.Command, args []string)
@@ -44,6 +49,7 @@ func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
 			// Set as a debug level here as it should already be logged earlier
 			// in the stack
 			slog.Debug("unhandled error", "err", err)
+			svcContainer.GetPluginManager().Kill()
 			os.Exit(errorExitCode)
 		}
 	}
@@ -64,6 +70,19 @@ func getToolsDir() string {
 	}
 
 	return configFile
+}
+
+func getPluginsDir() string {
+	homeDir, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	dir := fmt.Sprintf("%s/.orca/plugins", homeDir)
+
+	if override, found := os.LookupEnv(configPluginsPathOverrideEnv); found {
+		dir = override
+	}
+
+	return dir
 }
 
 func getOverlayDir() string {
@@ -171,9 +190,44 @@ func bootstrap() {
 	slog.SetDefault(slog.New(h))
 }
 
+// parsePersistentFlagsEarly parses the root command's persistent flags (e.g.
+// --log-level) before cobra does, ignoring any other flags. Plugins are loaded
+// before cobra runs, and they need to respect these.
+func parsePersistentFlagsEarly() {
+	fs := pflag.NewFlagSet("early", pflag.ContinueOnError)
+	fs.ParseErrorsAllowlist.UnknownFlags = true
+	fs.SetOutput(io.Discard)
+	fs.Usage = func() {}
+
+	// Shares the underlying flags, so parsed values land on the root command
+	fs.AddFlagSet(rootCmd.PersistentFlags())
+
+	// Any real errors will be reported when cobra parses the flags
+	_ = fs.Parse(os.Args[1:])
+}
+
 func main() {
-	if err := rootCmd.Execute(); err != nil {
+	// Configure logging from flags/env before plugins are started, cobra will run
+	// bootstrap again once it has parsed the flags itself.
+	parsePersistentFlagsEarly()
+	bootstrap()
+
+	// Done here rather than in init, so all builtin commands are registered first
+	registerPluginCommands(svcContainer.GetConfig())
+
+	err := rootCmd.Execute()
+
+	// Stop plugin processes before exiting, os.Exit won't run any defers
+	svcContainer.GetPluginManager().Kill()
+
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
+
+		var exitErr plugins.ExitError
+		if errors.As(err, &exitErr) && exitErr.Code != 0 {
+			os.Exit(exitErr.Code)
+		}
+
 		os.Exit(1)
 	}
 }

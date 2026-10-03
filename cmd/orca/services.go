@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log/slog"
 	"os"
 
 	"github.com/adamkirk/orca/internal/common"
@@ -10,6 +11,7 @@ import (
 	"github.com/adamkirk/orca/internal/git"
 	"github.com/adamkirk/orca/internal/github"
 	"github.com/adamkirk/orca/internal/hostsys"
+	"github.com/adamkirk/orca/internal/plugins"
 	"github.com/adamkirk/orca/internal/provisioner"
 	"github.com/adamkirk/orca/internal/repository"
 	"github.com/adamkirk/orca/internal/tls"
@@ -50,6 +52,8 @@ type services struct {
 	composeOverlayGenerator *docker.ComposeOverlayGenerator
 
 	provisionerRunner *provisioner.Runner
+
+	pluginManager *plugins.Manager
 }
 
 func (s *services) GetFs() afero.Fs {
@@ -279,4 +283,14 @@ func (s *services) GetProvisionerRunner() *provisioner.Runner {
 	)
 
 	return s.provisionerRunner
+}
+
+func (s *services) GetPluginManager() *plugins.Manager {
+	if s.pluginManager != nil {
+		return s.pluginManager
+	}
+
+	s.pluginManager = plugins.NewManager(slog.Default())
+
+	return s.pluginManager
 }
