@@ -5,6 +5,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var extCmd = &cobra.Command{
+	Use:   "ext",
+	Short: "Execute a custom extension, defined in the project configuration",
+	Run:   errorHandlerWrapper(handleExt, 1),
+}
+
+func init() {
+	addWorkspaceOption(extCmd, false)
+	addProjectOption(extCmd)
+	rootCmd.AddCommand(extCmd)
+}
+
 func handleExt(cmd *cobra.Command, args []string) error {
 	ctrl := svcContainer.GetController()
 

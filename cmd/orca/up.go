@@ -5,6 +5,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var upCmd = &cobra.Command{
+	Use:   "up",
+	Short: "Starts the workspace or project.",
+	Long:  `...TBD...`,
+	Run:   errorHandlerWrapper(handleUp, 1),
+}
+
+func init() {
+	addWorkspaceOption(upCmd, false)
+	addProjectOption(upCmd)
+
+	rootCmd.AddCommand(upCmd)
+}
+
 func handleUp(cmd *cobra.Command, args []string) error {
 	ctrl := svcContainer.GetController()
 

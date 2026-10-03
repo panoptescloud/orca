@@ -5,6 +5,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var downCmd = &cobra.Command{
+	Use:   "down",
+	Short: "Stops the workspace or project.",
+	Long:  `...TBD...`,
+	Run:   errorHandlerWrapper(handleDown, 1),
+}
+
+func init() {
+	addWorkspaceOption(downCmd, false)
+	addProjectOption(downCmd)
+
+	rootCmd.AddCommand(downCmd)
+}
+
 func handleDown(cmd *cobra.Command, args []string) error {
 	ctrl := svcContainer.GetController()
 

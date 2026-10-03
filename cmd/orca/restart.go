@@ -5,6 +5,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var restartCmd = &cobra.Command{
+	Use:   "restart",
+	Short: "Alias for running down && up.",
+	Long:  `...TBD...`,
+	Run:   errorHandlerWrapper(handleRestart, 1),
+}
+
+func init() {
+	addWorkspaceOption(restartCmd, false)
+	addProjectOption(restartCmd)
+
+	rootCmd.AddCommand(restartCmd)
+}
+
 func handleRestart(cmd *cobra.Command, args []string) error {
 	ctrl := svcContainer.GetController()
 
