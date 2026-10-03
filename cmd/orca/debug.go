@@ -17,14 +17,14 @@ var debugShowComposeConfigCmd = &cobra.Command{
 	Long: `Similar to the 'docker compose config' command (it uses this under the 
 hood), it will show you the resulting config after all files are merged together, 
 including any relevant values from environment variables, or profile changes etc.`,
-	Run: errorHandlerWrapper(handleDebugShowComposeConfig, 1),
+	RunE: handleErrors(handleDebugShowComposeConfig),
 }
 
 var debugShowComposeCommandCmd = &cobra.Command{
 	Use:   "show-compose-command",
 	Short: `Shows the compose command being used for this project.`,
 	Long:  `Can be used to run generic commands via: ` + "`$(orca debug show-compose-command) ps`",
-	Run:   errorHandlerWrapper(handleDebugShowComposeCommand, 1),
+	RunE:  handleErrors(handleDebugShowComposeCommand),
 }
 
 func init() {
@@ -41,10 +41,8 @@ func init() {
 func handleDebugShowComposeConfig(cmd *cobra.Command, args []string) error {
 	ctrl := svcContainer.GetController()
 
-	ws, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
-	project, err := cmd.Flags().GetString("project")
-	cobra.CheckErr(err)
+	ws := mustGetString(cmd, "workspace")
+	project := mustGetString(cmd, "project")
 
 	return ctrl.ShowComposeConfig(controller.ShowComposeConfigDTO{
 		Workspace: ws,
@@ -55,10 +53,8 @@ func handleDebugShowComposeConfig(cmd *cobra.Command, args []string) error {
 func handleDebugShowComposeCommand(cmd *cobra.Command, args []string) error {
 	ctrl := svcContainer.GetController()
 
-	ws, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
-	project, err := cmd.Flags().GetString("project")
-	cobra.CheckErr(err)
+	ws := mustGetString(cmd, "workspace")
+	project := mustGetString(cmd, "project")
 
 	return ctrl.ShowComposeCommand(controller.ShowComposeCommandDTO{
 		Workspace: ws,

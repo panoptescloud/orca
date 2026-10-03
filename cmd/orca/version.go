@@ -9,7 +9,7 @@ import (
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show the current version you're using.",
-	Run:   errorHandlerWrapper(handleVersion, 1),
+	RunE:  handleErrors(handleVersion),
 }
 
 func init() {

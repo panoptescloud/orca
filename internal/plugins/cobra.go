@@ -39,9 +39,6 @@ func buildCommands(provider plugin.CommandProvider, specs []plugin.CommandSpec, 
 			cmd.AddCommand(buildCommands(provider, spec.Subcommands, path)...)
 		} else {
 			cmd.RunE = executeFunc(provider, path)
-			// Errors are the plugin's to report, orca only exits with its code
-			cmd.SilenceUsage = true
-			cmd.SilenceErrors = true
 		}
 
 		cmds[i] = cmd
@@ -80,6 +77,10 @@ func executeFunc(provider plugin.CommandProvider, path []string) func(*cobra.Com
 		})
 
 		if err != nil || code != 0 {
+			// Orca prints plugin errors itself, without cobra's prefix and usage
+			cmd.SilenceErrors = true
+			cmd.SilenceUsage = true
+
 			return ExitError{Code: code, Err: err}
 		}
 

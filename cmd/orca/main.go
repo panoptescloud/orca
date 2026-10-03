@@ -22,7 +22,6 @@ const configToolsPathOverrideEnv = "ORCA_TOOLS_PATH"
 const configPluginsPathOverrideEnv = "ORCA_PLUGINS_PATH"
 
 type runEHandlerFunc func(cmd *cobra.Command, args []string) error
-type runHandlerFunc func(cmd *cobra.Command, args []string)
 
 var (
 	version string = "dev"
@@ -41,27 +40,13 @@ utilities to interact with services form anywhere on the host.`,
 	RunE: handleGroup,
 }
 
-func errorHandlerWrapper(f runEHandlerFunc, errorExitCode int) runHandlerFunc {
-	return func(cmd *cobra.Command, args []string) {
-		err := f(cmd, args)
-
-		if err != nil {
-			// Set as a debug level here as it should already be logged earlier
-			// in the stack
-			slog.Debug("unhandled error", "err", err)
-			svcContainer.GetPluginManager().Kill()
-			os.Exit(errorExitCode)
-		}
-	}
-}
-
 func handleGroup(cmd *cobra.Command, _ []string) error {
 	return cmd.Help()
 }
 
 func getToolsDir() string {
 	homeDir, err := os.UserHomeDir()
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	configFile := fmt.Sprintf("%s/.orca/bin", homeDir)
 
@@ -74,7 +59,7 @@ func getToolsDir() string {
 
 func getPluginsDir() string {
 	homeDir, err := os.UserHomeDir()
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	dir := fmt.Sprintf("%s/.orca/plugins", homeDir)
 
@@ -87,14 +72,14 @@ func getPluginsDir() string {
 
 func getOverlayDir() string {
 	homeDir, err := os.UserHomeDir()
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	return fmt.Sprintf("%s/.orca/overlays", homeDir)
 }
 
 func getTLSDir() string {
 	homeDir, err := os.UserHomeDir()
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	dir := fmt.Sprintf("%s/.orca/tls", homeDir)
 
@@ -103,7 +88,7 @@ func getTLSDir() string {
 
 func getConfigFilePath() string {
 	homeDir, err := os.UserHomeDir()
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	configFile := fmt.Sprintf("%s/.orca/%s", homeDir, configFileName)
 
@@ -117,7 +102,7 @@ func getConfigFilePath() string {
 func getWorkingDir() string {
 	wd, err := os.Getwd()
 
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	return wd
 }
@@ -129,7 +114,7 @@ func getWorkingDirParent() string {
 
 	_, err := os.Stat(dir)
 
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	return dir
 }
@@ -138,7 +123,7 @@ func init() {
 	cfg := svcContainer.GetConfig()
 
 	err := cfg.LoadOrCreate()
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	cobra.OnInitialize(bootstrap)
 
@@ -146,8 +131,8 @@ func init() {
 	rootCmd.PersistentFlags().String("log-level", cfg.GetLoggingLevel(), "Log level to use, one of: debug, info, warn, error, none. Defaults to none, as most errors are already surfaced anyway.")
 	rootCmd.PersistentFlags().String("log-format", cfg.GetLoggingFormat(), "log format to use")
 
-	cobra.CheckErr(viper.BindPFlag("logging.level", rootCmd.PersistentFlags().Lookup("log-level")))
-	cobra.CheckErr(viper.BindPFlag("logging.format", rootCmd.PersistentFlags().Lookup("log-format")))
+	checkErr(viper.BindPFlag("logging.level", rootCmd.PersistentFlags().Lookup("log-level")))
+	checkErr(viper.BindPFlag("logging.format", rootCmd.PersistentFlags().Lookup("log-format")))
 }
 
 func addServiceOption(cmd *cobra.Command, required bool) {
@@ -181,11 +166,11 @@ func bootstrap() {
 	viper.AutomaticEnv()
 
 	err := viper.Unmarshal(cfg.GetRuntimeConfig())
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	h, err := logging.NewSlogHandler(cfg)
 
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	slog.SetDefault(slog.New(h))
 }
@@ -207,27 +192,46 @@ func parsePersistentFlagsEarly() {
 }
 
 func main() {
+	os.Exit(run())
+}
+
+// run is the entrypoint, it returns the exit code rather than exiting so that
+// deferred cleanup always runs. See exit.go for how plugin processes are kept
+// from outliving orca.
+func run() int {
 	// Configure logging from flags/env before plugins are started, cobra will run
 	// bootstrap again once it has parsed the flags itself.
 	parsePersistentFlagsEarly()
 	bootstrap()
+
+	stopHandlingSignals := handleSignals()
+	defer stopHandlingSignals()
+	// Deferred after the above, so signals are still handled while plugins stop
+	defer svcContainer.KillPlugins()
 
 	// Done here rather than in init, so all builtin commands are registered first
 	registerPluginCommands(svcContainer.GetConfig())
 
 	err := rootCmd.Execute()
 
-	// Stop plugin processes before exiting, os.Exit won't run any defers
-	svcContainer.GetPluginManager().Kill()
+	// Any error is likely from plugins being stopped by the signal handler, which
+	// is about to exit with this code anyway.
+	if code := signalExitCode.Load(); code != 0 {
+		return int(code)
+	}
 
-	if err != nil {
+	if err == nil {
+		return 0
+	}
+
+	var exitErr plugins.ExitError
+	if errors.As(err, &exitErr) {
 		fmt.Fprintln(os.Stderr, err)
 
-		var exitErr plugins.ExitError
-		if errors.As(err, &exitErr) && exitErr.Code != 0 {
-			os.Exit(exitErr.Code)
+		if exitErr.Code != 0 {
+			return exitErr.Code
 		}
-
-		os.Exit(1)
 	}
+
+	return 1
 }

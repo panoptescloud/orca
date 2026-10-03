@@ -9,7 +9,7 @@ var downCmd = &cobra.Command{
 	Use:   "down",
 	Short: "Stops the workspace or project.",
 	Long:  `...TBD...`,
-	Run:   errorHandlerWrapper(handleDown, 1),
+	RunE:  handleErrors(handleDown),
 }
 
 func init() {
@@ -22,10 +22,8 @@ func init() {
 func handleDown(cmd *cobra.Command, args []string) error {
 	ctrl := svcContainer.GetController()
 
-	ws, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
-	project, err := cmd.Flags().GetString("project")
-	cobra.CheckErr(err)
+	ws := mustGetString(cmd, "workspace")
+	project := mustGetString(cmd, "project")
 
 	return ctrl.Down(controller.DownDTO{
 		Workspace: ws,

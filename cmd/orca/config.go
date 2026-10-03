@@ -16,13 +16,13 @@ var configCmd = &cobra.Command{
 var configShowCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Show the config",
-	Run:   errorHandlerWrapper(handleConfigShow, 1),
+	RunE:  handleErrors(handleConfigShow),
 }
 
 var configPathCmd = &cobra.Command{
 	Use:   "path",
 	Short: "Show the path to config being used.",
-	Run:   errorHandlerWrapper(handleConfigPath, 1),
+	RunE:  handleErrors(handleConfigPath),
 }
 
 func init() {
@@ -34,7 +34,7 @@ func init() {
 func handleConfigShow(cmd *cobra.Command, _ []string) error {
 	contents, err := yaml.Marshal(svcContainer.GetConfig().GetRuntimeConfig())
 
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	fmt.Print(string(contents))
 

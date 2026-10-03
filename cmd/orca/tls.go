@@ -15,7 +15,7 @@ var tlsGenCmd = &cobra.Command{
 	Use: "gen",
 	Short: `Generates TLS certificates for the current workspace.
 If no root certificate has been generated, one will be generated.`,
-	Run: errorHandlerWrapper(handleTLSGen, 1),
+	RunE: handleErrors(handleTLSGen),
 }
 
 func init() {
@@ -27,8 +27,7 @@ func init() {
 func handleTLSGen(cmd *cobra.Command, args []string) error {
 	cm := svcContainer.GetCertificateManager()
 
-	ws, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
+	ws := mustGetString(cmd, "workspace")
 
 	return cm.Generate(tls.GenerateDTO{
 		WorkspaceName: ws,

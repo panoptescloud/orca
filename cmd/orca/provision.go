@@ -8,7 +8,7 @@ import (
 var provisionCmd = &cobra.Command{
 	Use:   "provision",
 	Short: "Run any provisioning scripts for the given project",
-	Run:   errorHandlerWrapper(handleProvision, 1),
+	RunE:  handleErrors(handleProvision),
 }
 
 func init() {

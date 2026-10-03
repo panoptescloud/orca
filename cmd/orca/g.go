@@ -28,7 +28,7 @@ found, it will be checked out. If multiple are found will provide a list to sele
 
 		return nil
 	},
-	Run: errorHandlerWrapper(handleGCo, 1),
+	RunE: handleErrors(handleGCo),
 }
 
 var gBranchesCmd = &cobra.Command{
@@ -36,49 +36,49 @@ var gBranchesCmd = &cobra.Command{
 	Short: "Searches branches for the git repository.",
 	Long: `Will search for any branches containing the given search term (case-insensitive).
 If no search term is given, will list all branches.`,
-	Run: errorHandlerWrapper(handleGBranches, 1),
+	RunE: handleErrors(handleGBranches),
 }
 
 var gPullCmd = &cobra.Command{
 	Use:   "pull",
 	Short: "Pulls a branch from origin.",
 	Long:  `Will pull the currently checked out branch. Use --all to pull the current branch in every project in the workspace.`,
-	Run:   errorHandlerWrapper(handleGPull, 1),
+	RunE:  handleErrors(handleGPull),
 }
 
 var gRbiCmd = &cobra.Command{
 	Use:   "rbi",
 	Short: "Run an interactive rebase.",
 	Long:  `Starts an interactive rebase, for the number of commits required.`,
-	Run:   errorHandlerWrapper(handleGRebaseInteractively, 1),
+	RunE:  handleErrors(handleGRebaseInteractively),
 }
 
 var gPushCmd = &cobra.Command{
 	Use:   "push",
 	Short: "Pushes the branch to origin.",
 	Long:  `Pushes the current branch to origin, using the current branches name as the target on the origin. Use --all to push the current branch in every project in the workspace.`,
-	Run:   errorHandlerWrapper(handleGPush, 1),
+	RunE:  handleErrors(handleGPush),
 }
 
 var gUndoCmd = &cobra.Command{
 	Use:   "undo",
 	Short: "Removes commits from the branch.",
 	Long:  `This will (destructively) remove commits from the current branch. The number of commits to remove is defined by the 'number' option.`,
-	Run:   errorHandlerWrapper(handleGUndo, 1),
+	RunE:  handleErrors(handleGUndo),
 }
 
 var gStatusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Shows the checked out branch for projects.",
 	Long:  `Shows a table of the currently checked out branch. Use --all to show every project in the workspace.`,
-	Run:   errorHandlerWrapper(handleGStatus, 1),
+	RunE:  handleErrors(handleGStatus),
 }
 
 var gLoglCmd = &cobra.Command{
 	Use:   "logl",
 	Short: "Shows the last X commits.",
 	Long:  `Only shows the short commit sha and subject of each commit for the last X commits on the current branch.`,
-	Run:   errorHandlerWrapper(handleGLogl, 1),
+	RunE:  handleErrors(handleGLogl),
 }
 
 func init() {
@@ -128,10 +128,8 @@ func init() {
 }
 
 func handleGCo(cmd *cobra.Command, args []string) error {
-	ws, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
-	project, err := cmd.Flags().GetString("project")
-	cobra.CheckErr(err)
+	ws := mustGetString(cmd, "workspace")
+	project := mustGetString(cmd, "project")
 
 	g := svcContainer.GetGit()
 
@@ -141,19 +139,12 @@ func handleGCo(cmd *cobra.Command, args []string) error {
 		searchTerm = args[0]
 	}
 
-	allProjects, err := cmd.Flags().GetBool("all")
-	cobra.CheckErr(err)
+	allProjects := mustGetBool(cmd, "all")
+	shouldCreate := mustGetBool(cmd, "create")
+	shouldPull := mustGetBool(cmd, "pull")
+	shouldRebase := mustGetBool(cmd, "rebase")
 
-	shouldCreate, err := cmd.Flags().GetBool("create")
-	cobra.CheckErr(err)
-
-	shouldPull, err := cmd.Flags().GetBool("pull")
-	cobra.CheckErr(err)
-
-	shouldRebase, err := cmd.Flags().GetBool("rebase")
-	cobra.CheckErr(err)
-
-	err = g.Checkout(git.CheckoutDTO{
+	err := g.Checkout(git.CheckoutDTO{
 		Name:        searchTerm,
 		AllProjects: allProjects,
 		Workspace:   ws,
@@ -187,8 +178,7 @@ func handleGBranches(cmd *cobra.Command, args []string) error {
 func handleGRebaseInteractively(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
-	amount, err := cmd.Flags().GetInt("number")
-	cobra.CheckErr(err)
+	amount := mustGetInt(cmd, "number")
 
 	return g.RebaseInteractively(git.RebaseInteractivelyDTO{
 		Amount: amount,
@@ -198,14 +188,10 @@ func handleGRebaseInteractively(cmd *cobra.Command, args []string) error {
 func handleGPush(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
-	ws, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
-	project, err := cmd.Flags().GetString("project")
-	cobra.CheckErr(err)
-	allProjects, err := cmd.Flags().GetBool("all")
-	cobra.CheckErr(err)
-	force, err := cmd.Flags().GetBool("force")
-	cobra.CheckErr(err)
+	ws := mustGetString(cmd, "workspace")
+	project := mustGetString(cmd, "project")
+	allProjects := mustGetBool(cmd, "all")
+	force := mustGetBool(cmd, "force")
 
 	return g.Push(git.PushDTO{
 		AllProjects: allProjects,
@@ -218,11 +204,8 @@ func handleGPush(cmd *cobra.Command, args []string) error {
 func handleGUndo(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
-	autoConfirm, err := cmd.Flags().GetBool("yes")
-	cobra.CheckErr(err)
-
-	amount, err := cmd.Flags().GetInt("number")
-	cobra.CheckErr(err)
+	autoConfirm := mustGetBool(cmd, "yes")
+	amount := mustGetInt(cmd, "number")
 
 	return g.UndoLastXCommits(git.UndoLastXCommitsDTO{
 		Amount:           amount,
@@ -233,8 +216,7 @@ func handleGUndo(cmd *cobra.Command, args []string) error {
 func handleGLogl(cmd *cobra.Command, args []string) error {
 	g := svcContainer.GetGit()
 
-	amount, err := cmd.Flags().GetInt("number")
-	cobra.CheckErr(err)
+	amount := mustGetInt(cmd, "number")
 
 	return g.Logl(git.LoglDTO{
 		Amount: amount,
@@ -242,12 +224,9 @@ func handleGLogl(cmd *cobra.Command, args []string) error {
 }
 
 func handleGStatus(cmd *cobra.Command, args []string) error {
-	ws, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
-	project, err := cmd.Flags().GetString("project")
-	cobra.CheckErr(err)
-	allProjects, err := cmd.Flags().GetBool("all")
-	cobra.CheckErr(err)
+	ws := mustGetString(cmd, "workspace")
+	project := mustGetString(cmd, "project")
+	allProjects := mustGetBool(cmd, "all")
 
 	g := svcContainer.GetGit()
 
@@ -259,14 +238,10 @@ func handleGStatus(cmd *cobra.Command, args []string) error {
 }
 
 func handleGPull(cmd *cobra.Command, args []string) error {
-	ws, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
-	project, err := cmd.Flags().GetString("project")
-	cobra.CheckErr(err)
-	allProjects, err := cmd.Flags().GetBool("all")
-	cobra.CheckErr(err)
-	rebase, err := cmd.Flags().GetBool("rebase")
-	cobra.CheckErr(err)
+	ws := mustGetString(cmd, "workspace")
+	project := mustGetString(cmd, "project")
+	allProjects := mustGetBool(cmd, "all")
+	rebase := mustGetBool(cmd, "rebase")
 
 	g := svcContainer.GetGit()
 

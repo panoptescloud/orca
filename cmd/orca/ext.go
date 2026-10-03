@@ -8,7 +8,7 @@ import (
 var extCmd = &cobra.Command{
 	Use:   "ext",
 	Short: "Execute a custom extension, defined in the project configuration",
-	Run:   errorHandlerWrapper(handleExt, 1),
+	RunE:  handleErrors(handleExt),
 }
 
 func init() {
@@ -20,10 +20,8 @@ func init() {
 func handleExt(cmd *cobra.Command, args []string) error {
 	ctrl := svcContainer.GetController()
 
-	ws, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
-	project, err := cmd.Flags().GetString("project")
-	cobra.CheckErr(err)
+	ws := mustGetString(cmd, "workspace")
+	project := mustGetString(cmd, "project")
 
 	// TODO: validate arguments provided
 	extensionName := args[0]

@@ -14,7 +14,7 @@ var utilCmd = &cobra.Command{
 var utilGenDocsCmd = &cobra.Command{
 	Use:   "gen-docs",
 	Short: "Generates markdown documentation for the CLI.",
-	Run:   errorHandlerWrapper(handleUtilGenDocs, 1),
+	RunE:  handleErrors(handleUtilGenDocs),
 }
 
 func init() {

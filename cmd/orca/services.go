@@ -18,7 +18,6 @@ import (
 	"github.com/adamkirk/orca/internal/tui"
 	"github.com/adamkirk/orca/internal/workspaces"
 	"github.com/spf13/afero"
-	"github.com/spf13/cobra"
 )
 
 type services struct {
@@ -124,7 +123,7 @@ func (s *services) GetEtcHostsManager() *hostsys.EtcHostsManager {
 
 	mgr, err := hostsys.NewEtcHostsManager()
 
-	cobra.CheckErr(err)
+	checkErr(err)
 
 	s.etcHostsManager = mgr
 
@@ -293,4 +292,12 @@ func (s *services) GetPluginManager() *plugins.Manager {
 	s.pluginManager = plugins.NewManager(slog.Default())
 
 	return s.pluginManager
+}
+
+// KillPlugins stops any running plugin processes. Unlike GetPluginManager it
+// won't create the manager, so it's safe to call at any point.
+func (s *services) KillPlugins() {
+	if s.pluginManager != nil {
+		s.pluginManager.Kill()
+	}
 }

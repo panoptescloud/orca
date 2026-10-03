@@ -18,7 +18,7 @@ var pluginsCmd = &cobra.Command{
 var pluginsLsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "Lists the loaded plugins and the commands they provide.",
-	Run:   errorHandlerWrapper(handlePluginsLs, 1),
+	RunE:  handleErrors(handlePluginsLs),
 }
 
 func init() {

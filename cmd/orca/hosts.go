@@ -8,7 +8,7 @@ import (
 var hostsCmd = &cobra.Command{
 	Use:   "hosts",
 	Short: `Shows all the required hosts entries for the workspace.`,
-	Run:   errorHandlerWrapper(handleHosts, 1),
+	RunE:  handleErrors(handleHosts),
 }
 
 func init() {
@@ -19,8 +19,7 @@ func init() {
 func handleHosts(cmd *cobra.Command, args []string) error {
 	ctrl := svcContainer.GetController()
 
-	ws, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
+	ws := mustGetString(cmd, "workspace")
 
 	return ctrl.Hosts(controller.HostsDTO{
 		Workspace: ws,

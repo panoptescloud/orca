@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/adamkirk/orca/internal/common"
 	"github.com/adamkirk/orca/internal/hostsys"
@@ -19,7 +18,7 @@ var sysCheckCmd = &cobra.Command{
 	Use:          "check",
 	Short:        "Checks for dependencies.",
 	Long:         `Checks that the required system dependencies are installed and usable.`,
-	Run:          errorHandlerWrapper(handleCheck, 1),
+	RunE:         handleErrors(handleCheck),
 	SilenceUsage: true,
 }
 
@@ -29,7 +28,7 @@ var sysInstallCmd = &cobra.Command{
 	Long: fmt.Sprintf(`Tools are installed 'locally' rather than globally, they will be stored within %s.
 
 The first argument must be one of: %s`, getToolsDir(), hostsys.AllAvailableToolsCsv()),
-	Run:          errorHandlerWrapper(handleSysInstall, 1),
+	RunE:         handleErrors(handleSysInstall),
 	SilenceUsage: true,
 }
 
@@ -37,7 +36,7 @@ var sysSelfUpdateCmd = &cobra.Command{
 	Use:   "self-update",
 	Short: "Updates this tool.",
 	Long:  `By default will update to the latest available version. A specific version can be specified if a specific version is required.`,
-	Run:   errorHandlerWrapper(handleSysSelfUpdate, 1),
+	RunE:  handleErrors(handleSysSelfUpdate),
 }
 
 func init() {
@@ -57,8 +56,7 @@ func handleCheck(_ *cobra.Command, _ []string) error {
 	err := hs.VerifySetup()
 
 	if err != nil {
-		os.Exit(1)
-		return nil
+		return err
 	}
 
 	tui.Success("All requirements met!")
@@ -89,8 +87,7 @@ func handleSysInstall(_ *cobra.Command, args []string) error {
 func handleSysSelfUpdate(cmd *cobra.Command, _ []string) error {
 	sys := svcContainer.GetHostSystem()
 
-	to, err := cmd.Flags().GetString("to")
-	cobra.CheckErr(err)
+	to := mustGetString(cmd, "to")
 
 	strategy := hostsys.VersioningStrategyLatest
 

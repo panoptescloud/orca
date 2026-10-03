@@ -17,7 +17,7 @@ var wsCmd = &cobra.Command{
 var wsSwitchCmd = &cobra.Command{
 	Use:   "switch",
 	Short: "Switch to another workspace",
-	Run:   errorHandlerWrapper(handleWsSwitch, 1),
+	RunE:  handleErrors(handleWsSwitch),
 }
 
 var wsInitCmd = &cobra.Command{
@@ -26,25 +26,25 @@ var wsInitCmd = &cobra.Command{
 	Long: `Initialises a new workspace with orca. Either a local directory or a git repository can be supplied.
 When using a local directory, will locate an orca workspace config and clone the relevant projects.
 When using a git url, will clone the given repository, and then clone any other required repositories based on an orca workspace file within the repo.`,
-	Run: errorHandlerWrapper(handleWsInit, 1),
+	RunE: handleErrors(handleWsInit),
 }
 
 var wsLsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "Lists all available workspaces.",
-	Run:   errorHandlerWrapper(handleWsLs, 1),
+	RunE:  handleErrors(handleWsLs),
 }
 
 var wsCurrentCmd = &cobra.Command{
 	Use:   "current",
 	Short: "Shows the current workspace",
-	Run:   errorHandlerWrapper(handleWsCurrent, 1),
+	RunE:  handleErrors(handleWsCurrent),
 }
 
 var wsClearCurrentCmd = &cobra.Command{
 	Use:   "clear-current",
 	Short: "Deselects the current workspace at a global level",
-	Run:   errorHandlerWrapper(handleWsClearCurrent, 1),
+	RunE:  handleErrors(handleWsClearCurrent),
 }
 
 var wsCloneCmd = &cobra.Command{
@@ -53,7 +53,7 @@ var wsCloneCmd = &cobra.Command{
 	Long: `Based on the workspace config will clone each repository required by the workspace.
 This can be run at any time to clone any projects that have not already been cloned.
 The project option allows you to clone only a specific project.`,
-	Run: errorHandlerWrapper(handleWsClone, 1),
+	RunE: handleErrors(handleWsClone),
 }
 
 func init() {
@@ -103,12 +103,9 @@ func handleWsSwitch(cmd *cobra.Command, args []string) error {
 func handleWsInit(cmd *cobra.Command, args []string) error {
 	manager := svcContainer.GetWorkspaceManager()
 
-	source, err := cmd.Flags().GetString("source")
-	cobra.CheckErr(err)
-	target, err := cmd.Flags().GetString("target")
-	cobra.CheckErr(err)
-	configFile, err := cmd.Flags().GetString("config")
-	cobra.CheckErr(err)
+	source := mustGetString(cmd, "source")
+	target := mustGetString(cmd, "target")
+	configFile := mustGetString(cmd, "config")
 
 	return manager.Initialise(workspaces.InitialiseDTO{
 		SourceDirectory:   source,
@@ -138,14 +135,9 @@ func handleWsClearCurrent(cmd *cobra.Command, args []string) error {
 func handleWsClone(cmd *cobra.Command, args []string) error {
 	manager := svcContainer.GetWorkspaceManager()
 
-	name, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
-
-	projectName, err := cmd.Flags().GetString("project")
-	cobra.CheckErr(err)
-
-	to, err := cmd.Flags().GetString("target")
-	cobra.CheckErr(err)
+	name := mustGetString(cmd, "workspace")
+	projectName := mustGetString(cmd, "project")
+	to := mustGetString(cmd, "target")
 
 	return manager.Clone(workspaces.CloneDTO{
 		WorkspaceName: name,

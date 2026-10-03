@@ -9,7 +9,7 @@ var logsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: `Tails logs from docker compose project.`,
 	Long:  `Basically a 'docker compose logs -f', you may supply a service to tail specifically.`,
-	Run:   errorHandlerWrapper(handleLogs, 1),
+	RunE:  handleErrors(handleLogs),
 }
 
 func init() {
@@ -22,12 +22,9 @@ func init() {
 func handleLogs(cmd *cobra.Command, args []string) error {
 	ctrl := svcContainer.GetController()
 
-	ws, err := cmd.Flags().GetString("workspace")
-	cobra.CheckErr(err)
-	project, err := cmd.Flags().GetString("project")
-	cobra.CheckErr(err)
-	service, err := cmd.Flags().GetString("service")
-	cobra.CheckErr(err)
+	ws := mustGetString(cmd, "workspace")
+	project := mustGetString(cmd, "project")
+	service := mustGetString(cmd, "service")
 
 	return ctrl.Logs(controller.LogsDTO{
 		Workspace: ws,
